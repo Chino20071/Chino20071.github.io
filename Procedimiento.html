@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Procedimiento Detallado - Ley de Coulomb</title>
+  <style>
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+    }
+    
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: url('fondo.gif') center/cover no-repeat;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background-attachment: fixed;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      color: white;
+    }
+    
+    .container {
+      max-width: 1000px;
+      width: 100%;
+      padding: 30px;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      box-shadow: 0 0 30px rgba(128,0,128,0.7);
+      transform: translateY(50px);
+      opacity: 0;
+      animation: containerAppear 1s forwards 0.3s;
+    }
+    
+    @keyframes containerAppear {
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    
+    h1 {
+      color: white;
+      margin: 20px 0;
+      padding: 15px;
+      text-align: center;
+      font-size: 2.5rem; 
+      background: linear-gradient(90deg, rgba(156,39,176,0.3), rgba(103,58,183,0.3));
+      border-radius: 10px; 
+      animation: titleGlow 3s infinite alternate, titleFloat 4s ease-in-out infinite;
+      position: relative;
+    }
+    
+    @keyframes titleGlow {
+      from { box-shadow: 0 0 10px rgba(156,39,176,0.5); }
+      to { box-shadow: 0 0 20px rgba(103,58,183,0.8), 0 0 30px rgba(103,58,183,0.4); }
+    }
+    
+    @keyframes titleFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+    
+    h1::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #9c27b0, transparent);
+      animation: linePulse 2s infinite;
+    }
+    
+    @keyframes linePulse {
+      0%, 100% { opacity: 0.5; width: 80%; }
+      50% { opacity: 1; width: 90%; }
+    }
+    
+    h3 {
+      color: #ba68c8;
+      margin: 20px 0 15px;
+      text-align: center;
+      position: relative;
+      font-size: 1.5rem;
+      animation: subtitleAppear 0.8s forwards 0.6s;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    
+    @keyframes subtitleAppear {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    h3::after, h3::before {
+      content: '';
+      display: block;
+      width: 100px;
+      height: 3px;
+      margin: 5px auto 0;
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    
+    h3::after {
+      background: linear-gradient(90deg, transparent, #9c27b0);
+      animation: lineExtend 1s forwards 0.8s;
+      width: 0;
+    }
+    
+    h3::before {
+      background: linear-gradient(90deg, #9c27b0, transparent);
+      animation: lineExtend 1s forwards 0.9s;
+      width: 0;
+    }
+    
+    @keyframes lineExtend {
+      to { width: 100px; }
+    }
+    
+    .data-display {
+      background: rgba(30,30,30,0.7);
+      padding: 25px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: inset 0 0 15px rgba(128,0,128,0.4);
+      border: 1px solid rgba(156,39,176,0.3);
+      animation: fadeIn 1s ease-out 1s forwards, borderPulse 4s infinite 2s;
+      opacity: 0;
+    }
+    
+    @keyframes borderPulse {
+      0%, 100% { border-color: rgba(156,39,176,0.3); }
+      50% { border-color: rgba(156,39,176,0.7); }
+    }
+    
+    .data-group {
+      margin-bottom: 20px;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: slideIn 0.5s forwards;
+    }
+    
+    @keyframes slideIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .data-group:nth-child(1) { animation-delay: 1.2s; }
+    .data-group:nth-child(2) { animation-delay: 1.5s; }
+    .data-group:nth-child(3) { animation-delay: 1.8s; }
+    
+    .data-group h4 {
+      color: #ce93d8;
+      margin-bottom: 15px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(156,39,176,0.5);
+      display: flex;
+      align-items: center;
+      font-size: 1.2rem;
+    }
+    
+    .data-group h4::before {
+      content: '➤';
+      margin-right: 10px;
+      color: #9c27b0;
+      animation: arrowPulse 1.5s infinite;
+    }
+    
+    @keyframes arrowPulse {
+      0%, 100% { transform: translateX(0); }
+      50% { transform: translateX(5px); }
+    }
+    
+    .data-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      padding: 10px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 8px;
+      transition: all 0.3s;
+      border-left: 3px solid transparent;
+      animation: itemAppear 0.5s forwards;
+      transform-origin: left center;
+    }
+    
+    @keyframes itemAppear {
+      from { transform: scaleX(0); opacity: 0; }
+      to { transform: scaleX(1); opacity: 1; }
+    }
+    
+    .data-item:hover {
+      background: rgba(156,39,176,0.1);
+      border-left: 3px solid #9c27b0;
+      transform: translateX(5px) scale(1.02);
+      box-shadow: 0 5px 15px rgba(156,39,176,0.2);
+    }
+    
+    .procedure-steps {
+      background: rgba(30,30,30,0.7);
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: inset 0 0 15px rgba(128,0,128,0.4);
+      border: 1px solid rgba(156,39,176,0.3);
+      animation: stepsAppear 1s forwards 1.5s;
+      opacity: 0;
+    }
+    
+    @keyframes stepsAppear {
+      to { opacity: 1; }
+    }
+    
+    .step {
+      margin-bottom: 20px;
+      padding: 15px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 8px;
+      position: relative;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: stepAppear 0.8s forwards;
+      border-left: 4px solid #9c27b0;
+      transition: all 0.3s;
+    }
+    
+    .step:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(156,39,176,0.3);
+    }
+    
+    @keyframes stepAppear {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .step:nth-child(1) { animation-delay: 1.8s; }
+    .step:nth-child(2) { animation-delay: 2.1s; }
+    .step:nth-child(3) { animation-delay: 2.4s; }
+    .step:nth-child(4) { animation-delay: 2.7s; }
+    .step:nth-child(5) { animation-delay: 3.0s; }
+    .step:nth-child(6) { animation-delay: 3.3s; }
+    
+    .step::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, transparent, rgba(156,39,176,0.05), transparent);
+      z-index: 0;
+      animation: gradientFlow 6s linear infinite;
+    }
+    
+    @keyframes gradientFlow {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+    
+    .step-number {
+      display: inline-block;
+      width: 30px;
+      height: 30px;
+      background: linear-gradient(135deg, #9c27b0, #673ab7);
+      color: white;
+      border-radius: 50%;
+      text-align: center;
+      margin-right: 15px;
+      font-weight: bold;
+      line-height: 30px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      position: relative;
+      z-index: 1;
+      animation: numberPulse 2s infinite;
+    }
+    
+    @keyframes numberPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); box-shadow: 0 0 15px #9c27b0; }
+    }
+    
+    .step-content {
+      display: inline-block;
+      width: calc(100% - 45px);
+      vertical-align: top;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .step strong {
+      color: #ba68c8;
+      display: block;
+      margin-bottom: 8px;
+      font-size: 1.1rem;
+      animation: textGlow 3s infinite alternate;
+    }
+    
+    @keyframes textGlow {
+      from { text-shadow: 0 0 5px rgba(186,104,200,0.3); }
+      to { text-shadow: 0 0 10px rgba(186,104,200,0.7); }
+    }
+    
+    .formula {
+      background: rgba(0,0,0,0.5);
+      padding: 10px 15px;
+      border-radius: 8px;
+      margin: 10px 0;
+      font-family: 'Courier New', monospace;
+      border-left: 3px solid #9c27b0;
+      animation: pulse 2s infinite, formulaFloat 3s ease-in-out infinite;
+      position: relative;
+    }
+    
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(156,39,176,0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(156,39,176,0); }
+      100% { box-shadow: 0 0 0 0 rgba(156,39,176,0); }
+    }
+    
+    @keyframes formulaFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-3px); }
+    }
+    
+    .calculation {
+      background: rgba(156,39,176,0.1);
+      padding: 12px;
+      border-radius: 6px;
+      margin-top: 10px;
+      border: 1px dashed #9c27b0;
+      animation: calculationAppear 0.5s forwards;
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    
+    @keyframes calculationAppear {
+      to { opacity: 1; transform: scale(1); }
+    }
+    
+    .back-button {
+      display: block;
+      width: 220px;
+      margin: 30px auto 0;
+      padding: 12px 25px;
+      background: linear-gradient(135deg, #9c27b0, #673ab7);
+      color: white;
+      text-align: center;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(156,39,176,0.4);
+      position: relative;
+      overflow: hidden;
+      border: none;
+      cursor: pointer;
+      animation: buttonAppear 1s forwards 3.6s;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    
+    @keyframes buttonAppear {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .back-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 7px 20px rgba(156,39,176,0.6);
+      background: linear-gradient(135deg, #8e24aa, #5e35b1);
+    }
+    
+    .back-button:active {
+      transform: translateY(1px);
+    }
+    
+    .back-button::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+      transform: translateX(-100%);
+      transition: transform 0.6s;
+    }
+    
+    .back-button:hover::after {
+      transform: translateX(100%);
+    }
+    
+    .back-button::before {
+      content: '←';
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      transition: all 0.3s;
+    }
+    
+    .back-button:hover::before {
+      left: 10px;
+      animation: arrowBounce 0.5s infinite alternate;
+    }
+    
+    @keyframes arrowBounce {
+      to { transform: translateY(-50%) translateX(-3px); }
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    /* Animación para las cargas */
+    .charge-animation {
+      display: inline-block;
+      margin: 0 5px;
+      position: relative;
+    }
+    
+    .charge-animation::after {
+      content: '';
+      position: absolute;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: #ffeb3b;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 10px #ffeb3b;
+      animation: chargePulse 1.5s infinite;
+    }
+    
+    @keyframes chargePulse {
+      0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+      50% { transform: translate(-50%, -50%) scale(1.3); opacity: 0.7; }
+      100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    }
+    
+    /* Diagrama animado */
+    .diagram-container {
+      width: 100%;
+      height: 200px;
+      position: relative;
+      margin: 15px 0;
+      background: rgba(0,0,0,0.2);
+      border-radius: 8px;
+      overflow: hidden;
+      animation: diagramAppear 1s forwards;
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    
+    @keyframes diagramAppear {
+      to { opacity: 1; transform: scale(1); }
+    }
+    
+    .charge-diagram {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #9c27b0;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 10px #9c27b0;
+      animation: chargeDiagramPulse 2s infinite;
+    }
+    
+    @keyframes chargeDiagramPulse {
+      0%, 100% { box-shadow: 0 0 10px #9c27b0; }
+      50% { box-shadow: 0 0 20px #9c27b0; }
+    }
+    
+    .force-arrow {
+      position: absolute;
+      height: 2px;
+      background: #ff5722;
+      transform-origin: left center;
+      animation: arrowExtend 1s forwards, arrowGlow 1.5s infinite alternate;
+    }
+    
+    @keyframes arrowExtend {
+      from { width: 0; }
+      to { width: var(--arrow-length); }
+    }
+    
+    @keyframes arrowGlow {
+      from { box-shadow: 0 0 5px rgba(255,87,34,0.5); }
+      to { box-shadow: 0 0 15px rgba(255,87,34,0.9); }
+    }
+    
+    .force-arrow::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: -4px;
+      width: 0;
+      height: 0;
+      border-style: solid;
+      border-width: 5px 0 5px 8px;
+      border-color: transparent transparent transparent #ff5722;
+      animation: arrowHeadPulse 1s infinite alternate;
+    }
+    
+    @keyframes arrowHeadPulse {
+      from { transform: scale(1); }
+      to { transform: scale(1.2); }
+    }
+
+    /* Tabla de resultados */
+    .result-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+      background: rgba(0,0,0,0.3);
+      animation: tableAppear 0.8s forwards;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    
+    @keyframes tableAppear {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .result-table th, .result-table td {
+      padding: 10px;
+      text-align: center;
+      border: 1px solid rgba(156,39,176,0.3);
+      transition: all 0.3s;
+    }
+    
+    .result-table th {
+      background: rgba(156,39,176,0.2);
+      color: #ce93d8;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .result-table th::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, #9c27b0, transparent);
+      animation: tableHeaderGlow 3s infinite;
+    }
+    
+    @keyframes tableHeaderGlow {
+      0% { background: linear-gradient(90deg, #9c27b0, transparent); }
+      50% { background: linear-gradient(90deg, transparent, #9c27b0, transparent); }
+      100% { background: linear-gradient(90deg, transparent, #9c27b0); }
+    }
+    
+    .result-table tr:nth-child(even) {
+      background: rgba(156,39,176,0.1);
+    }
+    
+    .result-table tr {
+      transition: all 0.3s;
+    }
+    
+    .result-table tr:hover {
+      background: rgba(156,39,176,0.2);
+      transform: scale(1.01);
+    }
+    
+    .result-table td {
+      position: relative;
+    }
+    
+    .result-table td::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 1px;
+      background: #9c27b0;
+      transition: all 0.3s;
+    }
+    
+    .result-table td:hover::after {
+      width: 80%;
+    }
+    
+    /* Partículas flotantes */
+    .particles {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+      overflow: hidden;
+    }
+    
+    .particle {
+      position: absolute;
+      background: rgba(156,39,176,0.3);
+      border-radius: 50%;
+      animation: floatParticle linear infinite;
+    }
+    
+    @keyframes floatParticle {
+      0% {
+        transform: translateY(0) translateX(0);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-100vh) translateX(20px);
+        opacity: 0;
+      }
+    }
+    
+    /* Efecto de ondas en los pasos */
+    .wave-effect {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, rgba(156,39,176,0.1) 0%, transparent 70%);
+      opacity: 0;
+      border-radius: 8px;
+      animation: wavePulse 4s infinite;
+    }
+    
+    @keyframes wavePulse {
+      0% { transform: scale(0.5); opacity: 0; }
+      50% { opacity: 0.3; }
+      100% { transform: scale(1.5); opacity: 0; }
+    }
+    
+    /* Efecto de brillo en los títulos */
+    .shine {
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(
+        to bottom right,
+        rgba(255,255,255,0) 45%,
+        rgba(255,255,255,0.1) 50%,
+        rgba(255,255,255,0) 55%
+      );
+      transform: rotate(30deg);
+      animation: shine 3s infinite;
+    }
+    
+    @keyframes shine {
+      0% { transform: translateX(-100%) rotate(30deg); }
+      20% { transform: translateX(100%) rotate(30deg); }
+      100% { transform: translateX(100%) rotate(30deg); }
+    }
+    
+    /* Efecto de carga en los pasos */
+    .step-loading {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, #9c27b0, #673ab7);
+      transform-origin: left center;
+      animation: stepLoading 2s infinite alternate;
+    }
+    
+    @keyframes stepLoading {
+      0% { transform: scaleX(0); }
+      100% { transform: scaleX(1); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Partículas flotantes -->
+  <div class="particles" id="particles"></div>
+  
+  <div class="container">
+    <h1>PROCEDIMIENTO DETALLADO<span class="shine"></span></h1>
+    
+    <div id="dataDisplay" class="data-display">
+      <!-- Los datos se insertarán aquí mediante JavaScript -->
+    </div>
+    
+    <div class="procedure-steps">
+      <h3>PROCEDIMIENTO PASO A PASO</h3>
+      
+      <div class="step">
+        <span class="step-number">1</span>
+        <div class="step-content">
+          <strong>Conversión de unidades</strong>
+          <p>Convertimos todas las cargas a Coulombs (C) y las distancias a metros (m) para trabajar en el Sistema Internacional.</p>
+          
+          <div class="formula">Fórmula de conversión: Q(C) = Q(original) × factor de conversión</div>
+          
+          <div id="conversionCalculations" class="calculation">
+            <!-- Cálculos de conversión se insertarán aquí -->
+          </div>
+          <div class="wave-effect"></div>
+          <div class="step-loading"></div>
+        </div>
+      </div>
+      
+      <div class="step">
+        <span class="step-number">2</span>
+        <div class="step-content">
+          <strong>Ley de Coulomb</strong>
+          <p>Para cada par de cargas, calculamos la fuerza usando la Ley de Coulomb:</p>
+          
+          <div class="formula">F = k · |q₁·q₂| / r²</div>
+          <p>Donde:</p>
+          <ul style="margin-left: 20px;">
+            <li>k = 8.99×10⁹ N·m²/C² (constante de Coulomb)</li>
+            <li>q₁, q₂ = valores de las cargas en Coulombs</li>
+            <li>r = distancia entre cargas en metros</li>
+          </ul>
+          
+          <div id="forceCalculations" class="calculation">
+            <!-- Cálculos de fuerza se insertarán aquí -->
+          </div>
+          
+          <div class="diagram-container" id="forceDiagram">
+            <!-- Diagrama animado se insertará aquí -->
+          </div>
+          <div class="wave-effect"></div>
+          <div class="step-loading"></div>
+        </div>
+      </div>
+      
+      <div class="step">
+        <span class="step-number">3</span>
+        <div class="step-content">
+          <strong>Naturaleza de las fuerzas</strong>
+          <p>Determinamos si cada fuerza es de atracción o repulsión:</p>
+          
+          <div class="formula">
+            <span class="charge-animation" style="color: #ff5722;"></span> Cargas del mismo signo → Repulsión <span class="charge-animation" style="color: #ff5722;"></span>
+            <br>
+            <span class="charge-animation" style="color: #ff5722;"></span> Cargas de signo opuesto → Atracción <span class="charge-animation" style="color: #4caf50;"></span>
+          </div>
+          
+          <div id="forceTypes" class="calculation">
+            <!-- Tipos de fuerza se insertarán aquí -->
+          </div>
+          <div class="wave-effect"></div>
+          <div class="step-loading"></div>
+        </div>
+      </div>
+      
+      <div class="step">
+        <span class="step-number">4</span>
+        <div class="step-content">
+          <strong>Descomposición vectorial</strong>
+          <p>Descomponemos cada fuerza en sus componentes x e y usando trigonometría:</p>
+          
+          <div class="formula">Fₓ = F · cos(θ)</div>
+          <div class="formula">Fᵧ = F · sin(θ)</div>
+          
+          <div id="vectorComponents" class="calculation">
+            <!-- Componentes vectoriales se insertarán aquí -->
+          </div>
+          <div class="wave-effect"></div>
+          <div class="step-loading"></div>
+        </div>
+      </div>
+      
+      <div class="step">
+        <span class="step-number">5</span>
+        <div class="step-content">
+          <strong>Suma vectorial</strong>
+          <p>Sumamos todas las componentes x e y por separado:</p>
+          
+          <div class="formula">Fₜₒₜₐₗₓ = ΣFₓ</div>
+          <div class="formula">Fₜₒₜₐₗᵧ = ΣFᵧ</div>
+          
+          <div id="vectorSum" class="calculation">
+            <!-- Suma vectorial se insertará aquí -->
+          </div>
+          <div class="wave-effect"></div>
+          <div class="step-loading"></div>
+        </div>
+      </div>
+      
+      <div class="step">
+        <span class="step-number">6</span>
+        <div class="step-content">
+          <strong>Resultado final</strong>
+          <p>Calculamos la magnitud y dirección de la fuerza resultante:</p>
+          
+          <div class="formula">Magnitud: F = √(Fₓ² + Fᵧ²)</div>
+          <div class="formula">Dirección: θ = arctan(Fᵧ/Fₓ)</div>
+          
+          <div id="finalResult" class="calculation">
+            <!-- Resultado final se insertará aquí -->
+          </div>
+          
+          <table class="result-table" id="resultTable">
+            <!-- Tabla de resultados se insertará aquí -->
+          </table>
+          <div class="wave-effect"></div>
+          <div class="step-loading"></div>
+        </div>
+      </div>
+    </div>
+    
+    <a href="Proyecto Fisica.html" class="back-button">Volver al Simulador</a>
+  </div>
+
+  <script>
+    // Constante de Coulomb (N·m²/C²)
+    const k = 8.99e9;
+    
+    // Crear partículas flotantes
+    function createParticles() {
+      const particlesContainer = document.getElementById('particles');
+      const particleCount = 30;
+      
+      for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.classList.add('particle');
+        
+        // Tamaño aleatorio entre 1px y 5px
+        const size = Math.random() * 4 + 1;
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+        
+        // Posición inicial aleatoria
+        particle.style.left = `${Math.random() * 100}%`;
+        particle.style.bottom = `-10px`;
+        
+        // Duración de animación aleatoria entre 10s y 20s
+        const duration = Math.random() * 10 + 10;
+        particle.style.animationDuration = `${duration}s`;
+        
+        // Retraso aleatorio para que no todas empiecen juntas
+        particle.style.animationDelay = `${Math.random() * 20}s`;
+        
+        particlesContainer.appendChild(particle);
+      }
+    }
+    
+    // Función para formatear números en notación científica cuando sea necesario
+    function formatNumber(num) {
+      if (Math.abs(num) < 0.001 || Math.abs(num) >= 1e6) {
+        return num.toExponential(2);
+      }
+      return num.toFixed(4);
+    }
+    
+    // Función para obtener parámetros de la URL
+    function getUrlParams() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const dataParam = urlParams.get('data');
+      
+      if (dataParam) {
+        return JSON.parse(decodeURIComponent(dataParam));
+      }
+      return null;
+    }
+    
+    // Función para convertir unidades de carga a Coulombs
+    function convertCharge(value, unit) {
+      return value * parseFloat(unit);
+    }
+    
+    // Función para convertir unidades de distancia a metros
+    function convertDistance(value, unit) {
+      return value * parseFloat(unit);
+    }
+    
+    // Función para calcular la fuerza entre dos cargas
+    function calculateForce(q1, q2, distance) {
+      return k * Math.abs(q1 * q2) / Math.pow(distance, 2);
+    }
+    
+    // Función para mostrar los datos recibidos
+    function displayReceivedData() {
+      const params = getUrlParams();
+      if (!params) {
+        document.getElementById('dataDisplay').innerHTML = '<p>No se recibieron datos del simulador.</p>';
+        return;
+      }
+
+      const dataDisplay = document.getElementById('dataDisplay');
+      let html = '<h3>DATOS DEL SIMULADOR</h3>';
+      
+      // Mostrar datos de cargas
+      html += '<div class="data-group">';
+      html += '<h4>Cargas Eléctricas</h4>';
+      params.charges.forEach((charge, i) => {
+        const sign = charge.sign > 0 ? '+' : '-';
+        let unitText = '';
+        switch(charge.unit) {
+          case '1e-9': unitText = 'nC'; break;
+          case '1e-6': unitText = 'μC'; break;
+          case '1e-3': unitText = 'mC'; break;
+          case '1': unitText = 'C'; break;
+        }
+        
+        html += `
+          <div class="data-item" style="animation-delay: ${0.3 + i*0.1}s">
+            <span>Carga Q${i+1}:</span>
+            <span>${charge.value} ${unitText} (${sign})</span>
+          </div>
+        `;
+      });
+      html += '</div>';
+      
+      // Mostrar datos de distancias
+      html += '<div class="data-group">';
+      html += '<h4>Distancias entre cargas</h4>';
+      
+      const distancePairs = [
+        { label: 'Q1-Q2', data: params.distances.d12 },
+        { label: 'Q2-Q3', data: params.distances.d23 },
+        { label: 'Q3-Q1', data: params.distances.d31 }
+      ];
+      
+      distancePairs.forEach((item, i) => {
+        let unitText = '';
+        switch(item.data.unit) {
+          case '0.001': unitText = 'mm'; break;
+          case '0.01': unitText = 'cm'; break;
+          case '1': unitText = 'm'; break;
+        }
+        
+        html += `
+          <div class="data-item" style="animation-delay: ${0.6 + i*0.1}s">
+            <span>Distancia ${item.label}:</span>
+            <span>${item.data.value} ${unitText}</span>
+          </div>
+        `;
+      });
+      html += '</div>';
+      
+      // Mostrar carga seleccionada
+      html += '<div class="data-group">';
+      html += '<h4>Carga objetivo</h4>';
+      html += `
+        <div class="data-item" style="animation-delay: 0.9s">
+          <span>Carga seleccionada:</span>
+          <span>Q${parseInt(params.selectedCharge) + 1}</span>
+        </div>
+      `;
+      html += '</div>';
+      
+      dataDisplay.innerHTML = html;
+      
+      // Realizar cálculos y mostrar procedimiento detallado
+      showDetailedProcedure(params);
+    }
+    
+    // Función para mostrar el procedimiento detallado con cálculos
+    function showDetailedProcedure(params) {
+      // 1. Conversión de unidades
+      const charges = params.charges.map((charge, i) => {
+        const value = parseFloat(charge.value);
+        const converted = convertCharge(value, charge.unit);
+        return {
+          original: value,
+          unit: charge.unit,
+          sign: parseInt(charge.sign),
+          converted: converted,
+          finalValue: converted * parseInt(charge.sign)
+        };
+      });
+      
+      const distances = {
+        d12: convertDistance(parseFloat(params.distances.d12.value), params.distances.d12.unit),
+        d23: convertDistance(parseFloat(params.distances.d23.value), params.distances.d23.unit),
+        d31: convertDistance(parseFloat(params.distances.d31.value), params.distances.d31.unit)
+      };
+      
+      const selectedCharge = parseInt(params.selectedCharge);
+      
+      // Mostrar conversiones
+      let conversionHTML = '';
+      charges.forEach((charge, i) => {
+        let unitText = '';
+        switch(charge.unit) {
+          case '1e-9': unitText = 'nC'; break;
+          case '1e-6': unitText = 'μC'; break;
+          case '1e-3': unitText = 'mC'; break;
+          case '1': unitText = 'C'; break;
+        }
+        
+        conversionHTML += `
+          <p style="animation-delay: ${0.3 + i*0.2}s">Q${i+1}: ${charge.original} ${unitText} × ${charge.unit} = ${formatNumber(charge.converted)} C</p>
+        `;
+      });
+      
+      conversionHTML += '<p style="animation-delay: 1s">Distancias convertidas a metros:</p>';
+      conversionHTML += `
+        <p style="animation-delay: 1.1s">Q1-Q2: ${formatNumber(distances.d12)} m</p>
+        <p style="animation-delay: 1.2s">Q2-Q3: ${formatNumber(distances.d23)} m</p>
+        <p style="animation-delay: 1.3s">Q3-Q1: ${formatNumber(distances.d31)} m</p>
+      `;
+      
+      document.getElementById('conversionCalculations').innerHTML = conversionHTML;
+      
+      // 2. Cálculo de fuerzas según la Ley de Coulomb
+      const otherCharges = [0, 1, 2].filter(i => i !== selectedCharge);
+      const forces = otherCharges.map(i => {
+        // Calcular distancia entre las cargas
+        let distance;
+        if ((selectedCharge === 0 && i === 1) || (selectedCharge === 1 && i === 0)) {
+          distance = distances.d12;
+        } else if ((selectedCharge === 1 && i === 2) || (selectedCharge === 2 && i === 1)) {
+          distance = distances.d23;
+        } else {
+          distance = distances.d31;
+        }
+        
+        const force = calculateForce(
+          Math.abs(charges[selectedCharge].finalValue),
+          Math.abs(charges[i].finalValue),
+          distance
+        );
+        
+        return {
+          from: i,
+          distance: distance,
+          force: force,
+          attractive: charges[selectedCharge].finalValue * charges[i].finalValue < 0
+        };
+      });
+      
+      let forceHTML = '';
+      forces.forEach((force, i) => {
+        forceHTML += `
+          <div style="animation-delay: ${0.3 + i*0.3}s">
+            <p>Fuerza entre Q${selectedCharge+1} y Q${force.from+1}:</p>
+            <p>F = (8.99×10⁹) × |${formatNumber(charges[selectedCharge].finalValue)} × ${formatNumber(charges[force.from].finalValue)}| / (${formatNumber(force.distance)})²</p>
+            <p>F = ${formatNumber(force.force)} N</p>
+          </div>
+        `;
+      });
+      
+      document.getElementById('forceCalculations').innerHTML = forceHTML;
+      
+      // 3. Naturaleza de las fuerzas
+      let forceTypesHTML = '';
+      forces.forEach((force, i) => {
+        forceTypesHTML += `
+          <p style="animation-delay: ${0.3 + i*0.3}s">Fuerza Q${force.from+1} → Q${selectedCharge+1}: <span style="color: ${force.attractive ? '#4CAF50' : '#FF5722'}; font-weight: bold;">${force.attractive ? 'Atracción' : 'Repulsión'}</span></p>
+        `;
+      });
+      
+      document.getElementById('forceTypes').innerHTML = forceTypesHTML;
+      
+      // 4. Descomposición vectorial (simplificada para este ejemplo)
+      // En una implementación real, necesitarías calcular las posiciones y ángulos
+      let vectorHTML = `
+        <p style="animation-delay: 0.3s">Para descomposición vectorial necesitaríamos conocer las posiciones exactas de las cargas.</p>
+        <p style="animation-delay: 0.6s">En este ejemplo simplificado, asumiremos ángulos de 30° y 60° para demostración.</p>
+      `;
+      
+      forces.forEach((force, i) => {
+        const angle = i === 0 ? 30 : 60; // Ángulos de ejemplo
+        const fx = force.force * Math.cos(angle * Math.PI / 180);
+        const fy = force.force * Math.sin(angle * Math.PI / 180);
+        
+        vectorHTML += `
+          <div style="animation-delay: ${0.9 + i*0.3}s">
+            <p>Fuerza Q${force.from+1} → Q${selectedCharge+1}:</p>
+            <p>Fₓ = ${formatNumber(force.force)} × cos(${angle}°) = ${formatNumber(fx)} N</p>
+            <p>Fᵧ = ${formatNumber(force.force)} × sin(${angle}°) = ${formatNumber(fy)} N</p>
+          </div>
+        `;
+      });
+      
+      document.getElementById('vectorComponents').innerHTML = vectorHTML;
+      
+      // 5. Suma vectorial (usando los valores de ejemplo)
+      const totalFx = forces.reduce((sum, force, i) => {
+        const angle = i === 0 ? 30 : 60;
+        return sum + force.force * Math.cos(angle * Math.PI / 180);
+      }, 0);
+      
+      const totalFy = forces.reduce((sum, force, i) => {
+        const angle = i === 0 ? 30 : 60;
+        return sum + force.force * Math.sin(angle * Math.PI / 180);
+      }, 0);
+      
+      document.getElementById('vectorSum').innerHTML = `
+        <p style="animation-delay: 0.3s">Fₜₒₜₐₗₓ = ${formatNumber(totalFx)} N</p>
+        <p style="animation-delay: 0.6s">Fₜₒₜₐₗᵧ = ${formatNumber(totalFy)} N</p>
+      `;
+      
+      // 6. Resultado final
+      const magnitude = Math.sqrt(totalFx * totalFx + totalFy * totalFy);
+      const angle = Math.atan2(totalFy, totalFx) * 180 / Math.PI;
+      
+      document.getElementById('finalResult').innerHTML = `
+        <p style="animation-delay: 0.3s">Magnitud: √(${formatNumber(totalFx)}² + ${formatNumber(totalFy)}²) = <span style="color: #FFEB3B; font-weight: bold;">${formatNumber(magnitude)} N</span></p>
+        <p style="animation-delay: 0.6s">Dirección: arctan(${formatNumber(totalFy)}/${formatNumber(totalFx)}) = <span style="color: #FFEB3B; font-weight: bold;">${formatNumber(angle)}°</span></p>
+      `;
+      
+      // Crear tabla de resultados
+      const resultTable = document.getElementById('resultTable');
+      resultTable.innerHTML = `
+        <tr>
+          <th>Fuerza</th>
+          <th>Magnitud (N)</th>
+          <th>Ángulo (°)</th>
+          <th>Tipo</th>
+        </tr>
+        ${forces.map((force, i) => {
+          const angle = i === 0 ? 30 : 60;
+          return `
+            <tr style="animation-delay: ${0.3 + i*0.2}s">
+              <td>Q${force.from+1} → Q${selectedCharge+1}</td>
+              <td>${formatNumber(force.force)}</td>
+              <td>${angle}</td>
+              <td style="color: ${force.attractive ? '#4CAF50' : '#FF5722'}">${force.attractive ? 'Atracción' : 'Repulsión'}</td>
+            </tr>
+          `;
+        }).join('')}
+        <tr style="background: rgba(156,39,176,0.3); font-weight: bold; animation-delay: 1s">
+          <td>RESULTANTE</td>
+          <td style="color: #FFEB3B">${formatNumber(magnitude)}</td>
+          <td style="color: #FFEB3B">${formatNumber(angle)}</td>
+          <td>-</td>
+        </tr>
+      `;
+      
+      // Crear diagrama animado (simplificado)
+      const diagram = document.getElementById('forceDiagram');
+      diagram.innerHTML = '';
+      
+      // Posicionar cargas en el diagrama (simplificado)
+      const centerCharge = document.createElement('div');
+      centerCharge.className = 'charge-diagram';
+      centerCharge.style.left = '50%';
+      centerCharge.style.top = '50%';
+      centerCharge.style.backgroundColor = charges[selectedCharge].sign > 0 ? '#f44336' : '#2196F3';
+      centerCharge.style.animationDelay = '0.5s';
+      diagram.appendChild(centerCharge);
+      
+      // Agregar etiqueta a la carga central
+      const centerLabel = document.createElement('div');
+      centerLabel.textContent = `Q${selectedCharge+1}`;
+      centerLabel.style.position = 'absolute';
+      centerLabel.style.left = '50%';
+      centerLabel.style.top = 'calc(50% + 15px)';
+      centerLabel.style.transform = 'translateX(-50%)';
+      centerLabel.style.color = 'white';
+      centerLabel.style.fontSize = '12px';
+      centerLabel.style.animation = 'fadeIn 1s forwards 0.7s';
+      centerLabel.style.opacity = '0';
+      diagram.appendChild(centerLabel);
+      
+      // Agregar otras cargas y fuerzas
+      forces.forEach((force, i) => {
+        const angleDeg = i === 0 ? 30 : 150; // Ángulos diferentes para visualización
+        const distance = 80;
+        const angleRad = angleDeg * Math.PI / 180;
+        
+        const otherCharge = document.createElement('div');
+        otherCharge.className = 'charge-diagram';
+        otherCharge.style.left = `${50 + distance * Math.cos(angleRad)}%`;
+        otherCharge.style.top = `${50 + distance * Math.sin(angleRad)}%`;
+        otherCharge.style.backgroundColor = charges[force.from].sign > 0 ? '#f44336' : '#2196F3';
+        otherCharge.style.animationDelay = `${0.8 + i*0.3}s`;
+        diagram.appendChild(otherCharge);
+        
+        // Agregar etiqueta a la otra carga
+        const otherLabel = document.createElement('div');
+        otherLabel.textContent = `Q${force.from+1}`;
+        otherLabel.style.position = 'absolute';
+        otherLabel.style.left = `${50 + (distance + 10) * Math.cos(angleRad)}%`;
+        otherLabel.style.top = `${50 + (distance + 10) * Math.sin(angleRad)}%`;
+        otherLabel.style.transform = 'translate(-50%, -50%)';
+        otherLabel.style.color = 'white';
+        otherLabel.style.fontSize = '12px';
+        otherLabel.style.animation = `fadeIn 1s forwards ${1 + i*0.3}s`;
+        otherLabel.style.opacity = '0';
+        diagram.appendChild(otherLabel);
+        
+        // Dibujar fuerza
+        const arrow = document.createElement('div');
+        arrow.className = 'force-arrow';
+        arrow.style.left = '50%';
+        arrow.style.top = '50%';
+        arrow.style.width = '0';
+        arrow.style.setProperty('--arrow-length', `${distance * 0.7}%`);
+        arrow.style.transform = `rotate(${angleDeg}deg)`;
+        arrow.style.animation = `arrowExtend 1s forwards ${1.3 + i*0.3}s, arrowGlow 1.5s infinite alternate ${2.3 + i*0.3}s`;
+        diagram.appendChild(arrow);
+        
+        // Agregar etiqueta de fuerza
+        const forceLabel = document.createElement('div');
+        forceLabel.textContent = `${formatNumber(force.force)} N`;
+        forceLabel.style.position = 'absolute';
+        forceLabel.style.left = `${50 + (distance * 0.35) * Math.cos(angleRad)}%`;
+        forceLabel.style.top = `${50 + (distance * 0.35) * Math.sin(angleRad)}%`;
+        forceLabel.style.transform = 'translate(-50%, -50%)';
+        forceLabel.style.color = '#FF5722';
+        forceLabel.style.fontSize = '12px';
+        forceLabel.style.fontWeight = 'bold';
+        forceLabel.style.animation = `fadeIn 1s forwards ${1.6 + i*0.3}s`;
+        forceLabel.style.opacity = '0';
+        diagram.appendChild(forceLabel);
+      });
+      
+      // Agregar leyenda
+      const legend = document.createElement('div');
+      legend.style.position = 'absolute';
+      legend.style.bottom = '10px';
+      legend.style.left = '10px';
+      legend.style.color = 'white';
+      legend.style.fontSize = '12px';
+      legend.style.animation = 'fadeIn 1s forwards 2.5s';
+      legend.style.opacity = '0';
+      legend.innerHTML = `
+        <div style="display: flex; align-items: center; margin-bottom: 5px;">
+          <div style="width: 12px; height: 12px; background: #f44336; border-radius: 50%; margin-right: 5px;"></div>
+          <span>Carga positiva</span>
+        </div>
+        <div style="display: flex; align-items: center; margin-bottom: 5px;">
+          <div style="width: 12px; height: 12px; background: #2196F3; border-radius: 50%; margin-right: 5px;"></div>
+          <span>Carga negativa</span>
+        </div>
+        <div style="display: flex; align-items: center;">
+          <div style="width: 20px; height: 2px; background: #FF5722; margin-right: 5px; position: relative;">
+            <div style="position: absolute; right: 0; top: -4px; width: 0; height: 0; border-style: solid; border-width: 5px 0 5px 8px; border-color: transparent transparent transparent #FF5722;"></div>
+          </div>
+          <span>Fuerza</span>
+        </div>
+      `;
+      diagram.appendChild(legend);
+    }
+    
+    // Llamar a las funciones cuando se cargue la página
+    window.addEventListener('DOMContentLoaded', () => {
+      createParticles();
+      displayReceivedData();
+      
+      // Agregar efecto de brillo a los títulos de sección
+      document.querySelectorAll('h3').forEach(title => {
+        const shine = document.createElement('div');
+        shine.className = 'shine';
+        title.appendChild(shine);
+      });
+      
+      // Agregar efecto de ondas a los pasos
+      document.querySelectorAll('.step').forEach(step => {
+        const wave = document.createElement('div');
+        wave.className = 'wave-effect';
+        step.appendChild(wave);
+        
+        const loading = document.createElement('div');
+        loading.className = 'step-loading';
+        step.appendChild(loading);
+      });
+    });
+  </script>
+</body>
+</html>
