@@ -1,2429 +1,455 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ley de Coulomb</title>
-  <style>
-    * { 
-      box-sizing: border-box; 
-      margin: 0; 
-      padding: 0; 
-    }
-    
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      background-attachment: fixed;
-      display: flex;
-      flex-direction: column;
-      padding: 20px;
-      color: white;
-      overflow-x: hidden;
-    }
-    
-    .container {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      grid-template-rows: auto 1fr;
-      gap: 20px;
-      padding: 30px;
-      background: rgba(0,0,0,0.5);
-      backdrop-filter: blur(10px);
-      border-radius: 20px;
-      box-shadow: 0 0 20px rgba(128,0,128,0.5);
-      width: 100%;
-      max-width: 1200px;
-      animation: fadeIn 1s ease-out;
-    }
-    
-    .form-container {
-      grid-column: 1;
-      grid-row: 1 / span 2;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-    
-    .input-section {
-      padding: 20px;
-      background: rgba(30,30,30,0.6);
-      border-radius: 15px;
-      box-shadow: inset 0 0 10px rgba(128,0,128,0.3);
-      transition: transform 0.3s, box-shadow 0.3s;
-      border: 1px solid rgba(156, 39, 176, 0.3);
-    }
-    
-    .input-section:hover {
-      transform: translateY(-5px);
-      box-shadow: inset 0 0 15px rgba(128,0,128,0.5), 0 5px 15px rgba(0,0,0,0.2);
-    }
-    
-    .results-section {
-      grid-column: 2;
-      grid-row: 1;
-      padding: 20px;
-      background: rgba(30,30,30,0.6);
-      border-radius: 15px;
-      box-shadow: inset 0 0 10px rgba(128,0,128,0.3);
-      animation: slideInRight 0.5s ease-out;
-      border: 1px solid rgba(156, 39, 176, 0.3);
-      display: flex;
-      flex-direction: column;
-    }
-    
-    .graphics-container {
-      grid-column: 2;
-      grid-row: 2;
-      padding: 20px;
-      background: rgba(30,30,30,0.6);
-      border-radius: 15px;
-      box-shadow: inset 0 0 10px rgba(128,0,128,0.3);
-      display: flex;
-      flex-direction: column;
-      animation: slideInRight 0.7s ease-out;
-      border: 1px solid rgba(156, 39, 176, 0.3);
-    }
-    
-    h1 {
-      color: white;
-      margin: 20px 0;
-      padding: 15px;
-      text-align: center;
-      font-size: 2.5rem; 
-      background: linear-gradient(90deg, rgba(156,39,176,0.3) 0%, rgba(0,0,0,0.5) 50%, rgba(156,39,176,0.3) 100%);
-      border-radius: 10px; 
-      animation: fadeInDown 0.8s ease-out;
-      text-shadow: 0 0 10px rgba(156, 39, 176, 0.7);
-      border: 1px solid rgba(156, 39, 176, 0.3);
-      width: 100%;
-      max-width: 1200px;
-    }
-    
-    h3 {
-      color: #9c27b0;
-      margin-bottom: 15px;
-      text-align: center;
-      text-shadow: 0 0 5px rgba(156, 39, 176, 0.5);
-      font-size: 1.4rem;
-      padding-bottom: 8px;
-      border-bottom: 1px solid rgba(156, 39, 176, 0.3);
-    }
-    
-    .form-group {
-      margin-bottom: 15px;
-    }
-    
-    label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: bold;
-      color: #ba68c8;
-    }
-    
-    input, select {
-      padding: 10px;
-      border: none;
-      border-radius: 8px;
-      margin-right: 5px;
-      outline: none;
-      background: rgba(255,255,255,0.9);
-      color: #000;
-      transition: all 0.3s;
-      font-size: 14px;
-    }
-    
-    input:focus, select:focus {
-      box-shadow: 0 0 8px rgba(156, 39, 176, 0.7);
-      transform: scale(1.02);
-      background: rgba(255,255,255,1);
-    }
-    
-    .unit-wrapper {
-      display: flex;
-      gap: 5px;
-      align-items: center;
-    }
-    
-    button {
-      margin: 10px 5px 0 0;
-      padding: 12px 24px;
-      border: none;
-      border-radius: 8px;
-      color: #fff;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.3s;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-      font-size: 14px;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-    }
-    
-    button:active {
-      transform: translateY(0);
-    }
-    
-    button::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 5px;
-      height: 5px;
-      background: rgba(255, 255, 255, 0.5);
-      opacity: 0;
-      border-radius: 100%;
-      transform: scale(1, 1) translate(-50%);
-      transform-origin: 50% 50%;
-    }
-    
-    button:focus:not(:active)::after {
-      animation: ripple 1s ease-out;
-    }
-    
-    button[type="submit"] {
-      background: linear-gradient(135deg, #28a745 0%, #218838 100%);
-    }
-    
-    button[type="submit"]:hover {
-      background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
-    }
-    
-    button#resetBtn {
-      background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-    }
-    
-    button#resetBtn:hover {
-      background: linear-gradient(135deg, #dc3545 0%, #bd2130 100%);
-    }
-    
-    button#procedureBtn {
-      background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
-    }
-    
-    button#procedureBtn:hover {
-      background: linear-gradient(135deg, #17a2b8 0%, #117a8b 100%);
-    }
-    
-    button#animateBtn {
-      background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
-    }
-    
-    button#animateBtn:hover {
-      background: linear-gradient(135deg, #ff9800 0%, #e65100 100%);
-    }
-    
-    canvas {
-      display: block;
-      margin: 0 auto;
-      background: rgba(255,255,255,0.1);
-      border-radius: 10px;
-      max-width: 100%;
-      transition: all 0.5s;
-      border: 1px solid rgba(156, 39, 176, 0.3);
-    }
-    
-    #results {
-      color: #ba68c8;
-      font-family: 'Courier New', monospace;
-      white-space: pre-wrap;
-      background: rgba(0,0,0,0.3);
-      padding: 15px;
-      border-radius: 10px;
-      height: 100%;
-      overflow-y: auto;
-      max-height: 200px;
-      animation: fadeIn 0.5s ease-out;
-      font-size: 14px;
-      line-height: 1.5;
-      flex-grow: 1;
-    }
-    
-    .buttons-container {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin-top: 15px;
-      flex-wrap: wrap;
-    }
-    
-    .distance-section {
-      margin-top: 20px;
-    }
-    
-    #triangleCanvas {
-      background: rgba(255,255,255,0.1);
-    }
-    
-    .result-item {
-      margin-bottom: 10px;
-      padding: 8px;
-      background: rgba(0,0,0,0.2);
-      border-radius: 5px;
-      border-left: 3px solid #9c27b0;
-    }
-    
-    .result-value {
-      color: #4CAF50;
-      font-weight: bold;
-    }
-    
-    .result-unit {
-      color: #F44336;
-      font-size: 0.9em;
-    }
-    
-    .result-label {
-      color: #ba68c8;
-      font-weight: bold;
-    }
-    
-    /* Animaciones */
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    
-    @keyframes fadeInDown {
-      from {
-        opacity: 0;
-        transform: translateY(-20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    
-    @keyframes slideInRight {
-      from {
-        opacity: 0;
-        transform: translateX(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
-    }
-    
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-      100% { transform: scale(1); }
-    }
-    
-    @keyframes ripple {
-      0% {
-        transform: scale(0, 0);
-        opacity: 1;
-      }
-      20% {
-        transform: scale(25, 25);
-        opacity: 1;
-      }
-      100% {
-        opacity: 0;
-        transform: scale(40, 40);
-      }
-    }
-    
-    .pulse {
-      animation: pulse 1.5s infinite;
-    }
-    
-    .force-arrow {
-      stroke: #ff5722;
-      stroke-width: 3;
-      fill: none;
-      marker-end: url(#arrowhead);
-    }
-    
-    .charge-positive {
-      fill: #4CAF50;
-      animation: pulseGlow 2s infinite;
-    }
-    
-    .charge-negative {
-      fill: #F44336;
-      animation: pulseGlow 2s infinite;
-    }
-    
-    @keyframes pulseGlow {
-      0% { filter: drop-shadow(0 0 5px currentColor); }
-      50% { filter: drop-shadow(0 0 15px currentColor); }
-      100% { filter: drop-shadow(0 0 5px currentColor); }
-    }
-    
-    @keyframes float {
-      0% { transform: translateY(0px); }
-      50% { transform: translateY(-10px); }
-      100% { transform: translateY(0px); }
-    }
-    
-    .floating {
-      animation: float 3s ease-in-out infinite;
-    }
-    
-    .tooltip {
-      position: relative;
-      display: inline-block;
-      cursor: help;
-    }
-    
-    .tooltip .tooltiptext {
-      visibility: hidden;
-      width: 200px;
-      background-color: rgba(0,0,0,0.8);
-      color: #fff;
-      text-align: center;
-      border-radius: 6px;
-      padding: 5px;
-      position: absolute;
-      z-index: 1;
-      bottom: 125%;
-      left: 50%;
-      transform: translateX(-50%);
-      opacity: 0;
-      transition: opacity 0.3s;
-      font-size: 12px;
-      font-weight: normal;
-    }
-    
-    .tooltip:hover .tooltiptext {
-      visibility: visible;
-      opacity: 1;
-    }
-    
-    .results-tabs {
-      display: flex;
-      margin-bottom: 10px;
-      border-bottom: 1px solid rgba(156, 39, 176, 0.3);
-    }
-    
-    .results-tab {
-      padding: 8px 15px;
-      cursor: pointer;
-      background: rgba(0,0,0,0.2);
-      border: none;
-      border-radius: 5px 5px 0 0;
-      margin-right: 5px;
-      color: #ba68c8;
-      transition: all 0.3s;
-      font-size: 12px;
-    }
-    
-    .results-tab.active {
-      background: rgba(156, 39, 176, 0.3);
-      color: white;
-      font-weight: bold;
-    }
-    
-    .results-content {
-      display: none;
-    }
-    
-    .results-content.active {
-      display: block;
-    }
-    
-    .result-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-      font-size: 13px;
-    }
-    
-    .result-table th, .result-table td {
-      padding: 8px;
-      text-align: left;
-      border-bottom: 1px solid rgba(156, 39, 176, 0.2);
-    }
-    
-    .result-table th {
-      color: #9c27b0;
-    }
-    
-    .result-table tr:hover {
-      background: rgba(156, 39, 176, 0.1);
-    }
-    
-    /* Scrollbar personalizada */
-    ::-webkit-scrollbar {
-      width: 8px;
-    }
-    
-    ::-webkit-scrollbar-track {
-      background: rgba(0,0,0,0.1);
-      border-radius: 10px;
-    }
-    
-    ::-webkit-scrollbar-thumb {
-      background: rgba(156, 39, 176, 0.5);
-      border-radius: 10px;
-    }
-    
-    ::-webkit-scrollbar-thumb:hover {
-      background: rgba(156, 39, 176, 0.7);
-    }
-    
-    /* Efecto de partículas */
-    .particles {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: -1;
-      pointer-events: none;
-    }
-    
-    .particle {
-      position: absolute;
-      background: rgba(156, 39, 176, 0.5);
-      border-radius: 50%;
-      pointer-events: none;
-    }
-    
-    /* Efecto de carga */
-    .loading {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.7);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-      flex-direction: column;
-    }
-    
-    .spinner {
-      width: 50px;
-      height: 50px;
-      border: 5px solid rgba(156,39,176,0.3);
-      border-radius: 50%;
-      border-top-color: #9c27b0;
-      animation: spin 1s ease-in-out infinite;
-      margin-bottom: 20px;
-    }
-    
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    
-    .loading-text {
-      color: white;
-      font-size: 18px;
-      text-align: center;
-    }
-
-    /* Estilos para el procedimiento */
-    .procedure-container {
-      display: none;
-      max-width: 1000px;
-      width: 100%;
-      padding: 30px;
-      background: rgba(0,0,0,0.7);
-      backdrop-filter: blur(10px);
-      border-radius: 20px;
-      box-shadow: 0 0 30px rgba(128,0,128,0.7);
-      margin-top: 20px;
-      animation: fadeIn 1s ease-out;
-    }
-
-    .data-display {
-      background: rgba(30,30,30,0.7);
-      padding: 25px;
-      border-radius: 15px;
-      margin-bottom: 30px;
-      box-shadow: inset 0 0 15px rgba(128,0,128,0.4);
-      border: 1px solid rgba(156,39,176,0.3);
-      animation: fadeIn 1s ease-out, borderPulse 4s infinite 2s;
-    }
-    
-    @keyframes borderPulse {
-      0%, 100% { border-color: rgba(156,39,176,0.3); }
-      50% { border-color: rgba(156,39,176,0.7); }
-    }
-    
-    .data-group {
-      margin-bottom: 20px;
-      animation: fadeIn 0.8s ease-out;
-    }
-    
-    .data-group h4 {
-      color: #ce93d8;
-      margin-bottom: 15px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid rgba(156,39,176,0.5);
-      display: flex;
-      align-items: center;
-      font-size: 1.2rem;
-    }
-    
-    .data-group h4::before {
-      content: '➤';
-      margin-right: 10px;
-      color: #9c27b0;
-      animation: arrowPulse 1.5s infinite;
-    }
-    
-    @keyframes arrowPulse {
-      0%, 100% { transform: translateX(0); }
-      50% { transform: translateX(5px); }
-    }
-    
-    .data-item {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 8px;
-      padding: 10px;
-      background: rgba(0,0,0,0.3);
-      border-radius: 8px;
-      transition: all 0.3s;
-      border-left: 3px solid transparent;
-    }
-    
-    .data-item:hover {
-      background: rgba(156,39,176,0.1);
-      border-left: 3px solid #9c27b0;
-      transform: translateX(5px);
-      box-shadow: 0 5px 15px rgba(156,39,176,0.2);
-    }
-    
-    .procedure-steps {
-      background: rgba(30,30,30,0.7);
-      padding: 25px;
-      border-radius: 15px;
-      box-shadow: inset 0 0 15px rgba(128,0,128,0.4);
-      border: 1px solid rgba(156,39,176,0.3);
-      animation: fadeIn 1s ease-out;
-    }
-    
-    .step {
-      margin-bottom: 20px;
-      padding: 15px;
-      background: rgba(0,0,0,0.3);
-      border-radius: 8px;
-      position: relative;
-      overflow: hidden;
-      border-left: 4px solid #9c27b0;
-      transition: all 0.3s;
-    }
-    
-    .step:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 10px 20px rgba(156,39,176,0.3);
-    }
-    
-    .step::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(45deg, transparent, rgba(156,39,176,0.05), transparent);
-      z-index: 0;
-      animation: gradientFlow 6s linear infinite;
-    }
-    
-    @keyframes gradientFlow {
-      0% { transform: translateX(-100%); }
-      100% { transform: translateX(100%); }
-    }
-    
-    .step-number {
-      display: inline-block;
-      width: 30px;
-      height: 30px;
-      background: linear-gradient(135deg, #9c27b0, #673ab7);
-      color: white;
-      border-radius: 50%;
-      text-align: center;
-      margin-right: 15px;
-      font-weight: bold;
-      line-height: 30px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-      position: relative;
-      z-index: 1;
-      animation: numberPulse 2s infinite;
-    }
-    
-    @keyframes numberPulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.1); box-shadow: 0 0 15px #9c27b0; }
-    }
-    
-    .step-content {
-      display: inline-block;
-      width: calc(100% - 45px);
-      vertical-align: top;
-      position: relative;
-      z-index: 1;
-    }
-    
-    .step strong {
-      color: #ba68c8;
-      display: block;
-      margin-bottom: 8px;
-      font-size: 1.1rem;
-      animation: textGlow 3s infinite alternate;
-    }
-    
-    @keyframes textGlow {
-      from { text-shadow: 0 0 5px rgba(186,104,200,0.3); }
-      to { text-shadow: 0 0 10px rgba(186,104,200,0.7); }
-    }
-    
-    .formula {
-      background: rgba(0,0,0,0.5);
-      padding: 10px 15px;
-      border-radius: 8px;
-      margin: 10px 0;
-      font-family: 'Courier New', monospace;
-      border-left: 3px solid #9c27b0;
-      animation: pulse 2s infinite, formulaFloat 3s ease-in-out infinite;
-      position: relative;
-    }
-    
-    @keyframes formulaFloat {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-3px); }
-    }
-    
-    .calculation {
-      background: rgba(156,39,176,0.1);
-      padding: 12px;
-      border-radius: 6px;
-      margin-top: 10px;
-      border: 1px dashed #9c27b0;
-      animation: fadeIn 0.5s ease-out;
-    }
-    
-    .back-button {
-      display: block;
-      width: 220px;
-      margin: 30px auto 0;
-      padding: 12px 25px;
-      background: linear-gradient(135deg, #9c27b0, #673ab7);
-      color: white;
-      text-align: center;
-      border-radius: 50px;
-      text-decoration: none;
-      font-weight: bold;
-      transition: all 0.3s;
-      box-shadow: 0 4px 15px rgba(156,39,176,0.4);
-      position: relative;
-      overflow: hidden;
-      border: none;
-      cursor: pointer;
-    }
-    
-    .back-button:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 7px 20px rgba(156,39,176,0.6);
-      background: linear-gradient(135deg, #8e24aa, #5e35b1);
-    }
-    
-    .back-button:active {
-      transform: translateY(1px);
-    }
-    
-    .back-button::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
-      transform: translateX(-100%);
-      transition: transform 0.6s;
-    }
-    
-    .back-button:hover::after {
-      transform: translateX(100%);
-    }
-    
-    .back-button::before {
-      content: '←';
-      position: absolute;
-      left: 15px;
-      top: 50%;
-      transform: translateY(-50%);
-      transition: all 0.3s;
-    }
-    
-    .back-button:hover::before {
-      left: 10px;
-      animation: arrowBounce 0.5s infinite alternate;
-    }
-    
-    @keyframes arrowBounce {
-      to { transform: translateY(-50%) translateX(-3px); }
-    }
-    
-    .charge-animation {
-      display: inline-block;
-      margin: 0 5px;
-      position: relative;
-    }
-    
-    .charge-animation::after {
-      content: '';
-      position: absolute;
-      width: 15px;
-      height: 15px;
-      border-radius: 50%;
-      background: #ffeb3b;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      box-shadow: 0 0 10px #ffeb3b;
-      animation: chargePulse 1.5s infinite;
-    }
-    
-    @keyframes chargePulse {
-      0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-      50% { transform: translate(-50%, -50%) scale(1.3); opacity: 0.7; }
-      100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-    }
-    
-    .diagram-container {
-      width: 100%;
-      height: 200px;
-      position: relative;
-      margin: 15px 0;
-      background: rgba(0,0,0,0.2);
-      border-radius: 8px;
-      overflow: hidden;
-      animation: fadeIn 1s ease-out;
-    }
-    
-    .charge-diagram {
-      position: absolute;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: #9c27b0;
-      transform: translate(-50%, -50%);
-      box-shadow: 0 0 10px #9c27b0;
-      animation: chargeDiagramPulse 2s infinite;
-    }
-    
-    @keyframes chargeDiagramPulse {
-      0%, 100% { box-shadow: 0 0 10px #9c27b0; }
-      50% { box-shadow: 0 0 20px #9c27b0; }
-    }
-    
-    .force-arrow {
-      position: absolute;
-      height: 2px;
-      background: #ff5722;
-      transform-origin: left center;
-      animation: arrowExtend 1s forwards, arrowGlow 1.5s infinite alternate;
-    }
-    
-    @keyframes arrowExtend {
-      from { width: 0; }
-      to { width: var(--arrow-length); }
-    }
-    
-    @keyframes arrowGlow {
-      from { box-shadow: 0 0 5px rgba(255,87,34,0.5); }
-      to { box-shadow: 0 0 15px rgba(255,87,34,0.9); }
-    }
-    
-    .force-arrow::after {
-      content: '';
-      position: absolute;
-      right: 0;
-      top: -4px;
-      width: 0;
-      height: 0;
-      border-style: solid;
-      border-width: 5px 0 5px 8px;
-      border-color: transparent transparent transparent #ff5722;
-      animation: arrowHeadPulse 1s infinite alternate;
-    }
-    
-    @keyframes arrowHeadPulse {
-      from { transform: scale(1); }
-      to { transform: scale(1.2); }
-    }
-
-    .result-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 15px 0;
-      background: rgba(0,0,0,0.3);
-      animation: fadeIn 0.8s ease-out;
-    }
-    
-    .result-table th, .result-table td {
-      padding: 10px;
-      text-align: center;
-      border: 1px solid rgba(156,39,176,0.3);
-      transition: all 0.3s;
-    }
-    
-    .result-table th {
-      background: rgba(156,39,176,0.2);
-      color: #ce93d8;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .result-table th::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 2px;
-      background: linear-gradient(90deg, #9c27b0, transparent);
-      animation: tableHeaderGlow 3s infinite;
-    }
-    
-    @keyframes tableHeaderGlow {
-      0% { background: linear-gradient(90deg, #9c27b0, transparent); }
-      50% { background: linear-gradient(90deg, transparent, #9c27b0, transparent); }
-      100% { background: linear-gradient(90deg, transparent, #9c27b0); }
-    }
-    
-    .result-table tr:nth-child(even) {
-      background: rgba(156,39,176,0.1);
-    }
-    
-    .result-table tr {
-      transition: all 0.3s;
-    }
-    
-    .result-table tr:hover {
-      background: rgba(156,39,176,0.2);
-      transform: scale(1.01);
-    }
-    
-    .result-table td {
-      position: relative;
-    }
-    
-    .result-table td::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 0;
-      height: 1px;
-      background: #9c27b0;
-      transition: all 0.3s;
-    }
-    
-    .result-table td:hover::after {
-      width: 80%;
-    }
-    
-    .wave-effect {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: radial-gradient(circle, rgba(156,39,176,0.1) 0%, transparent 70%);
-      opacity: 0;
-      border-radius: 8px;
-      animation: wavePulse 4s infinite;
-    }
-    
-    @keyframes wavePulse {
-      0% { transform: scale(0.5); opacity: 0; }
-      50% { opacity: 0.3; }
-      100% { transform: scale(1.5); opacity: 0; }
-    }
-    
-    .shine {
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: linear-gradient(
-        to bottom right,
-        rgba(255,255,255,0) 45%,
-        rgba(255,255,255,0.1) 50%,
-        rgba(255,255,255,0) 55%
-      );
-      transform: rotate(30deg);
-      animation: shine 3s infinite;
-    }
-    
-    @keyframes shine {
-      0% { transform: translateX(-100%) rotate(30deg); }
-      20% { transform: translateX(100%) rotate(30deg); }
-      100% { transform: translateX(100%) rotate(30deg); }
-    }
-    
-    .step-loading {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 3px;
-      background: linear-gradient(90deg, #9c27b0, #673ab7);
-      transform-origin: left center;
-      animation: stepLoading 2s infinite alternate;
-    }
-    
-    @keyframes stepLoading {
-      0% { transform: scaleX(0); }
-      100% { transform: scaleX(1); }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡Feliz Cumpleaños Scarlet!</title>
+    <style>
+        :root {
+            --heart-love: #ff2e63;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+            color: white;
+        }
+        
+        /* Estilos para la portada */
+        #cover {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #ff2e63, #ff8fab, #08d9d6);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            transition: transform 1s ease-in-out;
+        }
+        
+        #cover.hidden {
+            transform: translateY(-100%);
+        }
+        
+        .gift-box {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin-bottom: 40px;
+            cursor: pointer;
+        }
+        
+        .gift-lid {
+            position: absolute;
+            width: 200px;
+            height: 50px;
+            background: #ff2e63;
+            border-radius: 10px 10px 0 0;
+            top: 0;
+            left: 0;
+            z-index: 2;
+            transition: transform 0.5s;
+        }
+        
+        .gift-box:hover .gift-lid {
+            transform: translateY(-10px) rotate(-5deg);
+        }
+        
+        .gift-body {
+            position: absolute;
+            width: 200px;
+            height: 150px;
+            background: #ff8fab;
+            border-radius: 0 0 10px 10px;
+            bottom: 0;
+            left: 0;
+        }
+        
+        .ribbon {
+            position: absolute;
+            background: #08d9d6;
+        }
+        
+        .ribbon-h {
+            width: 220px;
+            height: 20px;
+            top: 65px;
+            left: -10px;
+            z-index: 1;
+        }
+        
+        .ribbon-v {
+            width: 20px;
+            height: 170px;
+            left: 90px;
+            top: 0;
+            z-index: 1;
+        }
+        
+        .open-me {
+            font-size: 3rem;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            cursor: pointer;
+            animation: pulse 2s infinite;
+            text-align: center;
+            padding: 20px;
+            border: 3px solid white;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Estilos para el contenido de cumpleaños */
+        #birthday-content {
+            height: 100vh;
+            background: linear-gradient(to bottom, #252a34, #08d9d6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        
+        .container {
+            text-align: center;
+            z-index: 10;
+            position: relative;
+            padding: 30px;
+            background: rgba(37, 42, 52, 0.7);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            max-width: 90%;
+        }
+        
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            color: #ffde59;
+        }
+        
+        .name {
+            font-size: 2.8rem;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            color: #ff8fab;
+            font-weight: bold;
+        }
+        
+        .birthday-message {
+            font-size: 1.8rem;
+            margin: 25px 0;
+            line-height: 1.6;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+            color: #fff;
+            font-style: italic;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 15px;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Estilos para la torta */
+        .cake {
+            position: relative;
+            width: 220px;
+            height: 180px;
+            margin: 0 auto 20px;
+        }
+        
+        .cake-base {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 70px;
+            background: #f9c7b3;
+            border-radius: 10px 10px 5px 5px;
+        }
+        
+        .cake-middle {
+            position: absolute;
+            bottom: 70px;
+            left: 10%;
+            width: 80%;
+            height: 50px;
+            background: #f39f9f;
+            border-radius: 10px 10px 0 0;
+        }
+        
+        .cake-top {
+            position: absolute;
+            bottom: 120px;
+            left: 20%;
+            width: 60%;
+            height: 40px;
+            background: #f6d5c9;
+            border-radius: 10px 10px 0 0;
+        }
+        
+        .decoration {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: var(--heart-love);
+        }
+        
+        .decoration:nth-child(1) { bottom: 85px; left: 20%; }
+        .decoration:nth-child(2) { bottom: 85px; left: 40%; }
+        .decoration:nth-child(3) { bottom: 85px; left: 60%; }
+        .decoration:nth-child(4) { bottom: 85px; left: 80%; }
+        .decoration:nth-child(5) { bottom: 135px; left: 30%; }
+        .decoration:nth-child(6) { bottom: 135px; left: 50%; }
+        .decoration:nth-child(7) { bottom: 135px; left: 70%; }
+        
+        .candle {
+            position: absolute;
+            bottom: 160px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 10px;
+            height: 30px;
+            background: #4cdbdf;
+            border-radius: 5px;
+            z-index: 2;
+        }
+        
+        .flame {
+            position: absolute;
+            bottom: 190px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 15px;
+            height: 25px;
+            background: #ffde59;
+            border-radius: 50% 50% 20% 20%;
+            animation: flicker 0.8s infinite alternate;
+            box-shadow: 0 0 15px 5px rgba(255, 222, 89, 0.7);
+            z-index: 3;
+        }
+        
+        @keyframes flicker {
+            0% { transform: translateX(-50%) scale(1); }
+            25% { transform: translateX(-50%) scale(1.1) translateY(2px); }
+            50% { transform: translateX(-50%) scale(0.9) translateY(-1px); }
+            75% { transform: translateX(-50%) scale(1.05) translateY(1px); }
+            100% { transform: translateX(-50%) scale(1); }
+        }
+        
+        .Happy_Birthday {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: var(--heart-love);
+            top: -20px;
+            animation: fall 5s linear infinite;
+            transform: rotate(45deg);
+            opacity: 0.8;
+        }
+        
+        .Happy_Birthday::before,
+        .Happy_Birthday::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: var(--heart-love);
+            border-radius: 50%;
+        }
+        
+        .Happy_Birthday::before {
+            top: -10px;
+            left: 0;
+        }
+        
+        .Happy_Birthday::after {
+            top: 0;
+            left: -10px;
+        }
+        
+        @keyframes fall {
+            0% {
+                transform: rotate(45deg) translateY(0) translateX(0) rotate(0deg);
+                opacity: 0.8;
+            }
+            100% {
+                transform: rotate(45deg) translateY(100vh) translateX(100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        .custom-text {
+            margin-top: 20px;
+            padding: 10px;
+            width: 300px;
+            border-radius: 10px;
+            border: 2px solid #08d9d6;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+            text-align: center;
+        }
+        
+        .custom-text::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .update-btn {
+            background-color: #08d9d6;
+            border: none;
+            padding: 12px 25px;
+            margin-top: 15px;
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+        
+        .update-btn:hover {
+            background-color: var(--heart-love);
+            transform: scale(1.05);
+        }
+    </style>
 </head>
 <body>
-  <!-- Efecto de partículas -->
-  <div class="particles" id="particles"></div>
-  
-  <!-- Pantalla de carga inicial -->
-  <div class="loading" id="loadingScreen">
-    <div class="spinner"></div>
-    <div class="loading-text">Cargando ...</div>
-  </div>
-  
-  <div class="panel text-center">
-    <h1>Ley de Coulomb</h1>
-  </div>
-  
-  <div class="container" id="mainContainer">
-    <!-- Columna izquierda: Parte superior (Cargas) -->
-    <div class="form-container">
-      <form id="chargeForm">
-        <div class="input-section">
-          <h3>CONFIGURACIÓN DE CARGAS</h3>
-          <!-- Cargas Q1-Q3 -->
-          <div class="form-group">
-            <label for="charge1">Carga Q1: <span class="tooltip">(?)
-              <span class="tooltiptext">Ingrese el valor de la carga Q1 en la unidad seleccionada</span>
-            </span></label>
-            <div class="unit-wrapper">
-              <input type="number" id="charge1" step="any" required placeholder="Ej: 5.5">
-              <select id="unit1">
-                <option value="1e-9">nC (nanoCoulomb)</option>
-                <option value="1e-6">μC (microCoulomb)</option>
-                <option value="1e-3">mC (miliCoulomb)</option>
-                <option value="1">C (Coulomb)</option>
-              </select>
-              <select id="sign1">
-                <option value="1">Positiva (+)</option>
-                <option value="-1">Negativa (-)</option>
-              </select>
-            </div>
-          </div>
-          
-          <div class="form-group">
-            <label for="charge2">Carga Q2: <span class="tooltip">(?)
-              <span class="tooltiptext">Ingrese el valor de la carga Q2 en la unidad seleccionada</span>
-            </span></label>
-            <div class="unit-wrapper">
-              <input type="number" id="charge2" step="any" required placeholder="Ej: -3.2">
-              <select id="unit2">
-                <option value="1e-9">nC (nanoCoulomb)</option>
-                <option value="1e-6">μC (microCoulomb)</option>
-                <option value="1e-3">mC (miliCoulomb)</option>
-                <option value="1">C (Coulomb)</option>
-              </select>
-              <select id="sign2">
-                <option value="1">Positiva (+)</option>
-                <option value="-1">Negativa (-)</option>
-              </select>
-            </div>
-          </div>
-          
-          <div class="form-group">
-            <label for="charge3">Carga Q3: <span class="tooltip">(?)
-              <span class="tooltiptext">Ingrese el valor de la carga Q3 en la unidad seleccionada</span>
-            </span></label>
-            <div class="unit-wrapper">
-              <input type="number" id="charge3" step="any" required placeholder="Ej: 7.8">
-              <select id="unit3">
-                <option value="1e-9">nC (nanoCoulomb)</option>
-                <option value="1e-6">μC (microCoulomb)</option>
-                <option value="1e-3">mC (miliCoulomb)</option>
-                <option value="1">C (Coulomb)</option>
-              </select>
-              <select id="sign3">
-                <option value="1">Positiva (+)</option>
-                <option value="-1">Negativa (-)</option>
-              </select>
-            </div>
-          </div>
+    <!-- Portada con mensaje "Ábreme" -->
+    <div id="cover">
+        <div class="gift-box" onclick="openGift()">
+            <div class="gift-lid"></div>
+            <div class="gift-body"></div>
+            <div class="ribbon ribbon-h"></div>
+            <div class="ribbon ribbon-v"></div>
         </div>
-
-        <!-- Columna izquierda: Parte inferior (Distancias y controles) -->
-        <div class="input-section distance-section">
-          <h3>CONFIGURACIÓN DE DISTANCIAS</h3>
-          <!-- Distancias con selector de unidad -->
-          <div class="form-group">
-            <label for="d12">Distancia Q1-Q2: <span class="tooltip">(?)
-              <span class="tooltiptext">Distancia entre las cargas Q1 y Q2 en la unidad seleccionada</span>
-            </span></label>
-            <div class="unit-wrapper">
-              <input type="number" id="d12" step="any" required placeholder="Ej: 10">
-              <select id="unitD12">
-                <option value="0.001">mm (milímetros)</option>
-                <option value="0.01">cm (centímetros)</option>
-                <option value="1">m (metros)</option>
-              </select>
-            </div>
-          </div>
-          
-          <div class="form-group">
-            <label for="d23">Distancia Q2-Q3: <span class="tooltip">(?)
-              <span class="tooltiptext">Distancia entre las cargas Q2 y Q3 en la unidad seleccionada</span>
-            </span></label>
-            <div class="unit-wrapper">
-              <input type="number" id="d23" step="any" required placeholder="Ej: 15">
-              <select id="unitD23">
-                <option value="0.001">mm (milímetros)</option>
-                <option value="0.01">cm (centímetros)</option>
-                <option value="1">m (metros)</option>
-              </select>
-            </div>
-          </div>
-          
-          <div class="form-group">
-            <label for="d31">Distancia Q3-Q1: <span class="tooltip">(?)
-              <span class="tooltiptext">Distancia entre las cargas Q3 y Q1 en la unidad seleccionada</span>
-            </span></label>
-            <div class="unit-wrapper">
-              <input type="number" id="d31" step="any" required placeholder="Ej: 12">
-              <select id="unitD31">
-                <option value="0.001">mm (milímetros)</option>
-                <option value="0.01">cm (centímetros)</option>
-                <option value="1">m (metros)</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="selectedCharge">Carga objetivo: <span class="tooltip">(?)
-              <span class="tooltiptext">Seleccione la carga sobre la que desea calcular la fuerza resultante</span>
-            </span></label>
-            <select id="selectedCharge" class="full-width">
-              <option value="0">Carga Q1</option>
-              <option value="1">Carga Q2</option>
-              <option value="2">Carga Q3</option>
-            </select>
-          </div>
-
-          <div class="buttons-container">
-            <button type="submit" class="pulse">Calcular</button>
-            <button type="button" id="resetBtn">Eliminar</button>
-            <button type="button" id="procedureBtn">Procedimiento</button>
-            <button type="button" id="animateBtn">Animar</button>
-          </div>
+        <div class="open-me" onclick="openGift()">
+            ¡Ábreme!
         </div>
-      </form>
-    </div>
-
-    <!-- Centro superior: Título y resultados -->
-    <div class="results-section">
-      <h3>RESULTADOS</h3>
-      <div class="results-tabs">
-        <button class="results-tab active" data-tab="summary">Resumen</button>
-        <button class="results-tab" data-tab="forces">Fuerzas</button>
-        <button class="results-tab" data-tab="details">Detalles</button>
-      </div>
-      <div id="results-summary" class="results-content active">
-        <div id="results"></div>
-      </div>
-      <div id="results-forces" class="results-content">
-        <table class="result-table" id="forcesTable">
-          <thead>
-            <tr>
-              <th>Fuerza</th>
-              <th>Magnitud (N)</th>
-              <th>Dirección (°)</th>
-              <th>Tipo</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-      <div id="results-details" class="results-content">
-        <div id="detailedResults"></div>
-      </div>
-    </div>
-
-    <!-- Centro inferior: Área gráfica -->
-    <div class="graphics-container">
-      <h3>VISUALIZACIÓN INTERACTIVA</h3>
-      <canvas id="triangleCanvas" width="500" height="400"></canvas>
-      <div class="buttons-container" style="margin-top: 15px;">
-        <button type="button" id="zoomInBtn">+ Zoom</button>
-        <button type="button" id="zoomOutBtn">- Zoom</button>
-        <button type="button" id="rotateLeftBtn">↺ Rotar</button>
-        <button type="button" id="rotateRightBtn">↻ Rotar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Sección de procedimiento (oculta inicialmente) -->
-  <div class="procedure-container" id="procedureContainer">
-    <h1>PROCEDIMIENTO DETALLADO<span class="shine"></span></h1>
-    
-    <div id="dataDisplay" class="data-display">
-      <!-- Los datos se insertarán aquí mediante JavaScript -->
     </div>
     
-    <div class="procedure-steps">
-      <h3>PROCEDIMIENTO PASO A PASO</h3>
-      
-      <div class="step">
-        <span class="step-number">1</span>
-        <div class="step-content">
-          <strong>Conversión de unidades</strong>
-          <p>Convertimos todas las cargas a Coulombs (C) y las distancias a metros (m) para trabajar en el Sistema Internacional.</p>
-          
-          <div class="formula">Fórmula de conversión: Q(C) = Q(original) × factor de conversión</div>
-          
-          <div id="conversionCalculations" class="calculation">
-            <!-- Cálculos de conversión se insertarán aquí -->
-          </div>
-          <div class="wave-effect"></div>
-          <div class="step-loading"></div>
+    <!-- Contenido de cumpleaños (oculto inicialmente) -->
+    <div id="birthday-content" style="display: none;">
+        <div class="container">
+            <h1>¡Feliz Cumpleaños!</h1>
+            <div class="name">Scarlet</div>
+            
+            <div class="cake">
+                <div class="cake-base"></div>
+                <div class="cake-middle"></div>
+                <div class="cake-top"></div>
+                <div class="decoration"></div>
+                <div class="decoration"></div>
+                <div class="decoration"></div>
+                <div class="decoration"></div>
+                <div class="decoration"></div>
+                <div class="decoration"></div>
+                <div class="decoration"></div>
+                <div class="candle"></div>
+                <div class="flame"></div>
+            </div>
+            
+            <div class="birthday-message" id="message">
+                Que este día esté lleno de momentos especiales y mucha felicidad.
+            </div>
+            
+            <input type="text" class="custom-text" id="customText" placeholder="Escribe tu mensaje personalizado aquí">
+            <button class="update-btn" onclick="updateMessage()">Actualizar Mensaje</button>
         </div>
-      </div>
-      
-      <div class="step">
-        <span class="step-number">2</span>
-        <div class="step-content">
-          <strong>Ley de Coulomb</strong>
-          <p>Para cada par de cargas, calculamos la fuerza usando la Ley de Coulomb:</p>
-          
-          <div class="formula">F = k · |q₁·q₂| / r²</div>
-          <p>Donde:</p>
-          <ul style="margin-left: 20px;">
-            <li>k = 8.99×10⁹ N·m²/C² (constante de Coulomb)</li>
-            <li>q₁, q₂ = valores de las cargas en Coulombs</li>
-            <li>r = distancia entre cargas en metros</li>
-          </ul>
-          
-          <div id="forceCalculations" class="calculation">
-            <!-- Cálculos de fuerza se insertarán aquí -->
-          </div>
-          
-          <div class="diagram-container" id="forceDiagram">
-            <!-- Diagrama animado se insertará aquí -->
-          </div>
-          <div class="wave-effect"></div>
-          <div class="step-loading"></div>
-        </div>
-      </div>
-      
-      <div class="step">
-        <span class="step-number">3</span>
-        <div class="step-content">
-          <strong>Naturaleza de las fuerzas</strong>
-          <p>Determinamos si cada fuerza es de atracción o repulsión:</p>
-          
-          <div class="formula">
-            <span class="charge-animation" style="color: #ff5722;"></span> Cargas del mismo signo → Repulsión <span class="charge-animation" style="color: #ff5722;"></span>
-            <br>
-            <span class="charge-animation" style="color: #ff5722;"></span> Cargas de signo opuesto → Atracción <span class="charge-animation" style="color: #4caf50;"></span>
-          </div>
-          
-          <div id="forceTypes" class="calculation">
-            <!-- Tipos de fuerza se insertarán aquí -->
-          </div>
-          <div class="wave-effect"></div>
-          <div class="step-loading"></div>
-        </div>
-      </div>
-      
-      <div class="step">
-        <span class="step-number">4</span>
-        <div class="step-content">
-          <strong>Descomposición vectorial</strong>
-          <p>Descomponemos cada fuerza en sus componentes x e y usando trigonometría:</p>
-          
-          <div class="formula">Fₓ = F · cos(θ)</div>
-          <div class="formula">Fᵧ = F · sin(θ)</div>
-          
-          <div id="vectorComponents" class="calculation">
-            <!-- Componentes vectoriales se insertarán aquí -->
-          </div>
-          <div class="wave-effect"></div>
-          <div class="step-loading"></div>
-        </div>
-      </div>
-      
-      <div class="step">
-        <span class="step-number">5</span>
-        <div class="step-content">
-          <strong>Suma vectorial</strong>
-          <p>Sumamos todas las componentes x e y por separado:</p>
-          
-          <div class="formula">Fₜₒₜₐₗₓ = ΣFₓ</div>
-          <div class="formula">Fₜₒₜₐₗᵧ = ΣFᵧ</div>
-          
-          <div id="vectorSum" class="calculation">
-            <!-- Suma vectorial se insertará aquí -->
-          </div>
-          <div class="wave-effect"></div>
-          <div class="step-loading"></div>
-        </div>
-      </div>
-      
-      <div class="step">
-        <span class="step-number">6</span>
-        <div class="step-content">
-          <strong>Resultado final</strong>
-          <p>Calculamos la magnitud y dirección de la fuerza resultante:</p>
-          
-          <div class="formula">Magnitud: F = √(Fₓ² + Fᵧ²)</div>
-          <div class="formula">Dirección: θ = arctan(Fᵧ/Fₓ)</div>
-          
-          <div id="finalResult" class="calculation">
-            <!-- Resultado final se insertará aquí -->
-          </div>
-          
-          <table class="result-table" id="resultTable">
-            <!-- Tabla de resultados se insertará aquí -->
-          </table>
-          <div class="wave-effect"></div>
-          <div class="step-loading"></div>
-        </div>
-      </div>
     </div>
-    
-    <button class="back-button" id="backButton">Volver al Simulador</button>
-  </div>
 
-  <script>
-    // Constante de Coulomb (N·m²/C²)
-    const k = 8.9875517873681764e9;
-    const canvas = document.getElementById('triangleCanvas');
-    const ctx = canvas.getContext('2d');
-    const resultsDiv = document.getElementById('results');
-    const detailedResultsDiv = document.getElementById('detailedResults');
-    const forcesTableBody = document.querySelector('#forcesTable tbody');
-    const form = document.getElementById('chargeForm');
-    const mainContainer = document.getElementById('mainContainer');
-    const procedureContainer = document.getElementById('procedureContainer');
-    
-    // Variables para animación
-    let animationFrameId = null;
-    let animationStartTime = null;
-    let currentForces = [];
-    let targetForces = [];
-    let currentResultant = { fx: 0, fy: 0, mag: 0, angle: 0 };
-    let targetResultant = { fx: 0, fy: 0, mag: 0, angle: 0 };
-    let isAnimating = false;
-    let zoomLevel = 1;
-    let rotationAngle = 0;
-    let currentScale = 1;
-    let currentPositions = [];
-    let currentAngles = [];
-    
-    // Variables para partículas
-    const particles = [];
-    const particleCount = 50;
-    
-    // Mostrar pantalla de carga inicial
-    window.addEventListener('load', function() {
-      setTimeout(function() {
-        document.getElementById('loadingScreen').style.opacity = '0';
-        setTimeout(function() {
-          document.getElementById('loadingScreen').style.display = 'none';
-          createParticles();
-        }, 500);
-      }, 1500);
-    });
-    
-    // Crear partículas de fondo
-    function createParticles() {
-      const particlesContainer = document.getElementById('particles');
-      
-      for (let i = 0; i < particleCount; i++) {
-        const particle = document.createElement('div');
-        particle.className = 'particle';
-        
-        // Tamaño aleatorio entre 1px y 3px
-        const size = Math.random() * 2 + 1;
-        particle.style.width = `${size}px`;
-        particle.style.height = `${size}px`;
-        
-        // Posición aleatoria
-        particle.style.left = `${Math.random() * 100}%`;
-        particle.style.top = `${Math.random() * 100}%`;
-        
-        // Opacidad aleatoria
-        particle.style.opacity = Math.random() * 0.5 + 0.1;
-        
-        // Velocidad de animación aleatoria
-        const duration = Math.random() * 20 + 10;
-        const delay = Math.random() * 5;
-        
-        // Animación de movimiento
-        particle.style.animation = `float ${duration}s ease-in-out ${delay}s infinite`;
-        
-        particlesContainer.appendChild(particle);
-        particles.push(particle);
-      }
-    }
-    
-    // Función para formatear números en notación científica si es necesario
-    function formatNumber(num) {
-      if (num === 0) return '0';
-      
-      const absNum = Math.abs(num);
-      if (absNum >= 1000 || (absNum > 0 && absNum < 0.001)) {
-        return num.toExponential(2).replace('e', ' × 10^');
-      }
-      return num.toFixed(4).replace(/\.?0+$/, '');
-    }
-    
-    // Función para calcular las posiciones de las cargas
-    function computePositions(d12, d23, d31) {
-      const x1 = 0, y1 = 0;
-      const x2 = d12, y2 = 0;
-      
-      // Calcular posición de la tercera carga usando la ley de cosenos
-      const cosAngle = (d12*d12 + d31*d31 - d23*d23) / (2*d12*d31);
-      const angle = Math.acos(Math.max(-1, Math.min(1, cosAngle)));
-      const x3 = d31 * Math.cos(angle);
-      const y3 = d31 * Math.sin(angle);
-      
-      return [ 
-        {x: x1, y: y1},  // Carga Q1
-        {x: x2, y: y2},  // Carga Q2
-        {x: x3, y: y3}   // Carga Q3
-      ];
-    }
-    
-    // Función para calcular los ángulos del triángulo
-    function computeAngles(d12, d23, d31) {
-      const a = d23, b = d31, c = d12;
-      
-      // Ley de cosenos para cada ángulo
-      const A = Math.acos((b*b + c*c - a*a) / (2*b*c));
-      const B = Math.acos((c*c + a*a - b*b) / (2*c*a));
-      const C = Math.PI - A - B;
-      
-      return [ 
-        A * 180 / Math.PI, 
-        B * 180 / Math.PI, 
-        C * 180 / Math.PI 
-      ];
-    }
-    
-    // Función para calcular la fuerza entre dos cargas
-    function calculateForce(q1, q2, x1, y1, x2, y2) {
-      const dx = x2 - x1;
-      const dy = y2 - y1;
-      const r = Math.hypot(dx, dy);
-      
-      if (r === 0) return { 
-        fx: 0, fy: 0, r: 0, ux: 0, uy: 0, mag: 0, sign: 0,
-        fromX: x1, fromY: y1, toX: x2, toY: y2
-      };
-      
-      // Magnitud de la fuerza
-      const mag = k * Math.abs(q1 * q2) / (r * r);
-      
-      // Vector unitario
-      const ux = dx / r;
-      const uy = dy / r;
-      
-      // Determinar si es atracción o repulsión
-      const sign = Math.sign(q1 * q2);
-      
-      return { 
-        fx: sign * mag * ux, 
-        fy: sign * mag * uy, 
-        r, 
-        ux, 
-        uy, 
-        mag, 
-        sign,
-        fromX: x1,
-        fromY: y1,
-        toX: x2,
-        toY: y2,
-        angle: Math.atan2(dy, dx) * 180 / Math.PI
-      };
-    }
-    
-    // Función para animar las fuerzas
-    function animateForces(timestamp) {
-      if (!animationStartTime) animationStartTime = timestamp;
-      const progress = Math.min((timestamp - animationStartTime) / 1000, 1);
-      
-      // Interpolar fuerzas
-      const interpolatedForces = currentForces.map((force, i) => {
-        const target = targetForces[i];
-        const fx = force.fx + (target.fx - force.fx) * progress;
-        const fy = force.fy + (target.fy - force.fy) * progress;
-        
-        return {
-          fx, fy,
-          fromX: force.fromX,
-          fromY: force.fromY,
-          toX: target.toX,
-          toY: target.toY,
-          mag: force.mag + (target.mag - force.mag) * progress,
-          sign: target.sign,
-          angle: force.angle + (target.angle - force.angle) * progress
-        };
-      });
-      
-      // Interpolar resultante
-      const interpolatedResultant = {
-        fx: currentResultant.fx + (targetResultant.fx - currentResultant.fx) * progress,
-        fy: currentResultant.fy + (targetResultant.fy - currentResultant.fy) * progress,
-        mag: currentResultant.mag + (targetResultant.mag - currentResultant.mag) * progress,
-        angle: currentResultant.angle + (targetResultant.angle - currentResultant.angle) * progress
-      };
-      
-      // Redibujar con las fuerzas interpoladas
-      drawTriangleWithForces(interpolatedForces, interpolatedResultant);
-      
-      if (progress < 1) {
-        animationFrameId = requestAnimationFrame(animateForces);
-      } else {
-        animationStartTime = null;
-        // Guardar las fuerzas actuales para la próxima animación
-        currentForces = [...targetForces];
-        currentResultant = {...targetResultant};
-        isAnimating = false;
-      }
-    }
-    
-    // Función para dibujar el triángulo con fuerzas
-    function drawTriangleWithForces(forces, resultant) {
-      // Obtener valores del formulario para las posiciones
-      const d12 = parseFloat(document.getElementById('d12').value) * 
-                  parseFloat(document.getElementById('unitD12').value);
-      const d23 = parseFloat(document.getElementById('d23').value) * 
-                  parseFloat(document.getElementById('unitD23').value);
-      const d31 = parseFloat(document.getElementById('d31').value) * 
-                  parseFloat(document.getElementById('unitD31').value);
-      
-      const pos = computePositions(d12, d23, d31);
-      const angles = computeAngles(d12, d23, d31);
-      
-      // Guardar posiciones y ángulos para rotación/zoom
-      currentPositions = pos;
-      currentAngles = angles;
-      
-      // Limpiar el canvas
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      // Calcular el bounding box del triángulo
-      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-      pos.forEach(p => {
-        minX = Math.min(minX, p.x);
-        minY = Math.min(minY, p.y);
-        maxX = Math.max(maxX, p.x);
-        maxY = Math.max(maxY, p.y);
-      });
-      
-      // Calcular dimensiones del triángulo
-      const triangleWidth = maxX - minX;
-      const triangleHeight = maxY - minY;
-      
-      // Calcular márgenes y escala
-      const margin = 50;
-      const availableWidth = canvas.width - 2 * margin;
-      const availableHeight = canvas.height - 2 * margin;
-      
-      // Calcular escala para que el triángulo encaje manteniendo proporciones
-      const scaleX = availableWidth / triangleWidth;
-      const scaleY = availableHeight / triangleHeight;
-      currentScale = Math.min(scaleX, scaleY) * 0.8 * zoomLevel;
-      
-      // Calcular offset para centrar
-      const offsetX = (canvas.width - triangleWidth * currentScale) / 2 - minX * currentScale;
-      const offsetY = (canvas.height + triangleHeight * currentScale) / 2 - minY * currentScale;
-      
-      // Función para convertir coordenadas físicas a canvas con rotación
-      const toCanvas = (x, y) => {
-        // Centrar en el origen para rotación
-        const centeredX = x - (minX + triangleWidth/2);
-        const centeredY = y - (minY + triangleHeight/2);
-        
-        // Aplicar rotación
-        const rotatedX = centeredX * Math.cos(rotationAngle) - centeredY * Math.sin(rotationAngle);
-        const rotatedY = centeredX * Math.sin(rotationAngle) + centeredY * Math.cos(rotationAngle);
-        
-        // Volver a la posición original y escalar
-        return {
-          x: offsetX + (rotatedX + (minX + triangleWidth/2)) * currentScale,
-          y: offsetY - (rotatedY + (minY + triangleHeight/2)) * currentScale
-        };
-      };
-      
-      // Configuración de dibujo
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.strokeStyle = '#9c27b0';
-      ctx.lineWidth = 3;
-      
-      // Dibujar el triángulo
-      ctx.beginPath();
-      pos.forEach((p, i) => {
-        const {x, y} = toCanvas(p.x, p.y);
-        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-      });
-      ctx.closePath();
-      ctx.stroke();
-
-      // Dibujar las cargas (puntos)
-      const sel = parseInt(document.getElementById('selectedCharge').value);
-      const vals = [1, 2, 3].map(i => {
-        const v = parseFloat(document.getElementById('charge' + i).value);
-        const u = parseFloat(document.getElementById('unit' + i).value);
-        const s = parseInt(document.getElementById('sign' + i).value);
-        return v * u * s;
-      });
-      
-      pos.forEach((p, i) => {
-        const {x, y} = toCanvas(p.x, p.y);
-        
-        // Dibujar punto con color según el signo de la carga
-        const gradient = ctx.createRadialGradient(x, y, 5, x, y, 15);
-        if (vals[i] > 0) {
-          gradient.addColorStop(0, '#4CAF50');
-          gradient.addColorStop(1, 'rgba(76, 175, 80, 0.3)');
-        } else {
-          gradient.addColorStop(0, '#F44336');
-          gradient.addColorStop(1, 'rgba(244, 67, 54, 0.3)');
+    <script>
+        // Función para abrir el regalo y mostrar la animación de cumpleaños
+        function openGift() {
+            document.getElementById('cover').classList.add('hidden');
+            document.getElementById('birthday-content').style.display = 'flex';
+            
+            // Iniciar la animación de corazones después de un breve retraso
+            setTimeout(initHearts, 500);
         }
         
-        ctx.fillStyle = gradient;
-        ctx.beginPath();
-        ctx.arc(x, y, 15, 0, 2*Math.PI);
-        ctx.fill();
-        
-        // Resaltar la carga seleccionada
-        if (i === sel) {
-          ctx.strokeStyle = '#FFC107';
-          ctx.lineWidth = 3;
-          ctx.beginPath();
-          ctx.arc(x, y, 20, 0, 2*Math.PI);
-          ctx.stroke();
-          ctx.strokeStyle = '#9c27b0';
-          ctx.lineWidth = 3;
+        // Inicializar la animación de corazones
+        function initHearts() {
+            const container = document.body;
+            let hearts = [];
+            let heartCount = 40;
+            
+            // Crear corazones iniciales
+            createHearts(heartCount);
+            
+            // Función para crear corazones
+            function createHearts(count) {
+                for (let i = 0; i < count; i++) {
+                    setTimeout(() => {
+                        const heart = document.createElement('div');
+                        heart.className = 'Happy_Birthday';
+                        
+                        // Posición aleatoria
+                        heart.style.left = Math.random() * 100 + 'vw';
+                        
+                        // Tamaño aleatorio
+                        const size = Math.random() * 15 + 10;
+                        heart.style.width = size + 'px';
+                        heart.style.height = size + 'px';
+                        
+                        // Duración aleatoria de animación
+                        const duration = Math.random() * 4 + 3;
+                        heart.style.animationDuration = duration + 's';
+                        
+                        // Color aleatorio
+                        const colors = ['#ff2e63', '#ff6b8b', '#ff8fab', '#ffa8c2', '#ffc2d4'];
+                        heart.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                        
+                        container.appendChild(heart);
+                        hearts.push(heart);
+                        
+                        // Eliminar el corazón después de que termine la animación
+                        setTimeout(() => {
+                            if (heart.parentNode) {
+                                heart.parentNode.removeChild(heart);
+                            }
+                        }, duration * 1000);
+                    }, Math.random() * 2000);
+                }
+            }
+            
+            // Crear nuevos corazones continuamente
+            setInterval(() => {
+                if (hearts.length < heartCount) {
+                    createHearts(1);
+                }
+            }, 500);
         }
         
-        // Etiqueta de la carga
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 14px Arial';
-        ctx.fillText(`Q${i+1} (${formatNumber(vals[i])} C)`, x, y + 25);
-      });
-
-      // Dibujar fuerzas
-      forces.forEach((force, i) => {
-        const from = toCanvas(force.fromX, force.fromY);
-        const to = toCanvas(
-          force.fromX + force.fx * 0.1, // Escalar para visualización
-          force.fromY + force.fy * 0.1
-        );
-        
-        // Dibujar línea de fuerza
-        const gradient = ctx.createLinearGradient(from.x, from.y, to.x, to.y);
-        gradient.addColorStop(0, force.sign > 0 ? 'rgba(76, 175, 80, 0.7)' : 'rgba(244, 67, 54, 0.7)');
-        gradient.addColorStop(1, force.sign > 0 ? 'rgba(76, 175, 80, 0.2)' : 'rgba(244, 67, 54, 0.2)');
-        
-        ctx.strokeStyle = gradient;
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(from.x, from.y);
-        ctx.lineTo(to.x, to.y);
-        ctx.stroke();
-        
-        // Dibujar punta de flecha
-        const angle = Math.atan2(to.y - from.y, to.x - from.x);
-        const arrowSize = 12;
-        
-        ctx.fillStyle = force.sign > 0 ? '#4CAF50' : '#F44336';
-        ctx.beginPath();
-        ctx.moveTo(to.x, to.y);
-        ctx.lineTo(
-          to.x - arrowSize * Math.cos(angle - Math.PI/6),
-          to.y - arrowSize * Math.sin(angle - Math.PI/6)
-        );
-        ctx.lineTo(
-          to.x - arrowSize * Math.cos(angle + Math.PI/6),
-          to.y - arrowSize * Math.sin(angle + Math.PI/6)
-        );
-        ctx.closePath();
-        ctx.fill();
-        
-        // Etiqueta de magnitud de fuerza
-        ctx.fillStyle = force.sign > 0 ? '#4CAF50' : '#F44336';
-        ctx.font = 'bold 10px Arial';
-        ctx.fillText(
-          `F = ${formatNumber(force.mag)} N`, 
-          (from.x + to.x)/2 + 15, 
-          (from.y + to.y)/2 + 15
-        );
-      });
-      
-      // Dibujar fuerza resultante
-      if (resultant.fx !== 0 || resultant.fy !== 0) {
-        const from = toCanvas(pos[sel].x, pos[sel].y);
-        const to = toCanvas(
-          pos[sel].x + resultant.fx * 0.1, // Escalar para visualización
-          pos[sel].y + resultant.fy * 0.1
-        );
-        
-        // Dibujar línea de fuerza resultante con gradiente
-        const gradient = ctx.createLinearGradient(from.x, from.y, to.x, to.y);
-        gradient.addColorStop(0, 'rgba(255, 193, 7, 0.9)');
-        gradient.addColorStop(1, 'rgba(255, 193, 7, 0.3)');
-        
-        ctx.strokeStyle = gradient;
-        ctx.lineWidth = 4;
-        ctx.beginPath();
-        ctx.moveTo(from.x, from.y);
-        ctx.lineTo(to.x, to.y);
-        ctx.stroke();
-        
-        // Dibujar punta de flecha
-        const angle = Math.atan2(to.y - from.y, to.x - from.x);
-        const arrowSize = 15;
-        
-        ctx.fillStyle = '#FFC107';
-        ctx.beginPath();
-        ctx.moveTo(to.x, to.y);
-        ctx.lineTo(
-          to.x - arrowSize * Math.cos(angle - Math.PI/6),
-          to.y - arrowSize * Math.sin(angle - Math.PI/6)
-        );
-        ctx.lineTo(
-          to.x - arrowSize * Math.cos(angle + Math.PI/6),
-          to.y - arrowSize * Math.sin(angle + Math.PI/6)
-        );
-        ctx.closePath();
-        ctx.fill();
-        
-        // Etiqueta de fuerza resultante
-        const Ftot = Math.hypot(resultant.fx, resultant.fy);
-        ctx.fillStyle = '#FFC107';
-        ctx.font = 'bold 14px Arial';
-        ctx.fillText(
-          `Fᵣ = ${formatNumber(Ftot)} N`, 
-          (from.x + to.x)/2 + 20, 
-          (from.y + to.y)/2 - 20
-        );
-        
-        // Dibujar ángulo de la resultante
-        const angleDeg = Math.atan2(resultant.fy, resultant.fx) * 180 / Math.PI;
-        const radius = 30;
-        const arcStart = 0;
-        const arcEnd = angleDeg * Math.PI / 180;
-        
-        ctx.strokeStyle = '#FFC107';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(from.x, from.y, radius, arcStart, arcEnd, angleDeg < 0);
-        ctx.stroke();
-        
-        // Etiqueta del ángulo
-        ctx.fillStyle = '#FFC107';
-        ctx.font = '10px Arial';
-        ctx.fillText(
-          `${angleDeg.toFixed(1)}°`, 
-          from.x + radius * Math.cos(arcEnd/2), 
-          from.y + radius * Math.sin(arcEnd/2)
-        );
-      }
-
-      // Mostrar distancias en los lados del triángulo
-      const mids = [[0,1], [1,2], [2,0]].map(([i,j]) => ({
-        x: (pos[i].x + pos[j].x) / 2,
-        y: (pos[i].y + pos[j].y) / 2,
-        angle: Math.atan2(pos[j].y - pos[i].y, pos[j].x - pos[i].x)
-      }));
-      
-      ctx.font = 'bold 12px Arial';
-      mids.forEach((m, i) => {
-        const {x, y} = toCanvas(m.x, m.y);
-        
-        // Rotar el texto para que siga la línea del triángulo
-        ctx.save();
-        ctx.translate(x, y);
-        ctx.rotate(m.angle + rotationAngle);
-        
-        ctx.fillStyle = '#ba68c8';
-        ctx.fillText([d12, d23, d31][i].toFixed(2) + ' m', 0, -15);
-        
-        ctx.restore();
-      });
-
-      // Mostrar ángulos en los vértices
-      ['Q1', 'Q2', 'Q3'].forEach((lbl, i) => {
-        const p = pos[i];
-        const {x, y} = toCanvas(
-          p.x + (i === 1 ? -0.2 : 0.2),
-          p.y + (i === 1 ? 0.3 : 0)
-        );
-        ctx.fillStyle = '#ba68c8';
-        ctx.font = 'bold 12px Arial';
-        ctx.fillText(`${angles[i].toFixed(1)}°`, x, y);
-      });
-    }
-    
-    // Función para mostrar resultados detallados
-    function showDetailedResults(forces, resultant, sel, vals, pos) {
-      // Mostrar resumen
-      const Ftot = Math.hypot(resultant.fx, resultant.fy);
-      const angleDeg = Math.atan2(resultant.fy, resultant.fx) * 180 / Math.PI;
-      
-      let summary = `FUERZA RESULTANTE SOBRE Q${sel+1}:\n\n`;
-      summary += `• Magnitud: ${formatNumber(Ftot)} N\n`;
-      summary += `• Dirección: ${angleDeg.toFixed(1)}°\n`;
-      summary += `• Componente X: ${formatNumber(resultant.fx)} N\n`;
-      summary += `• Componente Y: ${formatNumber(resultant.fy)} N\n\n`;
-      
-      resultsDiv.textContent = summary;
-      
-      // Mostrar tabla de fuerzas individuales
-      forcesTableBody.innerHTML = '';
-      forces.forEach((force, i) => {
-        const otherCharge = i < sel ? i : i + 1;
-        const row = document.createElement('tr');
-        
-        row.innerHTML = `
-          <td>F<sub>${otherCharge+1}→${sel+1}</sub></td>
-          <td>${formatNumber(force.mag)}</td>
-          <td>${force.angle.toFixed(1)}</td>
-          <td>${force.sign > 0 ? 'Repulsión' : 'Atracción'}</td>
-        `;
-        
-        forcesTableBody.appendChild(row);
-      });
-      
-      // Mostrar detalles matemáticos
-      let details = `DETALLES MATEMÁTICOS:\n\n`;
-      details += `Carga Q${sel+1}: ${formatNumber(vals[sel])} C\n`;
-      details += `Posición: (${pos[sel].x.toFixed(2)} m, ${pos[sel].y.toFixed(2)} m)\n\n`;
-      
-      forces.forEach((force, i) => {
-        const otherCharge = i < sel ? i : i + 1;
-        details += `FUERZA DE Q${otherCharge+1} SOBRE Q${sel+1}:\n`;
-        details += `• Carga Q${otherCharge+1}: ${formatNumber(vals[otherCharge])} C\n`;
-        details += `• Posición: (${pos[otherCharge].x.toFixed(2)} m, ${pos[otherCharge].y.toFixed(2)} m)\n`;
-        details += `• Distancia: ${force.r.toFixed(2)} m\n`;
-        details += `• Vector unitario: (${force.ux.toFixed(4)}, ${force.uy.toFixed(4)})\n`;
-        details += `• Cálculo: F = k·|q1·q2|/r² = (8.99×10^9)·|${formatNumber(vals[sel])}·${formatNumber(vals[otherCharge])}|/(${force.r.toFixed(2)})² = ${formatNumber(force.mag)} N\n`;
-        details += `• Vector fuerza: (${formatNumber(force.fx)} N, ${formatNumber(force.fy)} N)\n\n`;
-      });
-      
-      details += `FUERZA RESULTANTE:\n`;
-      details += `• Suma de componentes X: ${forces.map(f => formatNumber(f.fx)).join(' + ')} = ${formatNumber(resultant.fx)} N\n`;
-      details += `• Suma de componentes Y: ${forces.map(f => formatNumber(f.fy)).join(' + ')} = ${formatNumber(resultant.fy)} N\n`;
-      details += `• Magnitud: √((${formatNumber(resultant.fx)})² + (${formatNumber(resultant.fy)})²) = ${formatNumber(Ftot)} N\n`;
-      details += `• Ángulo: arctan(${formatNumber(resultant.fy)}/${formatNumber(resultant.fx)}) = ${angleDeg.toFixed(1)}°\n`;
-      
-      detailedResultsDiv.textContent = details;
-    }
-    
-    // Función para mostrar el procedimiento detallado
-    function showProcedure() {
-      // Obtener todos los valores del formulario
-      const charges = [1, 2, 3].map(i => {
-        return {
-          value: document.getElementById(`charge${i}`).value,
-          unit: document.getElementById(`unit${i}`).value,
-          sign: document.getElementById(`sign${i}`).value
-        };
-      });
-
-      const distances = {
-        d12: {
-          value: document.getElementById('d12').value,
-          unit: document.getElementById('unitD12').value
-        },
-        d23: {
-          value: document.getElementById('d23').value,
-          unit: document.getElementById('unitD23').value
-        },
-        d31: {
-          value: document.getElementById('d31').value,
-          unit: document.getElementById('unitD31').value
-        }
-      };
-
-      const selectedCharge = document.getElementById('selectedCharge').value;
-
-      // Ocultar el contenedor principal y mostrar el de procedimiento
-      mainContainer.style.display = 'none';
-      procedureContainer.style.display = 'block';
-      
-      // Mostrar datos recibidos
-      displayReceivedData(charges, distances, selectedCharge);
-    }
-    
-    // Función para mostrar los datos recibidos en el procedimiento
-    function displayReceivedData(charges, distances, selectedCharge) {
-      const dataDisplay = document.getElementById('dataDisplay');
-      let html = '<h3>DATOS DEL SIMULADOR</h3>';
-      
-      // Mostrar datos de cargas
-      html += '<div class="data-group">';
-      html += '<h4>Cargas Eléctricas</h4>';
-      charges.forEach((charge, i) => {
-        const sign = charge.sign > 0 ? '+' : '-';
-        let unitText = '';
-        switch(charge.unit) {
-          case '1e-9': unitText = 'nC'; break;
-          case '1e-6': unitText = 'μC'; break;
-          case '1e-3': unitText = 'mC'; break;
-          case '1': unitText = 'C'; break;
+        // Función para actualizar el mensaje
+        function updateMessage() {
+            const customText = document.getElementById('customText').value;
+            if (customText.trim() !== '') {
+                document.getElementById('message').textContent = customText;
+            }
         }
         
-        html += `
-          <div class="data-item">
-            <span>Carga Q${i+1}:</span>
-            <span>${charge.value} ${unitText} (${sign})</span>
-          </div>
-        `;
-      });
-      html += '</div>';
-      
-      // Mostrar datos de distancias
-      html += '<div class="data-group">';
-      html += '<h4>Distancias entre cargas</h4>';
-      
-      const distancePairs = [
-        { label: 'Q1-Q2', data: distances.d12 },
-        { label: 'Q2-Q3', data: distances.d23 },
-        { label: 'Q3-Q1', data: distances.d31 }
-      ];
-      
-      distancePairs.forEach((item, i) => {
-        let unitText = '';
-        switch(item.data.unit) {
-          case '0.001': unitText = 'mm'; break;
-          case '0.01': unitText = 'cm'; break;
-          case '1': unitText = 'm'; break;
-        }
-        
-        html += `
-          <div class="data-item">
-            <span>Distancia ${item.label}:</span>
-            <span>${item.data.value} ${unitText}</span>
-          </div>
-        `;
-      });
-      html += '</div>';
-      
-      // Mostrar carga seleccionada
-      html += '<div class="data-group">';
-      html += '<h4>Carga objetivo</h4>';
-      html += `
-        <div class="data-item">
-          <span>Carga seleccionada:</span>
-          <span>Q${parseInt(selectedCharge) + 1}</span>
-        </div>
-      `;
-      html += '</div>';
-      
-      dataDisplay.innerHTML = html;
-      
-      // Realizar cálculos y mostrar procedimiento detallado
-      showDetailedProcedure(charges, distances, selectedCharge);
-    }
-    
-    // Función para mostrar el procedimiento detallado con cálculos
-    function showDetailedProcedure(charges, distances, selectedCharge) {
-      // 1. Conversión de unidades
-      const chargeValues = charges.map((charge, i) => {
-        const value = parseFloat(charge.value);
-        const converted = value * parseFloat(charge.unit);
-        return {
-          original: value,
-          unit: charge.unit,
-          sign: parseInt(charge.sign),
-          converted: converted,
-          finalValue: converted * parseInt(charge.sign)
-        };
-      });
-      
-      const distanceValues = {
-        d12: parseFloat(distances.d12.value) * parseFloat(distances.d12.unit),
-        d23: parseFloat(distances.d23.value) * parseFloat(distances.d23.unit),
-        d31: parseFloat(distances.d31.value) * parseFloat(distances.d31.unit)
-      };
-      
-      const sel = parseInt(selectedCharge);
-      
-      // Mostrar conversiones
-      let conversionHTML = '';
-      chargeValues.forEach((charge, i) => {
-        let unitText = '';
-        switch(charge.unit) {
-          case '1e-9': unitText = 'nC'; break;
-          case '1e-6': unitText = 'μC'; break;
-          case '1e-3': unitText = 'mC'; break;
-          case '1': unitText = 'C'; break;
-        }
-        
-        conversionHTML += `
-          <p>Q${i+1}: ${charge.original} ${unitText} × ${charge.unit} = ${formatNumber(charge.converted)} C</p>
-        `;
-      });
-      
-      conversionHTML += '<p>Distancias convertidas a metros:</p>';
-      conversionHTML += `
-        <p>Q1-Q2: ${formatNumber(distanceValues.d12)} m</p>
-        <p>Q2-Q3: ${formatNumber(distanceValues.d23)} m</p>
-        <p>Q3-Q1: ${formatNumber(distanceValues.d31)} m</p>
-      `;
-      
-      document.getElementById('conversionCalculations').innerHTML = conversionHTML;
-      
-      // 2. Cálculo de fuerzas según la Ley de Coulomb
-      const otherCharges = [0, 1, 2].filter(i => i !== sel);
-      const pos = computePositions(distanceValues.d12, distanceValues.d23, distanceValues.d31);
-      
-      const forces = otherCharges.map(i => {
-        // Calcular distancia entre las cargas
-        const dx = pos[i].x - pos[sel].x;
-        const dy = pos[i].y - pos[sel].y;
-        const distance = Math.hypot(dx, dy);
-        
-        const force = k * Math.abs(chargeValues[sel].finalValue * chargeValues[i].finalValue) / Math.pow(distance, 2);
-        
-        return {
-          from: i,
-          distance: distance,
-          force: force,
-          angle: Math.atan2(dy, dx) * 180 / Math.PI,
-          attractive: chargeValues[sel].finalValue * chargeValues[i].finalValue < 0
-        };
-      });
-      
-      let forceHTML = '';
-      forces.forEach((force, i) => {
-        forceHTML += `
-          <div>
-            <p>Fuerza entre Q${sel+1} y Q${force.from+1}:</p>
-            <p>F = (8.99×10⁹) × |${formatNumber(chargeValues[sel].finalValue)} × ${formatNumber(chargeValues[force.from].finalValue)}| / (${formatNumber(force.distance)})²</p>
-            <p>F = ${formatNumber(force.force)} N</p>
-          </div>
-        `;
-      });
-      
-      document.getElementById('forceCalculations').innerHTML = forceHTML;
-      
-      // 3. Naturaleza de las fuerzas
-      let forceTypesHTML = '';
-      forces.forEach((force, i) => {
-        forceTypesHTML += `
-          <p>Fuerza Q${force.from+1} → Q${sel+1}: <span style="color: ${force.attractive ? '#4CAF50' : '#FF5722'}; font-weight: bold;">${force.attractive ? 'Atracción' : 'Repulsión'}</span></p>
-        `;
-      });
-      
-      document.getElementById('forceTypes').innerHTML = forceTypesHTML;
-      
-      // 4. Descomposición vectorial
-      let vectorHTML = '';
-      forces.forEach((force, i) => {
-        const fx = force.force * Math.cos(force.angle * Math.PI / 180);
-        const fy = force.force * Math.sin(force.angle * Math.PI / 180);
-        
-        vectorHTML += `
-          <div>
-            <p>Fuerza Q${force.from+1} → Q${sel+1}:</p>
-            <p>Fₓ = ${formatNumber(force.force)} × cos(${force.angle.toFixed(1)}°) = ${formatNumber(fx)} N</p>
-            <p>Fᵧ = ${formatNumber(force.force)} × sin(${force.angle.toFixed(1)}°) = ${formatNumber(fy)} N</p>
-          </div>
-        `;
-      });
-      
-      document.getElementById('vectorComponents').innerHTML = vectorHTML;
-      
-      // 5. Suma vectorial
-      const totalFx = forces.reduce((sum, force) => {
-        return sum + force.force * Math.cos(force.angle * Math.PI / 180);
-      }, 0);
-      
-      const totalFy = forces.reduce((sum, force) => {
-        return sum + force.force * Math.sin(force.angle * Math.PI / 180);
-      }, 0);
-      
-      document.getElementById('vectorSum').innerHTML = `
-        <p>Fₜₒₜₐₗₓ = ${formatNumber(totalFx)} N</p>
-        <p>Fₜₒₜₐₗᵧ = ${formatNumber(totalFy)} N</p>
-      `;
-      
-      // 6. Resultado final
-      const magnitude = Math.sqrt(totalFx * totalFx + totalFy * totalFy);
-      const angle = Math.atan2(totalFy, totalFx) * 180 / Math.PI;
-      
-      document.getElementById('finalResult').innerHTML = `
-        <p>Magnitud: √(${formatNumber(totalFx)}² + ${formatNumber(totalFy)}²) = <span style="color: #FFEB3B; font-weight: bold;">${formatNumber(magnitude)} N</span></p>
-        <p>Dirección: arctan(${formatNumber(totalFy)}/${formatNumber(totalFx)}) = <span style="color: #FFEB3B; font-weight: bold;">${formatNumber(angle)}°</span></p>
-      `;
-      
-      // Crear tabla de resultados
-      const resultTable = document.getElementById('resultTable');
-      resultTable.innerHTML = `
-        <tr>
-          <th>Fuerza</th>
-          <th>Magnitud (N)</th>
-          <th>Ángulo (°)</th>
-          <th>Tipo</th>
-        </tr>
-        ${forces.map((force, i) => {
-          return `
-            <tr>
-              <td>Q${force.from+1} → Q${sel+1}</td>
-              <td>${formatNumber(force.force)}</td>
-              <td>${force.angle.toFixed(1)}</td>
-              <td style="color: ${force.attractive ? '#4CAF50' : '#FF5722'}">${force.attractive ? 'Atracción' : 'Repulsión'}</td>
-            </tr>
-          `;
-        }).join('')}
-        <tr style="background: rgba(156,39,176,0.3); font-weight: bold;">
-          <td>RESULTANTE</td>
-          <td style="color: #FFEB3B">${formatNumber(magnitude)}</td>
-          <td style="color: #FFEB3B">${formatNumber(angle)}</td>
-          <td>-</td>
-        </tr>
-      `;
-      
-      // Crear diagrama animado
-      const diagram = document.getElementById('forceDiagram');
-      diagram.innerHTML = '';
-      
-      // Posicionar cargas en el diagrama
-      const centerCharge = document.createElement('div');
-      centerCharge.className = 'charge-diagram';
-      centerCharge.style.left = '50%';
-      centerCharge.style.top = '50%';
-      centerCharge.style.backgroundColor = chargeValues[sel].sign > 0 ? '#f44336' : '#2196F3';
-      diagram.appendChild(centerCharge);
-      
-      // Agregar etiqueta a la carga central
-      const centerLabel = document.createElement('div');
-      centerLabel.textContent = `Q${sel+1}`;
-      centerLabel.style.position = 'absolute';
-      centerLabel.style.left = '50%';
-      centerLabel.style.top = 'calc(50% + 15px)';
-      centerLabel.style.transform = 'translateX(-50%)';
-      centerLabel.style.color = 'white';
-      centerLabel.style.fontSize = '12px';
-      diagram.appendChild(centerLabel);
-      
-      // Agregar otras cargas y fuerzas
-      forces.forEach((force, i) => {
-        const angleDeg = force.angle;
-        const distance = 80;
-        const angleRad = angleDeg * Math.PI / 180;
-        
-        const otherCharge = document.createElement('div');
-        otherCharge.className = 'charge-diagram';
-        otherCharge.style.left = `${50 + distance * Math.cos(angleRad)}%`;
-        otherCharge.style.top = `${50 + distance * Math.sin(angleRad)}%`;
-        otherCharge.style.backgroundColor = chargeValues[force.from].sign > 0 ? '#f44336' : '#2196F3';
-        diagram.appendChild(otherCharge);
-        
-        // Agregar etiqueta a la otra carga
-        const otherLabel = document.createElement('div');
-        otherLabel.textContent = `Q${force.from+1}`;
-        otherLabel.style.position = 'absolute';
-        otherLabel.style.left = `${50 + (distance + 10) * Math.cos(angleRad)}%`;
-        otherLabel.style.top = `${50 + (distance + 10) * Math.sin(angleRad)}%`;
-        otherLabel.style.transform = 'translate(-50%, -50%)';
-        otherLabel.style.color = 'white';
-        otherLabel.style.fontSize = '12px';
-        diagram.appendChild(otherLabel);
-        
-        // Dibujar fuerza
-        const arrow = document.createElement('div');
-        arrow.className = 'force-arrow';
-        arrow.style.left = '50%';
-        arrow.style.top = '50%';
-        arrow.style.width = '0';
-        arrow.style.setProperty('--arrow-length', `${distance * 0.7}%`);
-        arrow.style.transform = `rotate(${angleDeg}deg)`;
-        diagram.appendChild(arrow);
-        
-        // Agregar etiqueta de fuerza
-        const forceLabel = document.createElement('div');
-        forceLabel.textContent = `${formatNumber(force.force)} N`;
-        forceLabel.style.position = 'absolute';
-        forceLabel.style.left = `${50 + (distance * 0.35) * Math.cos(angleRad)}%`;
-        forceLabel.style.top = `${50 + (distance * 0.35) * Math.sin(angleRad)}%`;
-        forceLabel.style.transform = 'translate(-50%, -50%)';
-        forceLabel.style.color = '#FF5722';
-        forceLabel.style.fontSize = '12px';
-        forceLabel.style.fontWeight = 'bold';
-        diagram.appendChild(forceLabel);
-      });
-      
-      // Agregar leyenda
-      const legend = document.createElement('div');
-      legend.style.position = 'absolute';
-      legend.style.bottom = '10px';
-      legend.style.left = '10px';
-      legend.style.color = 'white';
-      legend.style.fontSize = '12px';
-      legend.innerHTML = `
-        <div style="display: flex; align-items: center; margin-bottom: 5px;">
-          <div style="width: 12px; height: 12px; background: #f44336; border-radius: 50%; margin-right: 5px;"></div>
-          <span>Carga positiva</span>
-        </div>
-        <div style="display: flex; align-items: center; margin-bottom: 5px;">
-          <div style="width: 12px; height: 12px; background: #2196F3; border-radius: 50%; margin-right: 5px;"></div>
-          <span>Carga negativa</span>
-        </div>
-        <div style="display: flex; align-items: center;">
-          <div style="width: 20px; height: 2px; background: #FF5722; margin-right: 5px; position: relative;">
-            <div style="position: absolute; right: 0; top: -4px; width: 0; height: 0; border-style: solid; border-width: 5px 0 5px 8px; border-color: transparent transparent transparent #FF5722;"></div>
-          </div>
-          <span>Fuerza</span>
-        </div>
-      `;
-      diagram.appendChild(legend);
-      
-      // Iniciar animaciones después de un breve retraso para que se renderice todo
-      setTimeout(() => {
-        document.querySelectorAll('.force-arrow').forEach(arrow => {
-          arrow.style.animation = 'arrowExtend 1s forwards, arrowGlow 1.5s infinite alternate';
+        // Permitir actualizar el mensaje con la tecla Enter
+        document.getElementById('customText').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                updateMessage();
+            }
         });
-      }, 100);
-    }
-    
-    // Manejar el envío del formulario
-    form.addEventListener('submit', function(e) {
-      e.preventDefault();
-      
-      // Mostrar pantalla de carga durante el cálculo
-      document.getElementById('loadingScreen').style.display = 'flex';
-      document.getElementById('loadingScreen').style.opacity = '1';
-      
-      // Simular tiempo de procesamiento para la animación de carga
-      setTimeout(function() {
-        calculateForces();
-        document.getElementById('loadingScreen').style.opacity = '0';
-        setTimeout(function() {
-          document.getElementById('loadingScreen').style.display = 'none';
-        }, 500);
-      }, 800);
-    });
-    
-    // Función para calcular las fuerzas
-    function calculateForces() {
-      // Obtener valores de las cargas (ahora permitiendo decimales)
-      const vals = [1, 2, 3].map(i => {
-        const v = parseFloat(document.getElementById('charge' + i).value);
-        const u = parseFloat(document.getElementById('unit' + i).value);
-        const s = parseInt(document.getElementById('sign' + i).value);
-        return v * u * s;
-      });
-      
-      // Obtener distancias y convertir a metros
-      const d12 = parseFloat(document.getElementById('d12').value) * 
-                  parseFloat(document.getElementById('unitD12').value);
-      const d23 = parseFloat(document.getElementById('d23').value) * 
-                  parseFloat(document.getElementById('unitD23').value);
-      const d31 = parseFloat(document.getElementById('d31').value) * 
-                  parseFloat(document.getElementById('unitD31').value);
-
-      // Calcular posiciones y ángulos
-      const pos = computePositions(d12, d23, d31);
-      const angles = computeAngles(d12, d23, d31);
-      
-      // Obtener la carga seleccionada
-      const sel = parseInt(document.getElementById('selectedCharge').value);
-      let Fx = 0, Fy = 0;
-      
-      // Calcular fuerzas entre cargas
-      targetForces = [];
-      for (let j = 0; j < 3; j++) {
-        if (j === sel) continue;
-        
-        const f = calculateForce(
-          vals[sel], 
-          vals[j],
-          pos[sel].x, 
-          pos[sel].y,
-          pos[j].x, 
-          pos[j].y
-        );
-        
-        Fx += f.fx;
-        Fy += f.fy;
-        targetForces.push(f);
-      }
-
-      // Calcular fuerza resultante
-      const Ftot = Math.hypot(Fx, Fy);
-      const angResult = Math.atan2(Fy, Fx) * 180 / Math.PI;
-      targetResultant = { 
-        fx: Fx, 
-        fy: Fy, 
-        mag: Ftot, 
-        angle: angResult 
-      };
-      
-      // Mostrar resultados detallados
-      showDetailedResults(targetForces, targetResultant, sel, vals, pos);
-      
-      // Iniciar animación
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-      }
-      
-      // Si es la primera vez, inicializar las fuerzas actuales
-      if (currentForces.length === 0) {
-        currentForces = targetForces.map(f => ({...f, fx: 0, fy: 0, mag: 0}));
-        currentResultant = { fx: 0, fy: 0, mag: 0, angle: 0 };
-      }
-      
-      animationStartTime = null;
-      isAnimating = true;
-      animationFrameId = requestAnimationFrame(animateForces);
-    }
-    
-    // Manejar el botón de reset
-    document.getElementById('resetBtn').addEventListener('click', function() {
-      form.reset();
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-        animationFrameId = null;
-      }
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      resultsDiv.textContent = 'Aquí se mostrarán los resultados del cálculo';
-      detailedResultsDiv.textContent = '';
-      forcesTableBody.innerHTML = '';
-      currentForces = [];
-      targetForces = [];
-      currentResultant = { fx: 0, fy: 0, mag: 0, angle: 0 };
-      targetResultant = { fx: 0, fy: 0, mag: 0, angle: 0 };
-      zoomLevel = 1;
-      rotationAngle = 0;
-      
-      // Dibujar un mensaje en el canvas
-      ctx.fillStyle = '#9c27b0';
-      ctx.font = '16px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText('Ingrese los valores y haga clic en Calcular', canvas.width/2, canvas.height/2);
-    });
-    
-    // Manejar el botón de animación
-    document.getElementById('animateBtn').addEventListener('click', function() {
-      if (!isAnimating && targetForces.length > 0) {
-        // Reiniciar la animación desde cero
-        currentForces = targetForces.map(f => ({...f, fx: 0, fy: 0, mag: 0}));
-        currentResultant = { fx: 0, fy: 0, mag: 0, angle: 0 };
-        animationStartTime = null;
-        isAnimating = true;
-        animationFrameId = requestAnimationFrame(animateForces);
-      }
-    });
-    
-    // Manejar botones de zoom y rotación
-    document.getElementById('zoomInBtn').addEventListener('click', function() {
-      if (zoomLevel < 3) {
-        zoomLevel += 0.2;
-        drawTriangleWithForces(targetForces, targetResultant);
-      }
-    });
-    
-    document.getElementById('zoomOutBtn').addEventListener('click', function() {
-      if (zoomLevel > 0.5) {
-        zoomLevel -= 0.2;
-        drawTriangleWithForces(targetForces, targetResultant);
-      }
-    });
-    
-    document.getElementById('rotateLeftBtn').addEventListener('click', function() {
-      rotationAngle -= Math.PI / 8;
-      drawTriangleWithForces(targetForces, targetResultant);
-    });
-    
-    document.getElementById('rotateRightBtn').addEventListener('click', function() {
-      rotationAngle += Math.PI / 8;
-      drawTriangleWithForces(targetForces, targetResultant);
-    });
-    
-    // Manejar pestañas de resultados
-    document.querySelectorAll('.results-tab').forEach(tab => {
-      tab.addEventListener('click', function() {
-        // Quitar clase active de todas las pestañas y contenidos
-        document.querySelectorAll('.results-tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.results-content').forEach(c => c.classList.remove('active'));
-        
-        // Añadir clase active a la pestaña y contenido seleccionados
-        this.classList.add('active');
-        const tabName = this.getAttribute('data-tab');
-        document.getElementById(`results-${tabName}`).classList.add('active');
-      });
-    });
-
-    // Manejar el botón de procedimiento
-    document.getElementById('procedureBtn').addEventListener('click', showProcedure);
-    
-    // Manejar el botón para volver al simulador
-    document.getElementById('backButton').addEventListener('click', function() {
-      procedureContainer.style.display = 'none';
-      mainContainer.style.display = 'grid';
-    });
-
-    // Dibujar mensaje inicial en el canvas
-    ctx.fillStyle = '#9c27b0';
-    ctx.font = '16px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('Ingrese los valores y haga clic en Calcular', canvas.width/2, canvas.height/2);
-    
-    // Ejemplo de datos iniciales para demostración
-    function loadExample() {
-      document.getElementById('charge1').value = '5';
-      document.getElementById('unit1').value = '1e-6';
-      document.getElementById('sign1').value = '1';
-      
-      document.getElementById('charge2').value = '3';
-      document.getElementById('unit2').value = '1e-6';
-      document.getElementById('sign2').value = '-1';
-      
-      document.getElementById('charge3').value = '2';
-      document.getElementById('unit3').value = '1e-6';
-      document.getElementById('sign3').value = '1';
-      
-      document.getElementById('d12').value = '10';
-      document.getElementById('unitD12').value = '0.01';
-      
-      document.getElementById('d23').value = '15';
-      document.getElementById('unitD23').value = '0.01';
-      
-      document.getElementById('d31').value = '12';
-      document.getElementById('unitD31').value = '0.01';
-      
-      document.getElementById('selectedCharge').value = '0';
-    }
-    
-    // Cargar ejemplo después de un breve retraso
-    setTimeout(loadExample, 2000);
-  </script>
+    </script>
 </body>
 </html>
