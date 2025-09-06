@@ -2,454 +2,162 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>¡Feliz Cumpleaños Scarlet!</title>
+    <title>Flowers</title>
+    <link rel="icon" href="img/flowers.png" type="image/x-icon">
     <style>
-        :root {
-            --heart-love: #ff2e63;
-        }
-        
         body {
             margin: 0;
-            padding: 0;
-            height: 100vh;
-            overflow: hidden;
-            font-family: 'Arial', sans-serif;
-            color: white;
+            font-family: Arial, sans-serif;
+            background: #111;
+            color: #fff;
+            overflow-x: hidden;
         }
-        
-        /* Estilos para la portada */
-        #cover {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #ff2e63, #ff8fab, #08d9d6);
+
+        .container {
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
-            z-index: 100;
-            transition: transform 1s ease-in-out;
-        }
-        
-        #cover.hidden {
-            transform: translateY(-100%);
-        }
-        
-        .gift-box {
-            position: relative;
-            width: 200px;
-            height: 200px;
-            margin-bottom: 40px;
-            cursor: pointer;
-        }
-        
-        .gift-lid {
-            position: absolute;
-            width: 200px;
-            height: 50px;
-            background: #ff2e63;
-            border-radius: 10px 10px 0 0;
-            top: 0;
-            left: 0;
-            z-index: 2;
-            transition: transform 0.5s;
-        }
-        
-        .gift-box:hover .gift-lid {
-            transform: translateY(-10px) rotate(-5deg);
-        }
-        
-        .gift-body {
-            position: absolute;
-            width: 200px;
-            height: 150px;
-            background: #ff8fab;
-            border-radius: 0 0 10px 10px;
-            bottom: 0;
-            left: 0;
-        }
-        
-        .ribbon {
-            position: absolute;
-            background: #08d9d6;
-        }
-        
-        .ribbon-h {
-            width: 220px;
-            height: 20px;
-            top: 65px;
-            left: -10px;
-            z-index: 1;
-        }
-        
-        .ribbon-v {
-            width: 20px;
-            height: 170px;
-            left: 90px;
-            top: 0;
-            z-index: 1;
-        }
-        
-        .open-me {
-            font-size: 3rem;
-            font-weight: bold;
-            color: white;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-            cursor: pointer;
-            animation: pulse 2s infinite;
-            text-align: center;
-            padding: 20px;
-            border: 3px solid white;
-            border-radius: 15px;
-            background: rgba(255, 255, 255, 0.2);
-        }
-        
-        /* Estilos para el contenido de cumpleaños */
-        #birthday-content {
-            height: 100vh;
-            background: linear-gradient(to bottom, #252a34, #08d9d6);
-            display: flex;
             justify-content: center;
-            align-items: center;
-            overflow: hidden;
         }
-        
-        .container {
-            text-align: center;
-            z-index: 10;
-            position: relative;
-            padding: 30px;
-            background: rgba(37, 42, 52, 0.7);
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            max-width: 90%;
+
+        .greetings span {
+            font-size: 2rem;
+            margin: 0 2px;
+            animation: appear 0.5s forwards;
         }
-        
-        h1 {
-            font-size: 3.5rem;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-            color: #ffde59;
+
+        @keyframes appear {
+            from { opacity: 0; transform: translateY(-20px);}
+            to { opacity: 1; transform: translateY(0);}
         }
-        
-        .name {
-            font-size: 2.8rem;
-            margin-bottom: 30px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-            color: #ff8fab;
-            font-weight: bold;
-        }
-        
-        .birthday-message {
-            font-size: 1.8rem;
-            margin: 25px 0;
-            line-height: 1.6;
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
-            color: #fff;
-            font-style: italic;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-            padding: 15px;
-            border-radius: 15px;
-            background: rgba(255, 255, 255, 0.1);
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.03); }
-            100% { transform: scale(1); }
-        }
-        
-        /* Estilos para la torta */
-        .cake {
-            position: relative;
-            width: 220px;
-            height: 180px;
-            margin: 0 auto 20px;
-        }
-        
-        .cake-base {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            height: 70px;
-            background: #f9c7b3;
-            border-radius: 10px 10px 5px 5px;
-        }
-        
-        .cake-middle {
-            position: absolute;
-            bottom: 70px;
-            left: 10%;
-            width: 80%;
-            height: 50px;
-            background: #f39f9f;
-            border-radius: 10px 10px 0 0;
-        }
-        
-        .cake-top {
-            position: absolute;
-            bottom: 120px;
-            left: 20%;
-            width: 60%;
-            height: 40px;
-            background: #f6d5c9;
-            border-radius: 10px 10px 0 0;
-        }
-        
-        .decoration {
-            position: absolute;
-            width: 15px;
-            height: 15px;
-            border-radius: 50%;
-            background: var(--heart-love);
-        }
-        
-        .decoration:nth-child(1) { bottom: 85px; left: 20%; }
-        .decoration:nth-child(2) { bottom: 85px; left: 40%; }
-        .decoration:nth-child(3) { bottom: 85px; left: 60%; }
-        .decoration:nth-child(4) { bottom: 85px; left: 80%; }
-        .decoration:nth-child(5) { bottom: 135px; left: 30%; }
-        .decoration:nth-child(6) { bottom: 135px; left: 50%; }
-        .decoration:nth-child(7) { bottom: 135px; left: 70%; }
-        
-        .candle {
-            position: absolute;
-            bottom: 160px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 10px;
-            height: 30px;
-            background: #4cdbdf;
-            border-radius: 5px;
-            z-index: 2;
-        }
-        
-        .flame {
-            position: absolute;
-            bottom: 190px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 15px;
-            height: 25px;
-            background: #ffde59;
-            border-radius: 50% 50% 20% 20%;
-            animation: flicker 0.8s infinite alternate;
-            box-shadow: 0 0 15px 5px rgba(255, 222, 89, 0.7);
-            z-index: 3;
-        }
-        
-        @keyframes flicker {
-            0% { transform: translateX(-50%) scale(1); }
-            25% { transform: translateX(-50%) scale(1.1) translateY(2px); }
-            50% { transform: translateX(-50%) scale(0.9) translateY(-1px); }
-            75% { transform: translateX(-50%) scale(1.05) translateY(1px); }
-            100% { transform: translateX(-50%) scale(1); }
-        }
-        
-        .Happy_Birthday {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            background-color: var(--heart-love);
-            top: -20px;
-            animation: fall 5s linear infinite;
-            transform: rotate(45deg);
-            opacity: 0.8;
-        }
-        
-        .Happy_Birthday::before,
-        .Happy_Birthday::after {
-            content: '';
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            background-color: var(--heart-love);
-            border-radius: 50%;
-        }
-        
-        .Happy_Birthday::before {
-            top: -10px;
-            left: 0;
-        }
-        
-        .Happy_Birthday::after {
-            top: 0;
-            left: -10px;
-        }
-        
-        @keyframes fall {
-            0% {
-                transform: rotate(45deg) translateY(0) translateX(0) rotate(0deg);
-                opacity: 0.8;
-            }
-            100% {
-                transform: rotate(45deg) translateY(100vh) translateX(100px) rotate(360deg);
-                opacity: 0;
-            }
-        }
-        
-        .custom-text {
+
+        .description {
             margin-top: 20px;
-            padding: 10px;
-            width: 300px;
-            border-radius: 10px;
-            border: 2px solid #08d9d6;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            font-size: 1rem;
+            font-size: 1.2rem;
             text-align: center;
         }
-        
-        .custom-text::placeholder {
-            color: rgba(255, 255, 255, 0.7);
+
+        .button {
+            margin-top: 20px;
         }
-        
-        .update-btn {
-            background-color: #08d9d6;
-            border: none;
-            padding: 12px 25px;
-            margin-top: 15px;
-            border-radius: 20px;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
+
+        .botones {
+            padding: 10px 20px;
             font-size: 1rem;
+            background: #ff6600;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
         }
-        
-        .update-btn:hover {
-            background-color: var(--heart-love);
-            transform: scale(1.05);
+
+        .botones a {
+            text-decoration: none;
+            color: #fff;
         }
+
+        .titulo {
+            font-size: 1.5rem;
+            text-align: center;
+            margin: 20px;
+            animation: fadeIn 3s ease-in-out;
+        }
+
+        @keyframes fadeOut {
+            to { opacity: 0; }
+        }
+
+        #lyrics {
+            position: fixed;
+            bottom: 50px;
+            width: 100%;
+            text-align: center;
+            font-size: 1.2rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        /* Aquí puedes agregar tus estilos de flores y animaciones */
+        .flowers { position: relative; width: 100%; height: 400px; }
+        .flower { position: absolute; bottom: 0; }
+        /* Para simplificar, se omite la estructura completa de flores */
     </style>
 </head>
-<body>
-    <!-- Portada con mensaje "Ábreme" -->
-    <div id="cover">
-        <div class="gift-box" onclick="openGift()">
-            <div class="gift-lid"></div>
-            <div class="gift-body"></div>
-            <div class="ribbon ribbon-h"></div>
-            <div class="ribbon ribbon-v"></div>
-        </div>
-        <div class="open-me" onclick="openGift()">
-            ¡Ábreme!
-        </div>
+<body class="container" onload="document.body.classList.remove('container')">
+
+    <div class="greetings">
+        <span>H</span>
+        <span>o</span>
+        <span>l</span>
+        <span>a</span>
+        <span>!</span>
     </div>
-    
-    <!-- Contenido de cumpleaños (oculto inicialmente) -->
-    <div id="birthday-content" style="display: none;">
-        <div class="container">
-            <h1>¡Feliz Cumpleaños!</h1>
-            <div class="name">Scarlet</div>
-            
-            <div class="cake">
-                <div class="cake-base"></div>
-                <div class="cake-middle"></div>
-                <div class="cake-top"></div>
-                <div class="decoration"></div>
-                <div class="decoration"></div>
-                <div class="decoration"></div>
-                <div class="decoration"></div>
-                <div class="decoration"></div>
-                <div class="decoration"></div>
-                <div class="decoration"></div>
-                <div class="candle"></div>
-                <div class="flame"></div>
-            </div>
-            
-            <div class="birthday-message" id="message">
-                Que este día esté lleno de momentos especiales y mucha felicidad.
-            </div>
-            
-            <input type="text" class="custom-text" id="customText" placeholder="Escribe tu mensaje personalizado aquí">
-            <button class="update-btn" onclick="updateMessage()">Actualizar Mensaje</button>
-        </div>
+
+    <div class="description">
+        <span>ESTE DETALLE ES PARA TI :)</span>
+    </div>
+
+    <div class="button">
+        <button class="botones">
+            <a href="#flowers">CLICK AQUÍ</a>
+        </button>
+    </div>
+
+    <audio src="sound/ChristianBasso&HaienQiu-Flowers.mp3" autoplay></audio>
+
+    <h1 class="titulo">
+        Estas flores amarillas son un reflejo de la alegría que traes a mi vida.<br><br>
+        Gracias por iluminar mis días con tu presencia.
+    </h1>
+
+    <div id="lyrics"></div>
+
+    <div class="flowers" id="flowers">
+        <!-- Aquí puedes colocar tu HTML completo de flores -->
     </div>
 
     <script>
-        // Función para abrir el regalo y mostrar la animación de cumpleaños
-        function openGift() {
-            document.getElementById('cover').classList.add('hidden');
-            document.getElementById('birthday-content').style.display = 'flex';
-            
-            // Iniciar la animación de corazones después de un breve retraso
-            setTimeout(initHearts, 500);
-        }
-        
-        // Inicializar la animación de corazones
-        function initHearts() {
-            const container = document.body;
-            let hearts = [];
-            let heartCount = 40;
-            
-            // Crear corazones iniciales
-            createHearts(heartCount);
-            
-            // Función para crear corazones
-            function createHearts(count) {
-                for (let i = 0; i < count; i++) {
-                    setTimeout(() => {
-                        const heart = document.createElement('div');
-                        heart.className = 'Happy_Birthday';
-                        
-                        // Posición aleatoria
-                        heart.style.left = Math.random() * 100 + 'vw';
-                        
-                        // Tamaño aleatorio
-                        const size = Math.random() * 15 + 10;
-                        heart.style.width = size + 'px';
-                        heart.style.height = size + 'px';
-                        
-                        // Duración aleatoria de animación
-                        const duration = Math.random() * 4 + 3;
-                        heart.style.animationDuration = duration + 's';
-                        
-                        // Color aleatorio
-                        const colors = ['#ff2e63', '#ff6b8b', '#ff8fab', '#ffa8c2', '#ffc2d4'];
-                        heart.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                        
-                        container.appendChild(heart);
-                        hearts.push(heart);
-                        
-                        // Eliminar el corazón después de que termine la animación
-                        setTimeout(() => {
-                            if (heart.parentNode) {
-                                heart.parentNode.removeChild(heart);
-                            }
-                        }, duration * 1000);
-                    }, Math.random() * 2000);
-                }
-            }
-            
-            // Crear nuevos corazones continuamente
-            setInterval(() => {
-                if (hearts.length < heartCount) {
-                    createHearts(1);
-                }
-            }, 500);
-        }
-        
-        // Función para actualizar el mensaje
-        function updateMessage() {
-            const customText = document.getElementById('customText').value;
-            if (customText.trim() !== '') {
-                document.getElementById('message').textContent = customText;
+        // Letras sincronizadas
+        var audio = document.querySelector("audio");
+        var lyrics = document.querySelector("#lyrics");
+        var lyricsData = [
+            { text: "At the time", time: 15 },
+            { text: "The whisper of birds", time: 18 },
+            { text: "Lonely before the sun cried", time: 27 },
+            { text: "Fell from the sky", time: 32 },
+            { text: "Like water drops", time: 33 },
+            { text: "Where I'm now? I don't know why", time: 41 },
+            { text: "Nice butterflies in my hands", time: 47 },
+            { text: "Too much light for twilight", time: 54 },
+            { text: "In the mood for the flowers love", time: 59 }
+        ];
+
+        function updateLyrics() {
+            var time = Math.floor(audio.currentTime);
+            var currentLine = lyricsData.find(
+                line => time >= line.time && time < line.time + 6
+            );
+
+            if (currentLine) {
+                var fadeInDuration = 0.1;
+                var opacity = Math.min(1, (time - currentLine.time) / fadeInDuration);
+                lyrics.style.opacity = opacity;
+                lyrics.innerHTML = currentLine.text;
+            } else {
+                lyrics.style.opacity = 0;
+                lyrics.innerHTML = "";
             }
         }
-        
-        // Permitir actualizar el mensaje con la tecla Enter
-        document.getElementById('customText').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                updateMessage();
-            }
-        });
+
+        setInterval(updateLyrics, 500);
+
+        // Ocultar título después de 216 segundos
+        setTimeout(() => {
+            var titulo = document.querySelector(".titulo");
+            titulo.style.animation = "fadeOut 3s ease-in-out forwards";
+            setTimeout(() => { titulo.style.display = "none"; }, 3000);
+        }, 216000);
     </script>
 </body>
 </html>
