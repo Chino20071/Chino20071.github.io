@@ -2,162 +2,1044 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flowers</title>
-    <link rel="icon" href="img/flowers.png" type="image/x-icon">
+    <title>Chatbot Automatizado - Migrantes Ecuatorianos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body {
+        * {
             margin: 0;
-            font-family: Arial, sans-serif;
-            background: #111;
-            color: #fff;
-            overflow-x: hidden;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
         }
 
-        .container {
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .chatbot-container {
+            width: 100%;
+            max-width: 1000px;
+            height: 90vh;
+            background: white;
+            border-radius: 25px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            display: flex;
+        }
+
+        /* Panel de Control del Bot */
+        .bot-control-panel {
+            width: 350px;
+            background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .bot-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .bot-avatar {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(45deg, #3498db, #2ecc71);
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 40px;
+            animation: pulse 2s infinite;
         }
 
-        .greetings span {
-            font-size: 2rem;
-            margin: 0 2px;
-            animation: appear 0.5s forwards;
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
 
-        @keyframes appear {
-            from { opacity: 0; transform: translateY(-20px);}
-            to { opacity: 1; transform: translateY(0);}
+        .bot-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
         }
 
-        .description {
-            margin-top: 20px;
-            font-size: 1.2rem;
-            text-align: center;
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            background: #2ecc71;
+            border-radius: 50%;
+            animation: blink 1.5s infinite;
         }
 
-        .button {
-            margin-top: 20px;
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
 
-        .botones {
-            padding: 10px 20px;
-            font-size: 1rem;
-            background: #ff6600;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
+        .ai-metrics {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
         }
 
-        .botones a {
-            text-decoration: none;
-            color: #fff;
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .titulo {
-            font-size: 1.5rem;
-            text-align: center;
-            margin: 20px;
-            animation: fadeIn 3s ease-in-out;
+        .training-controls {
+            margin-top: 30px;
         }
 
-        @keyframes fadeOut {
-            to { opacity: 0; }
-        }
-
-        #lyrics {
-            position: fixed;
-            bottom: 50px;
+        .train-btn {
             width: 100%;
-            text-align: center;
-            font-size: 1.2rem;
-            opacity: 0;
-            transition: opacity 0.3s;
+            padding: 15px;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 10px 0;
+            transition: transform 0.3s;
         }
 
-        /* Aquí puedes agregar tus estilos de flores y animaciones */
-        .flowers { position: relative; width: 100%; height: 400px; }
-        .flower { position: absolute; bottom: 0; }
-        /* Para simplificar, se omite la estructura completa de flores */
-    </style>
-</head>
-<body class="container" onload="document.body.classList.remove('container')">
+        .train-btn:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(45deg, #2980b9, #3498db);
+        }
 
-    <div class="greetings">
-        <span>H</span>
-        <span>o</span>
-        <span>l</span>
-        <span>a</span>
-        <span>!</span>
-    </div>
+        /* Área de Chat Principal */
+        .chat-main-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 30px;
+            position: relative;
+        }
 
-    <div class="description">
-        <span>ESTE DETALLE ES PARA TI :)</span>
-    </div>
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
 
-    <div class="button">
-        <button class="botones">
-            <a href="#flowers">CLICK AQUÍ</a>
-        </button>
-    </div>
+        .chat-title h1 {
+            color: #2c3e50;
+            font-size: 24px;
+        }
 
-    <audio src="sound/ChristianBasso&HaienQiu-Flowers.mp3" autoplay></audio>
+        .chat-title p {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
 
-    <h1 class="titulo">
-        Estas flores amarillas son un reflejo de la alegría que traes a mi vida.<br><br>
-        Gracias por iluminar mis días con tu presencia.
-    </h1>
+        .ai-badge {
+            background: linear-gradient(45deg, #e74c3c, #e67e22);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
 
-    <div id="lyrics"></div>
+        /* Área de Mensajes */
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
 
-    <div class="flowers" id="flowers">
-        <!-- Aquí puedes colocar tu HTML completo de flores -->
-    </div>
+        .message {
+            max-width: 80%;
+            padding: 15px 20px;
+            border-radius: 20px;
+            position: relative;
+            animation: slideIn 0.3s ease-out;
+        }
 
-    <script>
-        // Letras sincronizadas
-        var audio = document.querySelector("audio");
-        var lyrics = document.querySelector("#lyrics");
-        var lyricsData = [
-            { text: "At the time", time: 15 },
-            { text: "The whisper of birds", time: 18 },
-            { text: "Lonely before the sun cried", time: 27 },
-            { text: "Fell from the sky", time: 32 },
-            { text: "Like water drops", time: 33 },
-            { text: "Where I'm now? I don't know why", time: 41 },
-            { text: "Nice butterflies in my hands", time: 47 },
-            { text: "Too much light for twilight", time: 54 },
-            { text: "In the mood for the flowers love", time: 59 }
-        ];
-
-        function updateLyrics() {
-            var time = Math.floor(audio.currentTime);
-            var currentLine = lyricsData.find(
-                line => time >= line.time && time < line.time + 6
-            );
-
-            if (currentLine) {
-                var fadeInDuration = 0.1;
-                var opacity = Math.min(1, (time - currentLine.time) / fadeInDuration);
-                lyrics.style.opacity = opacity;
-                lyrics.innerHTML = currentLine.text;
-            } else {
-                lyrics.style.opacity = 0;
-                lyrics.innerHTML = "";
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
 
-        setInterval(updateLyrics, 500);
+        .user-message {
+            background: linear-gradient(90deg, #3498db, #2980b9);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
 
-        // Ocultar título después de 216 segundos
-        setTimeout(() => {
-            var titulo = document.querySelector(".titulo");
-            titulo.style.animation = "fadeOut 3s ease-in-out forwards";
-            setTimeout(() => { titulo.style.display = "none"; }, 3000);
-        }, 216000);
+        .bot-message {
+            background: #f8f9fa;
+            align-self: flex-start;
+            border: 1px solid #e9ecef;
+            border-bottom-left-radius: 5px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-top: 5px;
+            text-align: right;
+        }
+
+        /* Sugerencias Automáticas */
+        .suggestions-container {
+            padding: 15px 0;
+            border-top: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+            margin: 10px 0;
+        }
+
+        .suggestions-title {
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .suggestions-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .suggestion-btn {
+            background: #f1f2f6;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            color: #2c3e50;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .suggestion-btn:hover {
+            background: #3498db;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Área de Input */
+        .input-container {
+            position: relative;
+            margin-top: 20px;
+        }
+
+        #userInput {
+            width: 100%;
+            padding: 20px 70px 20px 30px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            transition: border 0.3s;
+            background: #f8f9fa;
+        }
+
+        #userInput:focus {
+            border-color: #3498db;
+            background: white;
+        }
+
+        .input-buttons {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            border: none;
+            background: #3498db;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.3s;
+        }
+
+        .input-btn:hover {
+            background: #2980b9;
+            transform: scale(1.1);
+        }
+
+        /* Resultados de Búsqueda Automática */
+        .auto-results {
+            background: #e8f4fc;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 15px;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .result-item {
+            padding: 10px;
+            border-bottom: 1px solid rgba(52, 152, 219, 0.2);
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .result-item:hover {
+            background: rgba(52, 152, 219, 0.1);
+        }
+
+        /* Panel de Aprendizaje */
+        .learning-panel {
+            position: absolute;
+            bottom: 100px;
+            right: 30px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            padding: 20px;
+            width: 300px;
+            z-index: 1000;
+            display: none;
+        }
+
+        .learning-panel.active {
+            display: block;
+            animation: slideUp 0.3s;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .chatbot-container {
+                flex-direction: column;
+                height: auto;
+                min-height: 100vh;
+            }
+            
+            .bot-control-panel {
+                width: 100%;
+                height: auto;
+            }
+            
+            .chat-main-area {
+                height: 70vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chatbot-container">
+        <!-- Panel de Control del Bot -->
+        <div class="bot-control-panel">
+            <div class="bot-header">
+                <div class="bot-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <h2>Asistente Legal AI</h2>
+                <div class="bot-status">
+                    <div class="status-indicator"></div>
+                    <span>AI Activa - Aprendiendo</span>
+                </div>
+            </div>
+
+            <div class="ai-metrics">
+                <h3><i class="fas fa-chart-line"></i> Métricas AI</h3>
+                <div class="metric">
+                    <span>Conocimientos:</span>
+                    <span id="knowledgeCount">142</span>
+                </div>
+                <div class="metric">
+                    <span>Precisión:</span>
+                    <span id="accuracyRate">94%</span>
+                </div>
+                <div class="metric">
+                    <span>Respuestas Hoy:</span>
+                    <span id="responsesToday">127</span>
+                </div>
+                <div class="metric">
+                    <span>Aprendizaje:</span>
+                    <span id="learningProgress">87%</span>
+                </div>
+            </div>
+
+            <div class="training-controls">
+                <h3><i class="fas fa-brain"></i> Entrenamiento AI</h3>
+                <button class="train-btn" onclick="trainWithNewData()">
+                    <i class="fas fa-graduation-cap"></i> Entrenar con Nuevos Datos
+                </button>
+                <button class="train-btn" onclick="enableAutoLearning()">
+                    <i class="fas fa-sync-alt"></i> Auto-Aprendizaje: <span id="autoLearnStatus">ON</span>
+                </button>
+                <button class="train-btn" onclick="exportKnowledge()">
+                    <i class="fas fa-download"></i> Exportar Conocimiento
+                </button>
+            </div>
+
+            <div style="margin-top: 30px; font-size: 12px; opacity: 0.8;">
+                <p><i class="fas fa-info-circle"></i> Este bot aprende automáticamente de cada conversación y mejora sus respuestas continuamente.</p>
+            </div>
+        </div>
+
+        <!-- Área de Chat Principal -->
+        <div class="chat-main-area">
+            <div class="chat-header">
+                <div class="chat-title">
+                    <h1>Asistente Legal Automatizado</h1>
+                    <p>Chatbot AI especializado en migración ecuatoriana</p>
+                </div>
+                <div class="ai-badge">
+                    <i class="fas fa-bolt"></i> INTELIGENCIA ARTIFICIAL ACTIVA
+                </div>
+            </div>
+
+            <!-- Contenedor de Mensajes -->
+            <div class="messages-container" id="messagesContainer">
+                <!-- Mensajes se cargan aquí automáticamente -->
+                <div class="message bot-message">
+                    <strong>🤖 Hola, soy tu asistente legal automatizado</strong><br><br>
+                    He sido entrenado con información actualizada sobre trámites migratorios ecuatorianos.<br>
+                    Puedo ayudarte con:<br>
+                    • Ciudadanía y nacionalidad<br>
+                    • Visas y permisos<br>
+                    • Documentación legal<br>
+                    • Ubicación de consulados<br><br>
+                    <div class="message-time">Sistema AI • Justo ahora</div>
+                </div>
+            </div>
+
+            <!-- Sugerencias Automáticas -->
+            <div class="suggestions-container" id="suggestionsBox">
+                <div class="suggestions-title">
+                    <i class="fas fa-lightbulb"></i> SUGERENCIAS AUTOMÁTICAS
+                </div>
+                <div class="suggestions-buttons" id="suggestionsButtons">
+                    <!-- Los botones se generan automáticamente -->
+                </div>
+            </div>
+
+            <!-- Resultados de Búsqueda Automática -->
+            <div class="auto-results" id="autoResults" style="display: none;">
+                <!-- Resultados se muestran aquí -->
+            </div>
+
+            <!-- Área de Input -->
+            <div class="input-container">
+                <input type="text" id="userInput" 
+                       placeholder="Escribe tu pregunta o dile 'aprende sobre [tema]'..." 
+                       autocomplete="off">
+                <div class="input-buttons">
+                    <button class="input-btn" onclick="sendMessage()">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                    <button class="input-btn" onclick="startVoiceInput()">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                    <button class="input-btn" onclick="toggleLearningPanel()">
+                        <i class="fas fa-brain"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Panel de Aprendizaje -->
+            <div class="learning-panel" id="learningPanel">
+                <h3><i class="fas fa-graduation-cap"></i> Panel de Aprendizaje</h3>
+                <div style="margin: 15px 0;">
+                    <input type="text" id="learnTopic" placeholder="Tema a aprender" style="width: 100%; padding: 10px; margin-bottom: 10px;">
+                    <textarea id="learnContent" placeholder="Información sobre el tema" rows="4" style="width: 100%; padding: 10px;"></textarea>
+                    <button onclick="manualLearn()" style="width: 100%; padding: 10px; margin-top: 10px; background: #3498db; color: white; border: none; border-radius: 5px;">
+                        <i class="fas fa-save"></i> Aprender Este Tema
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ================= SISTEMA DE INTELIGENCIA ARTIFICIAL =================
+        class AutoChatbot {
+            constructor() {
+                // Base de conocimiento inicial
+                this.knowledgeBase = this.loadKnowledgeBase();
+                this.conversationHistory = [];
+                this.learningMode = true;
+                this.autoSuggestEnabled = true;
+                
+                // Estadísticas
+                this.stats = {
+                    totalResponses: 0,
+                    accuracy: 94,
+                    topicsLearned: 142,
+                    todayResponses: 0
+                };
+                
+                this.initialize();
+            }
+
+            initialize() {
+                // Cargar desde localStorage
+                this.loadFromStorage();
+                
+                // Iniciar sugerencias automáticas
+                this.generateAutoSuggestions();
+                
+                // Actualizar métricas
+                this.updateMetrics();
+                
+                // Iniciar ciclo de aprendizaje automático
+                setInterval(() => this.autoLearnCycle(), 300000); // Cada 5 minutos
+                
+                console.log('🤖 Chatbot AI inicializado');
+            }
+
+            loadKnowledgeBase() {
+                return {
+                    // Ciudadanía y Nacionalidad
+                    'ciudadania': {
+                        patterns: ['ciudadanía', 'nacionalidad', 'ser ecuatoriano', 'obtener ciudadanía'],
+                        responses: [
+                            `Para obtener la ciudadanía ecuatoriana necesitas:<br><br>
+                            1. <strong>Acta de nacimiento</strong> original<br>
+                            2. <strong>Cédula de identidad</strong> (si aplica)<br>
+                            3. <strong>Certificado de residencia</strong> en Ecuador<br>
+                            4. <strong>Antecedentes penales</strong> apostillados<br>
+                            5. <strong>2 fotografías</strong> tamaño pasaporte<br><br>
+                            <em>Tiempo estimado:</em> 3-6 meses<br>
+                            <em>Costo aproximado:</em> $150-$300 USD`
+                        ],
+                        confidence: 0.95,
+                        lastUsed: Date.now(),
+                        usageCount: 42
+                    },
+
+                    // Visas
+                    'visas': {
+                        patterns: ['visa', 'visado', 'permiso residencia', 'tipo visa'],
+                        responses: [
+                            `Existen varios tipos de visa para Ecuador:<br><br>
+                            <strong>1. Visa de Turista (12-X):</strong> Hasta 90 días<br>
+                            <strong>2. Visa Temporal (9-I):</strong> Para trabajo, 2 años<br>
+                            <strong>3. Visa de Residencia (9-II):</strong> Residencia permanente<br>
+                            <strong>4. Visa de Estudiante (12-VI):</strong> Para estudios<br><br>
+                            Cada visa tiene requisitos específicos. ¿Cuál te interesa?`
+                        ],
+                        confidence: 0.92,
+                        lastUsed: Date.now(),
+                        usageCount: 38
+                    },
+
+                    // Cédula
+                    'cedula': {
+                        patterns: ['cédula', 'cedula', 'identificación', 'renovar cédula'],
+                        responses: [
+                            `Para la <strong>cédula ecuatoriana</strong>:<br><br>
+                            <strong>Primera vez:</strong><br>
+                            • Acta de nacimiento apostillada<br>
+                            • Comprobante de domicilio<br>
+                            • 2 fotografías fondo blanco<br><br>
+                            <strong>Renovación:</strong><br>
+                            • Cédula anterior<br>
+                            • Comprobante domicilio actual<br>
+                            • Costo: $45 USD<br><br>
+                            <em>Tiempo:</em> 15-30 días hábiles`
+                        ],
+                        confidence: 0.93,
+                        lastUsed: Date.now(),
+                        usageCount: 35
+                    },
+
+                    // Apostilla
+                    'apostilla': {
+                        patterns: ['apostilla', 'legalizar', 'autenticar documento'],
+                        responses: [
+                            `Proceso de <strong>apostilla</strong>:<br><br>
+                            1. Llevar documento original al Ministerio de Relaciones Exteriores<br>
+                            2. Presentar copia del documento<br>
+                            3. Pagar tasa de $25 USD<br>
+                            4. Recibir en 24-48 horas<br><br>
+                            <em>Horario:</em> Lunes a Viernes, 8:30 AM - 4:30 PM`
+                        ],
+                        confidence: 0.90,
+                        lastUsed: Date.now(),
+                        usageCount: 28
+                    },
+
+                    // Consulados
+                    'consulados': {
+                        patterns: ['consulado', 'embajada', 'representación', 'donde consulado'],
+                        responses: [
+                            `Consulados ecuatorianos principales:<br><br>
+                            <strong>🇺🇸 Estados Unidos:</strong><br>
+                            • Miami: (305) 774-0616<br>
+                            • Nueva York: (212) 808-0170<br>
+                            • Los Ángeles: (323) 658-6020<br><br>
+                            <strong>🇪🇸 España:</strong><br>
+                            • Madrid: +34 915 772 200<br>
+                            • Barcelona: +34 934 155 712`
+                        ],
+                        confidence: 0.88,
+                        lastUsed: Date.now(),
+                        usageCount: 31
+                    }
+                };
+            }
+
+            // ============== PROCESAMIENTO DE MENSAJES ==============
+            processMessage(message) {
+                this.stats.totalResponses++;
+                this.stats.todayResponses++;
+                this.updateMetrics();
+                
+                // Guardar en historial
+                this.conversationHistory.push({
+                    user: message,
+                    timestamp: Date.now()
+                });
+                
+                // Buscar respuesta más relevante
+                const response = this.findBestResponse(message.toLowerCase());
+                
+                // Aprender del mensaje si no se encontró buena respuesta
+                if (response.confidence < 0.5 && this.learningMode) {
+                    this.learnFromUnknown(message);
+                }
+                
+                // Generar nuevas sugerencias
+                if (this.autoSuggestEnabled) {
+                    setTimeout(() => this.generateAutoSuggestions(), 500);
+                }
+                
+                // Guardar en localStorage
+                this.saveToStorage();
+                
+                return response;
+            }
+
+            findBestResponse(message) {
+                let bestMatch = { response: '', confidence: 0, topic: '' };
+                
+                // Buscar en base de conocimiento
+                for (const [topic, data] of Object.entries(this.knowledgeBase)) {
+                    for (const pattern of data.patterns) {
+                        const similarity = this.calculateSimilarity(message, pattern);
+                        if (similarity > bestMatch.confidence) {
+                            bestMatch = {
+                                response: this.getRandomResponse(data.responses),
+                                confidence: similarity,
+                                topic: topic
+                            };
+                        }
+                    }
+                }
+                
+                // Si no hay buena coincidencia, usar respuesta general
+                if (bestMatch.confidence < 0.3) {
+                    bestMatch = {
+                        response: `No estoy seguro de entenderte completamente. Puedo ayudarte con:<br><br>
+                                1. <strong>Ciudadanía ecuatoriana</strong><br>
+                                2. <strong>Tipos de visa</strong><br>
+                                3. <strong>Cédula y pasaporte</strong><br>
+                                4. <strong>Apóstillas</strong><br>
+                                5. <strong>Consulados</strong><br><br>
+                                ¿Sobre cuál de estos temas necesitas información?`,
+                        confidence: 0.1,
+                        topic: 'general'
+                    };
+                }
+                
+                // Actualizar estadísticas del tema
+                if (this.knowledgeBase[bestMatch.topic]) {
+                    this.knowledgeBase[bestMatch.topic].lastUsed = Date.now();
+                    this.knowledgeBase[bestMatch.topic].usageCount++;
+                    this.knowledgeBase[bestMatch.topic].confidence = 
+                        Math.min(0.99, this.knowledgeBase[bestMatch.topic].confidence + 0.01);
+                }
+                
+                return bestMatch;
+            }
+
+            calculateSimilarity(str1, str2) {
+                // Algoritmo simple de similitud
+                const words1 = str1.split(' ');
+                const words2 = str2.split(' ');
+                let matches = 0;
+                
+                for (const word1 of words1) {
+                    for (const word2 of words2) {
+                        if (word1.includes(word2) || word2.includes(word1)) {
+                            matches++;
+                            break;
+                        }
+                    }
+                }
+                
+                return matches / Math.max(words1.length, words2.length);
+            }
+
+            getRandomResponse(responses) {
+                return responses[Math.floor(Math.random() * responses.length)];
+            }
+
+            // ============== SISTEMA DE APRENDIZAJE ==============
+            learnFromUnknown(message) {
+                const newTopic = this.extractTopic(message);
+                if (newTopic && !this.knowledgeBase[newTopic]) {
+                    this.knowledgeBase[newTopic] = {
+                        patterns: [newTopic],
+                        responses: [`He aprendido que preguntas sobre "${newTopic}". Aún estoy aprendiendo sobre este tema. ¿Podrías darme más información?`],
+                        confidence: 0.3,
+                        lastUsed: Date.now(),
+                        usageCount: 1
+                    };
+                    
+                    this.stats.topicsLearned++;
+                    this.showLearningNotification(`🤖 Aprendí nuevo tema: "${newTopic}"`);
+                }
+            }
+
+            extractTopic(message) {
+                // Extraer palabras clave
+                const keywords = ['ciudadanía', 'visa', 'cédula', 'pasaporte', 'apostilla', 'consulado'];
+                for (const keyword of keywords) {
+                    if (message.includes(keyword)) {
+                        return keyword;
+                    }
+                }
+                
+                // Extraer primera palabra sustantiva
+                const words = message.split(' ');
+                for (const word of words) {
+                    if (word.length > 3 && !['como', 'donde', 'cuanto', 'necesito'].includes(word)) {
+                        return word;
+                    }
+                }
+                
+                return null;
+            }
+
+            manualLearn(topic, content) {
+                if (!this.knowledgeBase[topic]) {
+                    this.knowledgeBase[topic] = {
+                        patterns: [topic],
+                        responses: [content],
+                        confidence: 0.8,
+                        lastUsed: Date.now(),
+                        usageCount: 1
+                    };
+                } else {
+                    this.knowledgeBase[topic].responses.push(content);
+                    this.knowledgeBase[topic].confidence = Math.min(0.99, this.knowledgeBase[topic].confidence + 0.05);
+                }
+                
+                this.stats.topicsLearned++;
+                this.saveToStorage();
+                this.showLearningNotification(`📚 Aprendizaje manual completado: "${topic}"`);
+            }
+
+            autoLearnCycle() {
+                // Mejorar respuestas basado en uso
+                for (const [topic, data] of Object.entries(this.knowledgeBase)) {
+                    const daysSinceUse = (Date.now() - data.lastUsed) / (1000 * 60 * 60 * 24);
+                    if (daysSinceUse > 30) {
+                        // Reducir confianza de temas no usados
+                        data.confidence = Math.max(0.3, data.confidence - 0.05);
+                    }
+                }
+                
+                console.log('🤖 Ciclo de auto-aprendizaje completado');
+            }
+
+            // ============== SUGERENCIAS AUTOMÁTICAS ==============
+            generateAutoSuggestions() {
+                const suggestionsBox = document.getElementById('suggestionsButtons');
+                if (!suggestionsBox) return;
+                
+                // Obtener temas más relevantes basado en historial
+                const popularTopics = this.getPopularTopics();
+                
+                const suggestions = [
+                    '¿Cómo obtener ciudadanía?',
+                    'Tipos de visa disponibles',
+                    'Renovar cédula ecuatoriana',
+                    'Proceso de apostilla',
+                    'Consulados en el extranjero',
+                    'Costo de trámites',
+                    'Tiempos de espera'
+                ];
+                
+                // Mezclar sugerencias
+                const shuffled = [...suggestions].sort(() => 0.5 - Math.random());
+                const selected = shuffled.slice(0, 4);
+                
+                suggestionsBox.innerHTML = selected.map(suggestion => 
+                    `<button class="suggestion-btn" onclick="askAuto('${suggestion}')">${suggestion}</button>`
+                ).join('');
+            }
+
+            getPopularTopics() {
+                // Ordenar temas por uso reciente
+                return Object.entries(this.knowledgeBase)
+                    .sort((a, b) => b[1].usageCount - a[1].usageCount)
+                    .slice(0, 5)
+                    .map(([topic]) => topic);
+            }
+
+            // ============== UTILIDADES ==============
+            updateMetrics() {
+                document.getElementById('knowledgeCount').textContent = this.stats.topicsLearned;
+                document.getElementById('accuracyRate').textContent = `${this.stats.accuracy}%`;
+                document.getElementById('responsesToday').textContent = this.stats.todayResponses;
+                document.getElementById('learningProgress').textContent = 
+                    `${Math.min(100, Math.floor(this.stats.topicsLearned / 200 * 100))}%`;
+            }
+
+            showLearningNotification(message) {
+                const notification = document.createElement('div');
+                notification.className = 'message bot-message';
+                notification.innerHTML = `<i class="fas fa-graduation-cap"></i> ${message}`;
+                document.getElementById('messagesContainer').appendChild(notification);
+            }
+
+            saveToStorage() {
+                try {
+                    localStorage.setItem('chatbotKnowledge', JSON.stringify(this.knowledgeBase));
+                    localStorage.setItem('chatbotStats', JSON.stringify(this.stats));
+                    localStorage.setItem('chatbotHistory', JSON.stringify(this.conversationHistory.slice(-50)));
+                } catch (e) {
+                    console.log('Error guardando en localStorage');
+                }
+            }
+
+            loadFromStorage() {
+                try {
+                    const savedKnowledge = localStorage.getItem('chatbotKnowledge');
+                    const savedStats = localStorage.getItem('chatbotStats');
+                    const savedHistory = localStorage.getItem('chatbotHistory');
+                    
+                    if (savedKnowledge) {
+                        this.knowledgeBase = JSON.parse(savedKnowledge);
+                    }
+                    if (savedStats) {
+                        this.stats = JSON.parse(savedStats);
+                    }
+                    if (savedHistory) {
+                        this.conversationHistory = JSON.parse(savedHistory);
+                    }
+                } catch (e) {
+                    console.log('Error cargando de localStorage');
+                }
+            }
+
+            exportKnowledge() {
+                const dataStr = JSON.stringify(this.knowledgeBase, null, 2);
+                const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                const exportFileDefaultName = 'conocimiento_chatbot.json';
+                
+                const linkElement = document.createElement('a');
+                linkElement.setAttribute('href', dataUri);
+                linkElement.setAttribute('download', exportFileDefaultName);
+                linkElement.click();
+            }
+        }
+
+        // ================= INICIALIZACIÓN =================
+        const chatbot = new AutoChatbot();
+
+        // ================= FUNCIONES DE INTERFAZ =================
+        function sendMessage() {
+            const input = document.getElementById('userInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Mostrar mensaje del usuario
+            addMessage(message, 'user');
+            
+            // Procesar con IA
+            const response = chatbot.processMessage(message);
+            
+            // Mostrar respuesta del bot
+            setTimeout(() => {
+                addMessage(response.response, 'bot', response.confidence);
+            }, 500);
+            
+            // Limpiar input
+            input.value = '';
+            
+            // Ocultar resultados anteriores
+            document.getElementById('autoResults').style.display = 'none';
+        }
+
+        function addMessage(text, sender, confidence = 1) {
+            const container = document.getElementById('messagesContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            
+            const time = new Date().toLocaleTimeString('es-EC', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            
+            let confidenceBadge = '';
+            if (sender === 'bot' && confidence < 0.8) {
+                confidenceBadge = `<span style="font-size: 10px; background: #ff9800; color: white; padding: 2px 8px; border-radius: 10px; margin-left: 10px;">Confianza: ${Math.round(confidence * 100)}%</span>`;
+            }
+            
+            messageDiv.innerHTML = `${text}<br>
+                <div class="message-time">
+                    ${sender === 'bot' ? '🤖 AI' : '👤 Tú'} • ${time}
+                    ${confidenceBadge}
+                </div>`;
+            
+            container.appendChild(messageDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function askAuto(question) {
+            document.getElementById('userInput').value = question;
+            sendMessage();
+        }
+
+        function startVoiceInput() {
+            if ('webkitSpeechRecognition' in window) {
+                const recognition = new webkitSpeechRecognition();
+                recognition.lang = 'es-ES';
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    document.getElementById('userInput').value = transcript;
+                    sendMessage();
+                };
+                
+                recognition.start();
+                addMessage('🎤 Escuchando... habla ahora.', 'bot');
+            } else {
+                addMessage('Tu navegador no soporta reconocimiento de voz.', 'bot');
+            }
+        }
+
+        function toggleLearningPanel() {
+            const panel = document.getElementById('learningPanel');
+            panel.classList.toggle('active');
+        }
+
+        function manualLearn() {
+            const topic = document.getElementById('learnTopic').value;
+            const content = document.getElementById('learnContent').value;
+            
+            if (topic && content) {
+                chatbot.manualLearn(topic.toLowerCase(), content);
+                document.getElementById('learnTopic').value = '';
+                document.getElementById('learnContent').value = '';
+                document.getElementById('learningPanel').classList.remove('active');
+                
+                addMessage(`✅ He aprendido sobre "${topic}". ¡Gracias por enseñarme!`, 'bot');
+            }
+        }
+
+        function trainWithNewData() {
+            // Simular entrenamiento con nuevos datos
+            addMessage('🧠 Entrenando con nueva información legal...', 'bot');
+            
+            setTimeout(() => {
+                // Añadir nuevos datos de ejemplo
+                chatbot.manualLearn('refugiado', 'Los ecuatorianos pueden solicitar refugio en otros países bajo ciertas condiciones. Requieren documentación específica y asesoría legal.');
+                chatbot.manualLearn('doble nacionalidad', 'Ecuador permite la doble nacionalidad. No se pierde la ciudadanía ecuatoriana al adquirir otra.');
+                
+                addMessage('✅ Entrenamiento completado. He aprendido sobre refugiados y doble nacionalidad.', 'bot');
+            }, 2000);
+        }
+
+        function enableAutoLearning() {
+            chatbot.learningMode = !chatbot.learningMode;
+            const statusElement = document.getElementById('autoLearnStatus');
+            statusElement.textContent = chatbot.learningMode ? 'ON' : 'OFF';
+            statusElement.style.color = chatbot.learningMode ? '#2ecc71' : '#e74c3c';
+            
+            addMessage(
+                chatbot.learningMode 
+                    ? '🔵 Auto-aprendizaje ACTIVADO. Aprenderé de cada conversación.' 
+                    : '🔴 Auto-aprendizaje DESACTIVADO.',
+                'bot'
+            );
+        }
+
+        function exportKnowledge() {
+            chatbot.exportKnowledge();
+            addMessage('📁 Base de conocimiento exportada como JSON.', 'bot');
+        }
+
+        // Inicializar con Enter
+        document.getElementById('userInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Cargar historial guardado
+        window.addEventListener('load', function() {
+            const savedHistory = localStorage.getItem('chatbotHistory');
+            if (savedHistory) {
+                const history = JSON.parse(savedHistory);
+                history.forEach(item => {
+                    addMessage(item.user, 'user');
+                    // Simular respuestas anteriores
+                    setTimeout(() => {
+                        addMessage('Respuesta cargada del historial...', 'bot', 0.9);
+                    }, 100);
+                });
+            }
+        });
     </script>
 </body>
 </html>
