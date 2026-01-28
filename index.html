@@ -3,1043 +3,1234 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chatbot Automatizado - Migrantes Ecuatorianos</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Simulador de Magnetismo - Método Gauss-Jordan</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Arial', sans-serif;
+        }
+
+        :root {
+            --bg-primary: #0a0f1a;
+            --bg-secondary: #111827;
+            --bg-card: rgba(17, 24, 39, 0.8);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent-cyan: #00d4ff;
+            --accent-blue: #0ea5e9;
+            --accent-green: #22c55e;
+            --accent-red: #ef4444;
+            --accent-purple: #a855f7;
+            --border-color: rgba(148, 163, 184, 0.2);
+            --gradient-electric: linear-gradient(135deg, #0ea5e9, #00d4ff);
         }
 
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
+            line-height: 1.6;
         }
 
-        .chatbot-container {
-            width: 100%;
-            max-width: 1000px;
-            height: 90vh;
-            background: white;
-            border-radius: 25px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
-            display: flex;
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
         }
 
-        /* Panel de Control del Bot */
-        .bot-control-panel {
-            width: 350px;
-            background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
-            color: white;
-            padding: 30px;
-            overflow-y: auto;
-        }
-
-        .bot-header {
+        /* Header */
+        .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: var(--bg-card);
+            border-radius: 1rem;
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
         }
 
-        .bot-avatar {
-            width: 100px;
-            height: 100px;
-            background: linear-gradient(45deg, #3498db, #2ecc71);
+        .header h1 {
+            font-size: 2.5rem;
+            background: var(--gradient-electric);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        /* Grid Layout */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border-radius: 1rem;
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .card-title .icon {
+            color: var(--accent-cyan);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .btn-electric {
+            background: var(--gradient-electric);
+            color: white;
+            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
+        }
+
+        .btn-electric:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 25px rgba(14, 165, 233, 0.5);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .btn-outline:hover {
+            background: rgba(148, 163, 184, 0.1);
+        }
+
+        .btn-outline:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--accent-red);
+        }
+
+        .btn-ghost:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .btn-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            padding: 0;
+            justify-content: center;
+        }
+
+        /* Wire Input */
+        .wire-item {
+            background: rgba(148, 163, 184, 0.1);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .wire-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .wire-header span {
+            color: var(--accent-cyan);
+            font-weight: 500;
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .input-group label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .input-group input {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            color: var(--text-primary);
+            font-family: 'Consolas', monospace;
+            font-size: 0.875rem;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.2);
+        }
+
+        /* Measurement Point */
+        .measurement-section {
+            background: rgba(148, 163, 184, 0.1);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .measurement-section h4 {
+            color: var(--accent-cyan);
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+        }
+
+        /* Results */
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .result-box {
+            background: rgba(10, 15, 26, 0.5);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .result-box .label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .result-box .value {
+            font-size: 1.25rem;
+            font-family: 'Consolas', monospace;
+            font-weight: 700;
+        }
+
+        .result-box .value.primary {
+            color: var(--accent-cyan);
+            font-size: 1.5rem;
+        }
+
+        /* Formula Box */
+        .formula-box {
+            background: rgba(14, 165, 233, 0.1);
+            border: 1px solid rgba(14, 165, 233, 0.3);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .formula-box h4 {
+            color: var(--accent-cyan);
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .formula-box .formula {
+            font-family: 'Consolas', monospace;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .formula-box .note {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* SVG Visualization */
+        .visualization-container {
+            margin-top: 1rem;
+        }
+
+        .visualization-container svg {
+            width: 100%;
+            height: 350px;
+            background: rgba(10, 15, 26, 0.5);
+            border-radius: 0.75rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1rem;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .legend-dot {
+            width: 1rem;
+            height: 1rem;
             border-radius: 50%;
-            margin: 0 auto 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 40px;
-            animation: pulse 2s infinite;
+            font-size: 0.6rem;
+            font-weight: bold;
         }
 
+        .legend-dot.positive {
+            background: var(--accent-blue);
+        }
+
+        .legend-dot.negative {
+            background: var(--accent-red);
+        }
+
+        /* Step by Step Solver */
+        .step-progress {
+            display: flex;
+            gap: 0.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .step-dot {
+            flex: 1;
+            height: 0.5rem;
+            border-radius: 9999px;
+            background: rgba(148, 163, 184, 0.3);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .step-dot.active {
+            background: var(--accent-cyan);
+            box-shadow: 0 0 10px var(--accent-cyan);
+        }
+
+        .step-dot.completed {
+            background: var(--accent-green);
+        }
+
+        .step-info {
+            background: rgba(148, 163, 184, 0.1);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .step-info .description {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-info .operation {
+            font-family: 'Consolas', monospace;
+            color: var(--accent-cyan);
+            font-size: 1.1rem;
+        }
+
+        /* Matrix Display */
+        .matrix-container {
+            display: flex;
+            justify-content: center;
+            overflow-x: auto;
+            padding: 1rem 0;
+        }
+
+        .matrix-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .matrix-bracket {
+            font-size: 3rem;
+            color: var(--accent-cyan);
+            font-weight: 300;
+        }
+
+        .matrix-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .matrix-row {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .matrix-cell {
+            min-width: 4rem;
+            padding: 0.5rem;
+            text-align: center;
+            font-family: 'Consolas', monospace;
+            font-size: 0.875rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 0.375rem;
+            transition: all 0.3s;
+        }
+
+        .matrix-cell.highlight-row {
+            background: rgba(14, 165, 233, 0.3);
+            border-color: var(--accent-cyan);
+        }
+
+        .matrix-cell.highlight-col {
+            background: rgba(34, 197, 94, 0.3);
+            border-color: var(--accent-green);
+        }
+
+        .matrix-cell.highlight-pivot {
+            background: rgba(14, 165, 233, 0.5);
+            border-color: var(--accent-cyan);
+            transform: scale(1.05);
+        }
+
+        .matrix-divider {
+            width: 1px;
+            height: 2rem;
+            background: rgba(14, 165, 233, 0.5);
+            margin: 0 0.25rem;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        /* Solution */
+        .solution-box {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid var(--accent-green);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .solution-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--accent-green);
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .solution-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 1rem;
+        }
+
+        .solution-item {
+            background: rgba(10, 15, 26, 0.5);
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            text-align: center;
+        }
+
+        .solution-item .var-name {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .solution-item .var-value {
+            font-size: 1.25rem;
+            font-family: 'Consolas', monospace;
+            font-weight: 700;
+            margin-top: 0.25rem;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state .icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        /* Animations */
         @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        .bot-status {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .status-indicator {
-            width: 10px;
-            height: 10px;
-            background: #2ecc71;
-            border-radius: 50%;
-            animation: blink 1.5s infinite;
-        }
-
-        @keyframes blink {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
         }
 
-        .ai-metrics {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 20px;
-            margin: 20px 0;
+        .animate-pulse {
+            animation: pulse 2s infinite;
         }
 
-        .metric {
-            display: flex;
-            justify-content: space-between;
-            margin: 10px 0;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .training-controls {
-            margin-top: 30px;
-        }
-
-        .train-btn {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(45deg, #3498db, #2980b9);
-            border: none;
-            border-radius: 10px;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin: 10px 0;
-            transition: transform 0.3s;
-        }
-
-        .train-btn:hover {
-            transform: translateY(-2px);
-            background: linear-gradient(45deg, #2980b9, #3498db);
-        }
-
-        /* Área de Chat Principal */
-        .chat-main-area {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            padding: 30px;
-            position: relative;
-        }
-
-        .chat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #eee;
-        }
-
-        .chat-title h1 {
-            color: #2c3e50;
-            font-size: 24px;
-        }
-
-        .chat-title p {
-            color: #7f8c8d;
-            font-size: 14px;
-        }
-
-        .ai-badge {
-            background: linear-gradient(45deg, #e74c3c, #e67e22);
-            color: white;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        /* Área de Mensajes */
-        .messages-container {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px 0;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .message {
-            max-width: 80%;
-            padding: 15px 20px;
-            border-radius: 20px;
-            position: relative;
-            animation: slideIn 0.3s ease-out;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .user-message {
-            background: linear-gradient(90deg, #3498db, #2980b9);
-            color: white;
-            align-self: flex-end;
-            border-bottom-right-radius: 5px;
-        }
-
-        .bot-message {
-            background: #f8f9fa;
-            align-self: flex-start;
-            border: 1px solid #e9ecef;
-            border-bottom-left-radius: 5px;
-        }
-
-        .message-time {
-            font-size: 11px;
-            opacity: 0.7;
-            margin-top: 5px;
-            text-align: right;
-        }
-
-        /* Sugerencias Automáticas */
-        .suggestions-container {
-            padding: 15px 0;
-            border-top: 1px solid #eee;
-            border-bottom: 1px solid #eee;
-            margin: 10px 0;
-        }
-
-        .suggestions-title {
-            color: #7f8c8d;
-            font-size: 14px;
-            margin-bottom: 10px;
-        }
-
-        .suggestions-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .suggestion-btn {
-            background: #f1f2f6;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 20px;
-            color: #2c3e50;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 14px;
-        }
-
-        .suggestion-btn:hover {
-            background: #3498db;
-            color: white;
-            transform: translateY(-2px);
-        }
-
-        /* Área de Input */
-        .input-container {
-            position: relative;
-            margin-top: 20px;
-        }
-
-        #userInput {
-            width: 100%;
-            padding: 20px 70px 20px 30px;
-            border: 2px solid #e0e0e0;
-            border-radius: 25px;
-            font-size: 16px;
-            outline: none;
-            transition: border 0.3s;
-            background: #f8f9fa;
-        }
-
-        #userInput:focus {
-            border-color: #3498db;
-            background: white;
-        }
-
-        .input-buttons {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            display: flex;
-            gap: 10px;
-        }
-
-        .input-btn {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            border: none;
-            background: #3498db;
-            color: white;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            transition: all 0.3s;
-        }
-
-        .input-btn:hover {
-            background: #2980b9;
-            transform: scale(1.1);
-        }
-
-        /* Resultados de Búsqueda Automática */
-        .auto-results {
-            background: #e8f4fc;
-            border-radius: 15px;
-            padding: 20px;
-            margin-top: 15px;
-            animation: fadeIn 0.5s;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .result-item {
-            padding: 10px;
-            border-bottom: 1px solid rgba(52, 152, 219, 0.2);
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        .result-item:hover {
-            background: rgba(52, 152, 219, 0.1);
-        }
-
-        /* Panel de Aprendizaje */
-        .learning-panel {
-            position: absolute;
-            bottom: 100px;
-            right: 30px;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-            padding: 20px;
-            width: 300px;
-            z-index: 1000;
-            display: none;
-        }
-
-        .learning-panel.active {
-            display: block;
-            animation: slideUp 0.3s;
-        }
-
-        @keyframes slideUp {
-            from {
-                transform: translateY(20px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .chatbot-container {
-                flex-direction: column;
-                height: auto;
-                min-height: 100vh;
-            }
-            
-            .bot-control-panel {
-                width: 100%;
-                height: auto;
-            }
-            
-            .chat-main-area {
-                height: 70vh;
-            }
+        /* Full Width Section */
+        .full-width {
+            grid-column: 1 / -1;
         }
     </style>
 </head>
 <body>
-    <div class="chatbot-container">
-        <!-- Panel de Control del Bot -->
-        <div class="bot-control-panel">
-            <div class="bot-header">
-                <div class="bot-avatar">
-                    <i class="fas fa-robot"></i>
-                </div>
-                <h2>Asistente Legal AI</h2>
-                <div class="bot-status">
-                    <div class="status-indicator"></div>
-                    <span>AI Activa - Aprendiendo</span>
-                </div>
-            </div>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>⚡ Simulador de Magnetismo</h1>
+            <p>Calcula campos magnéticos y resuelve sistemas con el método Gauss-Jordan</p>
+        </header>
 
-            <div class="ai-metrics">
-                <h3><i class="fas fa-chart-line"></i> Métricas AI</h3>
-                <div class="metric">
-                    <span>Conocimientos:</span>
-                    <span id="knowledgeCount">142</span>
-                </div>
-                <div class="metric">
-                    <span>Precisión:</span>
-                    <span id="accuracyRate">94%</span>
-                </div>
-                <div class="metric">
-                    <span>Respuestas Hoy:</span>
-                    <span id="responsesToday">127</span>
-                </div>
-                <div class="metric">
-                    <span>Aprendizaje:</span>
-                    <span id="learningProgress">87%</span>
-                </div>
-            </div>
-
-            <div class="training-controls">
-                <h3><i class="fas fa-brain"></i> Entrenamiento AI</h3>
-                <button class="train-btn" onclick="trainWithNewData()">
-                    <i class="fas fa-graduation-cap"></i> Entrenar con Nuevos Datos
-                </button>
-                <button class="train-btn" onclick="enableAutoLearning()">
-                    <i class="fas fa-sync-alt"></i> Auto-Aprendizaje: <span id="autoLearnStatus">ON</span>
-                </button>
-                <button class="train-btn" onclick="exportKnowledge()">
-                    <i class="fas fa-download"></i> Exportar Conocimiento
-                </button>
-            </div>
-
-            <div style="margin-top: 30px; font-size: 12px; opacity: 0.8;">
-                <p><i class="fas fa-info-circle"></i> Este bot aprende automáticamente de cada conversación y mejora sus respuestas continuamente.</p>
-            </div>
-        </div>
-
-        <!-- Área de Chat Principal -->
-        <div class="chat-main-area">
-            <div class="chat-header">
-                <div class="chat-title">
-                    <h1>Asistente Legal Automatizado</h1>
-                    <p>Chatbot AI especializado en migración ecuatoriana</p>
-                </div>
-                <div class="ai-badge">
-                    <i class="fas fa-bolt"></i> INTELIGENCIA ARTIFICIAL ACTIVA
-                </div>
-            </div>
-
-            <!-- Contenedor de Mensajes -->
-            <div class="messages-container" id="messagesContainer">
-                <!-- Mensajes se cargan aquí automáticamente -->
-                <div class="message bot-message">
-                    <strong>🤖 Hola, soy tu asistente legal automatizado</strong><br><br>
-                    He sido entrenado con información actualizada sobre trámites migratorios ecuatorianos.<br>
-                    Puedo ayudarte con:<br>
-                    • Ciudadanía y nacionalidad<br>
-                    • Visas y permisos<br>
-                    • Documentación legal<br>
-                    • Ubicación de consulados<br><br>
-                    <div class="message-time">Sistema AI • Justo ahora</div>
-                </div>
-            </div>
-
-            <!-- Sugerencias Automáticas -->
-            <div class="suggestions-container" id="suggestionsBox">
-                <div class="suggestions-title">
-                    <i class="fas fa-lightbulb"></i> SUGERENCIAS AUTOMÁTICAS
-                </div>
-                <div class="suggestions-buttons" id="suggestionsButtons">
-                    <!-- Los botones se generan automáticamente -->
-                </div>
-            </div>
-
-            <!-- Resultados de Búsqueda Automática -->
-            <div class="auto-results" id="autoResults" style="display: none;">
-                <!-- Resultados se muestran aquí -->
-            </div>
-
-            <!-- Área de Input -->
-            <div class="input-container">
-                <input type="text" id="userInput" 
-                       placeholder="Escribe tu pregunta o dile 'aprende sobre [tema]'..." 
-                       autocomplete="off">
-                <div class="input-buttons">
-                    <button class="input-btn" onclick="sendMessage()">
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
-                    <button class="input-btn" onclick="startVoiceInput()">
-                        <i class="fas fa-microphone"></i>
-                    </button>
-                    <button class="input-btn" onclick="toggleLearningPanel()">
-                        <i class="fas fa-brain"></i>
+        <div class="main-grid">
+            <!-- Wire Input Panel -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="icon">⚡</span>
+                        Conductores
+                    </div>
+                    <button class="btn btn-electric" onclick="addWire()">
+                        <span>+</span> Agregar
                     </button>
                 </div>
+                <div id="wires-container"></div>
+
+                <!-- Measurement Point -->
+                <div class="measurement-section">
+                    <h4>📍 Punto de Medición</h4>
+                    <div class="input-grid">
+                        <div class="input-group">
+                            <label>Posición X (m)</label>
+                            <input type="number" id="measure-x" value="0.5" step="0.1" onchange="updateSimulation()">
+                        </div>
+                        <div class="input-group">
+                            <label>Posición Y (m)</label>
+                            <input type="number" id="measure-y" value="0.5" step="0.1" onchange="updateSimulation()">
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- Panel de Aprendizaje -->
-            <div class="learning-panel" id="learningPanel">
-                <h3><i class="fas fa-graduation-cap"></i> Panel de Aprendizaje</h3>
-                <div style="margin: 15px 0;">
-                    <input type="text" id="learnTopic" placeholder="Tema a aprender" style="width: 100%; padding: 10px; margin-bottom: 10px;">
-                    <textarea id="learnContent" placeholder="Información sobre el tema" rows="4" style="width: 100%; padding: 10px;"></textarea>
-                    <button onclick="manualLearn()" style="width: 100%; padding: 10px; margin-top: 10px; background: #3498db; color: white; border: none; border-radius: 5px;">
-                        <i class="fas fa-save"></i> Aprender Este Tema
+            <!-- Results Panel -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="icon">🧭</span>
+                        Resultados del Campo
+                    </div>
+                </div>
+
+                <div style="background: rgba(148, 163, 184, 0.1); border-radius: 0.75rem; padding: 1rem;">
+                    <div style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem;">
+                        Punto de medición: (<span id="display-x">0.5</span>, <span id="display-y">0.5</span>) m
+                    </div>
+
+                    <div class="results-grid">
+                        <div class="result-box">
+                            <div class="label">Magnitud |B|</div>
+                            <div class="value primary" id="result-magnitude">0 T</div>
+                        </div>
+                        <div class="result-box">
+                            <div class="label">Componente Bx</div>
+                            <div class="value" id="result-bx">0 T</div>
+                        </div>
+                        <div class="result-box">
+                            <div class="label">Componente By</div>
+                            <div class="value" id="result-by">0 T</div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 1rem; font-size: 0.875rem; color: var(--text-muted);">
+                        📐 Dirección: <span id="result-angle">0</span>°
+                    </div>
+                </div>
+
+                <div class="formula-box">
+                    <h4>ℹ️ Ley de Biot-Savart</h4>
+                    <div class="formula">B = μ₀·I·N / (2πr)</div>
+                    <div class="note">Donde μ₀ = 4π × 10⁻⁷ T·m/A (permeabilidad del vacío)</div>
+                </div>
+            </div>
+
+            <!-- Visualization -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="icon">🔬</span>
+                        Visualización del Campo Magnético
+                    </div>
+                </div>
+                <div class="visualization-container">
+                    <svg id="field-visualization" viewBox="0 0 400 350"></svg>
+                </div>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-dot positive">•</div>
+                        <span>I saliendo ⊙</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot negative">✕</div>
+                        <span>I entrando ⊗</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step by Step Solver -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="icon">📊</span>
+                        Resolución Paso a Paso
+                    </div>
+                    <div style="font-size: 0.875rem; color: var(--text-muted);">
+                        Paso <span id="current-step">1</span> de <span id="total-steps">1</span>
+                    </div>
+                </div>
+
+                <div class="step-progress" id="step-progress"></div>
+
+                <div class="step-info">
+                    <div class="description" id="step-description">Matriz aumentada inicial</div>
+                    <div class="operation" id="step-operation"></div>
+                </div>
+
+                <div class="matrix-container">
+                    <div class="matrix-wrapper">
+                        <span class="matrix-bracket">[</span>
+                        <div class="matrix-grid" id="matrix-display"></div>
+                        <span class="matrix-bracket">]</span>
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <button class="btn btn-outline btn-icon" onclick="resetSteps()" id="btn-reset">⟲</button>
+                    <button class="btn btn-outline btn-icon" onclick="prevStep()" id="btn-prev">◀</button>
+                    <button class="btn btn-electric" onclick="toggleAutoPlay()" id="btn-autoplay">
+                        ▶ Auto Play
                     </button>
+                    <button class="btn btn-outline btn-icon" onclick="nextStep()" id="btn-next">▶</button>
+                </div>
+
+                <div class="solution-box" id="solution-box" style="display: none;">
+                    <div class="solution-header">
+                        ✓ Solución Encontrada
+                    </div>
+                    <div class="solution-grid" id="solution-grid"></div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // ================= SISTEMA DE INTELIGENCIA ARTIFICIAL =================
-        class AutoChatbot {
-            constructor() {
-                // Base de conocimiento inicial
-                this.knowledgeBase = this.loadKnowledgeBase();
-                this.conversationHistory = [];
-                this.learningMode = true;
-                this.autoSuggestEnabled = true;
-                
-                // Estadísticas
-                this.stats = {
-                    totalResponses: 0,
-                    accuracy: 94,
-                    topicsLearned: 142,
-                    todayResponses: 0
-                };
-                
-                this.initialize();
-            }
+        // Constants
+        const MU_0 = 4 * Math.PI * 1e-7;
 
-            initialize() {
-                // Cargar desde localStorage
-                this.loadFromStorage();
-                
-                // Iniciar sugerencias automáticas
-                this.generateAutoSuggestions();
-                
-                // Actualizar métricas
-                this.updateMetrics();
-                
-                // Iniciar ciclo de aprendizaje automático
-                setInterval(() => this.autoLearnCycle(), 300000); // Cada 5 minutos
-                
-                console.log('🤖 Chatbot AI inicializado');
-            }
+        // State
+        let wires = [
+            { id: 1, current: 5, x: 0, y: 0, turns: 1 },
+            { id: 2, current: -3, x: 1, y: 0, turns: 1 }
+        ];
+        let gaussJordanResult = null;
+        let currentStepIndex = 0;
+        let autoPlayInterval = null;
 
-            loadKnowledgeBase() {
-                return {
-                    // Ciudadanía y Nacionalidad
-                    'ciudadania': {
-                        patterns: ['ciudadanía', 'nacionalidad', 'ser ecuatoriano', 'obtener ciudadanía'],
-                        responses: [
-                            `Para obtener la ciudadanía ecuatoriana necesitas:<br><br>
-                            1. <strong>Acta de nacimiento</strong> original<br>
-                            2. <strong>Cédula de identidad</strong> (si aplica)<br>
-                            3. <strong>Certificado de residencia</strong> en Ecuador<br>
-                            4. <strong>Antecedentes penales</strong> apostillados<br>
-                            5. <strong>2 fotografías</strong> tamaño pasaporte<br><br>
-                            <em>Tiempo estimado:</em> 3-6 meses<br>
-                            <em>Costo aproximado:</em> $150-$300 USD`
-                        ],
-                        confidence: 0.95,
-                        lastUsed: Date.now(),
-                        usageCount: 42
-                    },
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            renderWires();
+            updateSimulation();
+        });
 
-                    // Visas
-                    'visas': {
-                        patterns: ['visa', 'visado', 'permiso residencia', 'tipo visa'],
-                        responses: [
-                            `Existen varios tipos de visa para Ecuador:<br><br>
-                            <strong>1. Visa de Turista (12-X):</strong> Hasta 90 días<br>
-                            <strong>2. Visa Temporal (9-I):</strong> Para trabajo, 2 años<br>
-                            <strong>3. Visa de Residencia (9-II):</strong> Residencia permanente<br>
-                            <strong>4. Visa de Estudiante (12-VI):</strong> Para estudios<br><br>
-                            Cada visa tiene requisitos específicos. ¿Cuál te interesa?`
-                        ],
-                        confidence: 0.92,
-                        lastUsed: Date.now(),
-                        usageCount: 38
-                    },
+        // Wire Management
+        function addWire() {
+            const newId = wires.length > 0 ? Math.max(...wires.map(w => w.id)) + 1 : 1;
+            wires.push({ id: newId, current: 1, x: 0, y: 0, turns: 1 });
+            renderWires();
+            updateSimulation();
+        }
 
-                    // Cédula
-                    'cedula': {
-                        patterns: ['cédula', 'cedula', 'identificación', 'renovar cédula'],
-                        responses: [
-                            `Para la <strong>cédula ecuatoriana</strong>:<br><br>
-                            <strong>Primera vez:</strong><br>
-                            • Acta de nacimiento apostillada<br>
-                            • Comprobante de domicilio<br>
-                            • 2 fotografías fondo blanco<br><br>
-                            <strong>Renovación:</strong><br>
-                            • Cédula anterior<br>
-                            • Comprobante domicilio actual<br>
-                            • Costo: $45 USD<br><br>
-                            <em>Tiempo:</em> 15-30 días hábiles`
-                        ],
-                        confidence: 0.93,
-                        lastUsed: Date.now(),
-                        usageCount: 35
-                    },
-
-                    // Apostilla
-                    'apostilla': {
-                        patterns: ['apostilla', 'legalizar', 'autenticar documento'],
-                        responses: [
-                            `Proceso de <strong>apostilla</strong>:<br><br>
-                            1. Llevar documento original al Ministerio de Relaciones Exteriores<br>
-                            2. Presentar copia del documento<br>
-                            3. Pagar tasa de $25 USD<br>
-                            4. Recibir en 24-48 horas<br><br>
-                            <em>Horario:</em> Lunes a Viernes, 8:30 AM - 4:30 PM`
-                        ],
-                        confidence: 0.90,
-                        lastUsed: Date.now(),
-                        usageCount: 28
-                    },
-
-                    // Consulados
-                    'consulados': {
-                        patterns: ['consulado', 'embajada', 'representación', 'donde consulado'],
-                        responses: [
-                            `Consulados ecuatorianos principales:<br><br>
-                            <strong>🇺🇸 Estados Unidos:</strong><br>
-                            • Miami: (305) 774-0616<br>
-                            • Nueva York: (212) 808-0170<br>
-                            • Los Ángeles: (323) 658-6020<br><br>
-                            <strong>🇪🇸 España:</strong><br>
-                            • Madrid: +34 915 772 200<br>
-                            • Barcelona: +34 934 155 712`
-                        ],
-                        confidence: 0.88,
-                        lastUsed: Date.now(),
-                        usageCount: 31
-                    }
-                };
-            }
-
-            // ============== PROCESAMIENTO DE MENSAJES ==============
-            processMessage(message) {
-                this.stats.totalResponses++;
-                this.stats.todayResponses++;
-                this.updateMetrics();
-                
-                // Guardar en historial
-                this.conversationHistory.push({
-                    user: message,
-                    timestamp: Date.now()
-                });
-                
-                // Buscar respuesta más relevante
-                const response = this.findBestResponse(message.toLowerCase());
-                
-                // Aprender del mensaje si no se encontró buena respuesta
-                if (response.confidence < 0.5 && this.learningMode) {
-                    this.learnFromUnknown(message);
-                }
-                
-                // Generar nuevas sugerencias
-                if (this.autoSuggestEnabled) {
-                    setTimeout(() => this.generateAutoSuggestions(), 500);
-                }
-                
-                // Guardar en localStorage
-                this.saveToStorage();
-                
-                return response;
-            }
-
-            findBestResponse(message) {
-                let bestMatch = { response: '', confidence: 0, topic: '' };
-                
-                // Buscar en base de conocimiento
-                for (const [topic, data] of Object.entries(this.knowledgeBase)) {
-                    for (const pattern of data.patterns) {
-                        const similarity = this.calculateSimilarity(message, pattern);
-                        if (similarity > bestMatch.confidence) {
-                            bestMatch = {
-                                response: this.getRandomResponse(data.responses),
-                                confidence: similarity,
-                                topic: topic
-                            };
-                        }
-                    }
-                }
-                
-                // Si no hay buena coincidencia, usar respuesta general
-                if (bestMatch.confidence < 0.3) {
-                    bestMatch = {
-                        response: `No estoy seguro de entenderte completamente. Puedo ayudarte con:<br><br>
-                                1. <strong>Ciudadanía ecuatoriana</strong><br>
-                                2. <strong>Tipos de visa</strong><br>
-                                3. <strong>Cédula y pasaporte</strong><br>
-                                4. <strong>Apóstillas</strong><br>
-                                5. <strong>Consulados</strong><br><br>
-                                ¿Sobre cuál de estos temas necesitas información?`,
-                        confidence: 0.1,
-                        topic: 'general'
-                    };
-                }
-                
-                // Actualizar estadísticas del tema
-                if (this.knowledgeBase[bestMatch.topic]) {
-                    this.knowledgeBase[bestMatch.topic].lastUsed = Date.now();
-                    this.knowledgeBase[bestMatch.topic].usageCount++;
-                    this.knowledgeBase[bestMatch.topic].confidence = 
-                        Math.min(0.99, this.knowledgeBase[bestMatch.topic].confidence + 0.01);
-                }
-                
-                return bestMatch;
-            }
-
-            calculateSimilarity(str1, str2) {
-                // Algoritmo simple de similitud
-                const words1 = str1.split(' ');
-                const words2 = str2.split(' ');
-                let matches = 0;
-                
-                for (const word1 of words1) {
-                    for (const word2 of words2) {
-                        if (word1.includes(word2) || word2.includes(word1)) {
-                            matches++;
-                            break;
-                        }
-                    }
-                }
-                
-                return matches / Math.max(words1.length, words2.length);
-            }
-
-            getRandomResponse(responses) {
-                return responses[Math.floor(Math.random() * responses.length)];
-            }
-
-            // ============== SISTEMA DE APRENDIZAJE ==============
-            learnFromUnknown(message) {
-                const newTopic = this.extractTopic(message);
-                if (newTopic && !this.knowledgeBase[newTopic]) {
-                    this.knowledgeBase[newTopic] = {
-                        patterns: [newTopic],
-                        responses: [`He aprendido que preguntas sobre "${newTopic}". Aún estoy aprendiendo sobre este tema. ¿Podrías darme más información?`],
-                        confidence: 0.3,
-                        lastUsed: Date.now(),
-                        usageCount: 1
-                    };
-                    
-                    this.stats.topicsLearned++;
-                    this.showLearningNotification(`🤖 Aprendí nuevo tema: "${newTopic}"`);
-                }
-            }
-
-            extractTopic(message) {
-                // Extraer palabras clave
-                const keywords = ['ciudadanía', 'visa', 'cédula', 'pasaporte', 'apostilla', 'consulado'];
-                for (const keyword of keywords) {
-                    if (message.includes(keyword)) {
-                        return keyword;
-                    }
-                }
-                
-                // Extraer primera palabra sustantiva
-                const words = message.split(' ');
-                for (const word of words) {
-                    if (word.length > 3 && !['como', 'donde', 'cuanto', 'necesito'].includes(word)) {
-                        return word;
-                    }
-                }
-                
-                return null;
-            }
-
-            manualLearn(topic, content) {
-                if (!this.knowledgeBase[topic]) {
-                    this.knowledgeBase[topic] = {
-                        patterns: [topic],
-                        responses: [content],
-                        confidence: 0.8,
-                        lastUsed: Date.now(),
-                        usageCount: 1
-                    };
-                } else {
-                    this.knowledgeBase[topic].responses.push(content);
-                    this.knowledgeBase[topic].confidence = Math.min(0.99, this.knowledgeBase[topic].confidence + 0.05);
-                }
-                
-                this.stats.topicsLearned++;
-                this.saveToStorage();
-                this.showLearningNotification(`📚 Aprendizaje manual completado: "${topic}"`);
-            }
-
-            autoLearnCycle() {
-                // Mejorar respuestas basado en uso
-                for (const [topic, data] of Object.entries(this.knowledgeBase)) {
-                    const daysSinceUse = (Date.now() - data.lastUsed) / (1000 * 60 * 60 * 24);
-                    if (daysSinceUse > 30) {
-                        // Reducir confianza de temas no usados
-                        data.confidence = Math.max(0.3, data.confidence - 0.05);
-                    }
-                }
-                
-                console.log('🤖 Ciclo de auto-aprendizaje completado');
-            }
-
-            // ============== SUGERENCIAS AUTOMÁTICAS ==============
-            generateAutoSuggestions() {
-                const suggestionsBox = document.getElementById('suggestionsButtons');
-                if (!suggestionsBox) return;
-                
-                // Obtener temas más relevantes basado en historial
-                const popularTopics = this.getPopularTopics();
-                
-                const suggestions = [
-                    '¿Cómo obtener ciudadanía?',
-                    'Tipos de visa disponibles',
-                    'Renovar cédula ecuatoriana',
-                    'Proceso de apostilla',
-                    'Consulados en el extranjero',
-                    'Costo de trámites',
-                    'Tiempos de espera'
-                ];
-                
-                // Mezclar sugerencias
-                const shuffled = [...suggestions].sort(() => 0.5 - Math.random());
-                const selected = shuffled.slice(0, 4);
-                
-                suggestionsBox.innerHTML = selected.map(suggestion => 
-                    `<button class="suggestion-btn" onclick="askAuto('${suggestion}')">${suggestion}</button>`
-                ).join('');
-            }
-
-            getPopularTopics() {
-                // Ordenar temas por uso reciente
-                return Object.entries(this.knowledgeBase)
-                    .sort((a, b) => b[1].usageCount - a[1].usageCount)
-                    .slice(0, 5)
-                    .map(([topic]) => topic);
-            }
-
-            // ============== UTILIDADES ==============
-            updateMetrics() {
-                document.getElementById('knowledgeCount').textContent = this.stats.topicsLearned;
-                document.getElementById('accuracyRate').textContent = `${this.stats.accuracy}%`;
-                document.getElementById('responsesToday').textContent = this.stats.todayResponses;
-                document.getElementById('learningProgress').textContent = 
-                    `${Math.min(100, Math.floor(this.stats.topicsLearned / 200 * 100))}%`;
-            }
-
-            showLearningNotification(message) {
-                const notification = document.createElement('div');
-                notification.className = 'message bot-message';
-                notification.innerHTML = `<i class="fas fa-graduation-cap"></i> ${message}`;
-                document.getElementById('messagesContainer').appendChild(notification);
-            }
-
-            saveToStorage() {
-                try {
-                    localStorage.setItem('chatbotKnowledge', JSON.stringify(this.knowledgeBase));
-                    localStorage.setItem('chatbotStats', JSON.stringify(this.stats));
-                    localStorage.setItem('chatbotHistory', JSON.stringify(this.conversationHistory.slice(-50)));
-                } catch (e) {
-                    console.log('Error guardando en localStorage');
-                }
-            }
-
-            loadFromStorage() {
-                try {
-                    const savedKnowledge = localStorage.getItem('chatbotKnowledge');
-                    const savedStats = localStorage.getItem('chatbotStats');
-                    const savedHistory = localStorage.getItem('chatbotHistory');
-                    
-                    if (savedKnowledge) {
-                        this.knowledgeBase = JSON.parse(savedKnowledge);
-                    }
-                    if (savedStats) {
-                        this.stats = JSON.parse(savedStats);
-                    }
-                    if (savedHistory) {
-                        this.conversationHistory = JSON.parse(savedHistory);
-                    }
-                } catch (e) {
-                    console.log('Error cargando de localStorage');
-                }
-            }
-
-            exportKnowledge() {
-                const dataStr = JSON.stringify(this.knowledgeBase, null, 2);
-                const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-                const exportFileDefaultName = 'conocimiento_chatbot.json';
-                
-                const linkElement = document.createElement('a');
-                linkElement.setAttribute('href', dataUri);
-                linkElement.setAttribute('download', exportFileDefaultName);
-                linkElement.click();
+        function removeWire(id) {
+            if (wires.length > 1) {
+                wires = wires.filter(w => w.id !== id);
+                renderWires();
+                updateSimulation();
             }
         }
 
-        // ================= INICIALIZACIÓN =================
-        const chatbot = new AutoChatbot();
-
-        // ================= FUNCIONES DE INTERFAZ =================
-        function sendMessage() {
-            const input = document.getElementById('userInput');
-            const message = input.value.trim();
-            
-            if (!message) return;
-            
-            // Mostrar mensaje del usuario
-            addMessage(message, 'user');
-            
-            // Procesar con IA
-            const response = chatbot.processMessage(message);
-            
-            // Mostrar respuesta del bot
-            setTimeout(() => {
-                addMessage(response.response, 'bot', response.confidence);
-            }, 500);
-            
-            // Limpiar input
-            input.value = '';
-            
-            // Ocultar resultados anteriores
-            document.getElementById('autoResults').style.display = 'none';
+        function updateWire(id, field, value) {
+            wires = wires.map(w => w.id === id ? { ...w, [field]: parseFloat(value) || 0 } : w);
+            updateSimulation();
         }
 
-        function addMessage(text, sender, confidence = 1) {
-            const container = document.getElementById('messagesContainer');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${sender}-message`;
+        function renderWires() {
+            const container = document.getElementById('wires-container');
             
-            const time = new Date().toLocaleTimeString('es-EC', { 
-                hour: '2-digit', 
-                minute: '2-digit' 
+            if (wires.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">⚡</div>
+                        <p>Agrega conductores para comenzar la simulación</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = wires.map((wire, index) => `
+                <div class="wire-item">
+                    <div class="wire-header">
+                        <span>Conductor ${index + 1}</span>
+                        ${wires.length > 1 ? `
+                            <button class="btn btn-ghost btn-icon" onclick="removeWire(${wire.id})">🗑</button>
+                        ` : ''}
+                    </div>
+                    <div class="input-grid">
+                        <div class="input-group">
+                            <label>Corriente (A)</label>
+                            <input type="number" value="${wire.current}" step="0.1" 
+                                   onchange="updateWire(${wire.id}, 'current', this.value)">
+                        </div>
+                        <div class="input-group">
+                            <label>Espiras</label>
+                            <input type="number" value="${wire.turns}" min="1" 
+                                   onchange="updateWire(${wire.id}, 'turns', this.value)">
+                        </div>
+                        <div class="input-group">
+                            <label>Posición X (m)</label>
+                            <input type="number" value="${wire.x}" step="0.1" 
+                                   onchange="updateWire(${wire.id}, 'x', this.value)">
+                        </div>
+                        <div class="input-group">
+                            <label>Posición Y (m)</label>
+                            <input type="number" value="${wire.y}" step="0.1" 
+                                   onchange="updateWire(${wire.id}, 'y', this.value)">
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Magnetic Field Calculations
+        function calculateFieldFromWire(wire, px, py) {
+            const dx = px - wire.x;
+            const dy = py - wire.y;
+            const r = Math.sqrt(dx * dx + dy * dy);
+            
+            if (r < 1e-10) return { Bx: 0, By: 0 };
+            
+            const B = (MU_0 * wire.current * wire.turns) / (2 * Math.PI * r);
+            const angle = Math.atan2(dy, dx);
+            
+            return {
+                Bx: -B * Math.sin(angle),
+                By: B * Math.cos(angle)
+            };
+        }
+
+        function calculateTotalField(px, py) {
+            let Bx = 0, By = 0;
+            
+            wires.forEach(wire => {
+                const field = calculateFieldFromWire(wire, px, py);
+                Bx += field.Bx;
+                By += field.By;
             });
             
-            let confidenceBadge = '';
-            if (sender === 'bot' && confidence < 0.8) {
-                confidenceBadge = `<span style="font-size: 10px; background: #ff9800; color: white; padding: 2px 8px; border-radius: 10px; margin-left: 10px;">Confianza: ${Math.round(confidence * 100)}%</span>`;
+            const magnitude = Math.sqrt(Bx * Bx + By * By);
+            return { Bx, By, magnitude };
+        }
+
+        function formatMagneticField(value) {
+            const absValue = Math.abs(value);
+            if (absValue === 0) return "0 T";
+            if (absValue < 1e-9) return (value * 1e12).toFixed(2) + " pT";
+            if (absValue < 1e-6) return (value * 1e9).toFixed(2) + " nT";
+            if (absValue < 1e-3) return (value * 1e6).toFixed(2) + " μT";
+            if (absValue < 1) return (value * 1e3).toFixed(2) + " mT";
+            return value.toFixed(4) + " T";
+        }
+
+        // Gauss-Jordan Elimination
+        function gaussJordan(matrix) {
+            const steps = [];
+            const n = matrix.length;
+            const m = matrix[0].length;
+            let mat = matrix.map(row => [...row]);
+            
+            steps.push({
+                matrix: mat.map(r => [...r]),
+                description: "Matriz aumentada inicial [A|b]",
+                operation: null,
+                pivotRow: null,
+                pivotCol: null
+            });
+            
+            let pivotRow = 0;
+            
+            for (let col = 0; col < m - 1 && pivotRow < n; col++) {
+                // Find pivot
+                let maxRow = pivotRow;
+                for (let row = pivotRow + 1; row < n; row++) {
+                    if (Math.abs(mat[row][col]) > Math.abs(mat[maxRow][col])) {
+                        maxRow = row;
+                    }
+                }
+                
+                if (Math.abs(mat[maxRow][col]) < 1e-10) continue;
+                
+                // Swap rows if needed
+                if (maxRow !== pivotRow) {
+                    [mat[pivotRow], mat[maxRow]] = [mat[maxRow], mat[pivotRow]];
+                    steps.push({
+                        matrix: mat.map(r => [...r]),
+                        description: `Intercambiar fila ${pivotRow + 1} con fila ${maxRow + 1}`,
+                        operation: `F${pivotRow + 1} ↔ F${maxRow + 1}`,
+                        pivotRow: pivotRow,
+                        pivotCol: col
+                    });
+                }
+                
+                // Scale pivot row
+                const pivot = mat[pivotRow][col];
+                if (Math.abs(pivot - 1) > 1e-10) {
+                    for (let j = 0; j < m; j++) {
+                        mat[pivotRow][j] /= pivot;
+                    }
+                    steps.push({
+                        matrix: mat.map(r => [...r]),
+                        description: `Dividir fila ${pivotRow + 1} entre ${pivot.toFixed(4)}`,
+                        operation: `F${pivotRow + 1} → F${pivotRow + 1} / ${pivot.toFixed(4)}`,
+                        pivotRow: pivotRow,
+                        pivotCol: col
+                    });
+                }
+                
+                // Eliminate column
+                for (let row = 0; row < n; row++) {
+                    if (row !== pivotRow && Math.abs(mat[row][col]) > 1e-10) {
+                        const factor = mat[row][col];
+                        for (let j = 0; j < m; j++) {
+                            mat[row][j] -= factor * mat[pivotRow][j];
+                        }
+                        steps.push({
+                            matrix: mat.map(r => [...r]),
+                            description: `Eliminar elemento en fila ${row + 1}, columna ${col + 1}`,
+                            operation: `F${row + 1} → F${row + 1} - (${factor.toFixed(4)})·F${pivotRow + 1}`,
+                            pivotRow: row,
+                            pivotCol: col
+                        });
+                    }
+                }
+                
+                pivotRow++;
             }
             
-            messageDiv.innerHTML = `${text}<br>
-                <div class="message-time">
-                    ${sender === 'bot' ? '🤖 AI' : '👤 Tú'} • ${time}
-                    ${confidenceBadge}
-                </div>`;
+            // Extract solution
+            const solution = mat.map(row => row[m - 1]);
             
-            container.appendChild(messageDiv);
-            container.scrollTop = container.scrollHeight;
-        }
-
-        function askAuto(question) {
-            document.getElementById('userInput').value = question;
-            sendMessage();
-        }
-
-        function startVoiceInput() {
-            if ('webkitSpeechRecognition' in window) {
-                const recognition = new webkitSpeechRecognition();
-                recognition.lang = 'es-ES';
-                recognition.continuous = false;
-                recognition.interimResults = false;
-                
-                recognition.onresult = function(event) {
-                    const transcript = event.results[0][0].transcript;
-                    document.getElementById('userInput').value = transcript;
-                    sendMessage();
-                };
-                
-                recognition.start();
-                addMessage('🎤 Escuchando... habla ahora.', 'bot');
-            } else {
-                addMessage('Tu navegador no soporta reconocimiento de voz.', 'bot');
-            }
-        }
-
-        function toggleLearningPanel() {
-            const panel = document.getElementById('learningPanel');
-            panel.classList.toggle('active');
-        }
-
-        function manualLearn() {
-            const topic = document.getElementById('learnTopic').value;
-            const content = document.getElementById('learnContent').value;
+            steps.push({
+                matrix: mat.map(r => [...r]),
+                description: "Matriz escalonada reducida - Solución encontrada",
+                operation: null,
+                pivotRow: null,
+                pivotCol: null
+            });
             
-            if (topic && content) {
-                chatbot.manualLearn(topic.toLowerCase(), content);
-                document.getElementById('learnTopic').value = '';
-                document.getElementById('learnContent').value = '';
-                document.getElementById('learningPanel').classList.remove('active');
-                
-                addMessage(`✅ He aprendido sobre "${topic}". ¡Gracias por enseñarme!`, 'bot');
-            }
+            return { steps, solution, finalMatrix: mat };
         }
 
-        function trainWithNewData() {
-            // Simular entrenamiento con nuevos datos
-            addMessage('🧠 Entrenando con nueva información legal...', 'bot');
+        function generateSystemMatrix() {
+            if (wires.length === 0) return null;
             
-            setTimeout(() => {
-                // Añadir nuevos datos de ejemplo
-                chatbot.manualLearn('refugiado', 'Los ecuatorianos pueden solicitar refugio en otros países bajo ciertas condiciones. Requieren documentación específica y asesoría legal.');
-                chatbot.manualLearn('doble nacionalidad', 'Ecuador permite la doble nacionalidad. No se pierde la ciudadanía ecuatoriana al adquirir otra.');
-                
-                addMessage('✅ Entrenamiento completado. He aprendido sobre refugiados y doble nacionalidad.', 'bot');
-            }, 2000);
-        }
-
-        function enableAutoLearning() {
-            chatbot.learningMode = !chatbot.learningMode;
-            const statusElement = document.getElementById('autoLearnStatus');
-            statusElement.textContent = chatbot.learningMode ? 'ON' : 'OFF';
-            statusElement.style.color = chatbot.learningMode ? '#2ecc71' : '#e74c3c';
+            const n = wires.length;
+            const matrix = [];
             
-            addMessage(
-                chatbot.learningMode 
-                    ? '🔵 Auto-aprendizaje ACTIVADO. Aprenderé de cada conversación.' 
-                    : '🔴 Auto-aprendizaje DESACTIVADO.',
-                'bot'
-            );
-        }
-
-        function exportKnowledge() {
-            chatbot.exportKnowledge();
-            addMessage('📁 Base de conocimiento exportada como JSON.', 'bot');
-        }
-
-        // Inicializar con Enter
-        document.getElementById('userInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                sendMessage();
-            }
-        });
-
-        // Cargar historial guardado
-        window.addEventListener('load', function() {
-            const savedHistory = localStorage.getItem('chatbotHistory');
-            if (savedHistory) {
-                const history = JSON.parse(savedHistory);
-                history.forEach(item => {
-                    addMessage(item.user, 'user');
-                    // Simular respuestas anteriores
-                    setTimeout(() => {
-                        addMessage('Respuesta cargada del historial...', 'bot', 0.9);
-                    }, 100);
+            const measureX = parseFloat(document.getElementById('measure-x').value) || 0;
+            const measureY = parseFloat(document.getElementById('measure-y').value) || 0;
+            
+            // Generate measurement points
+            const points = [];
+            for (let i = 0; i < n; i++) {
+                const angle = (2 * Math.PI * i) / n;
+                const radius = 0.3;
+                points.push({
+                    x: measureX + radius * Math.cos(angle),
+                    y: measureY + radius * Math.sin(angle)
                 });
             }
-        });
+            
+            // Build coefficient matrix
+            for (let i = 0; i < n; i++) {
+                const row = [];
+                const point = points[i];
+                
+                for (let j = 0; j < n; j++) {
+                    const wire = wires[j];
+                    const dx = point.x - wire.x;
+                    const dy = point.y - wire.y;
+                    const r = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (r < 1e-10) {
+                        row.push(0);
+                    } else {
+                        row.push((MU_0 * wire.turns) / (2 * Math.PI * r));
+                    }
+                }
+                
+                // Calculate actual field magnitude at this point
+                const field = calculateTotalField(point.x, point.y);
+                row.push(field.magnitude);
+                
+                matrix.push(row);
+            }
+            
+            return matrix;
+        }
+
+        // Visualization
+        function renderVisualization() {
+            const svg = document.getElementById('field-visualization');
+            const width = 400;
+            const height = 350;
+            
+            // Calculate bounds
+            const allX = wires.map(w => w.x);
+            const allY = wires.map(w => w.y);
+            const measureX = parseFloat(document.getElementById('measure-x').value) || 0;
+            const measureY = parseFloat(document.getElementById('measure-y').value) || 0;
+            allX.push(measureX);
+            allY.push(measureY);
+            
+            const padding = 1;
+            const minX = Math.min(...allX) - padding;
+            const maxX = Math.max(...allX) + padding;
+            const minY = Math.min(...allY) - padding;
+            const maxY = Math.max(...allY) + padding;
+            
+            const scaleX = x => ((x - minX) / (maxX - minX)) * width;
+            const scaleY = y => height - ((y - minY) / (maxY - minY)) * height;
+            
+            // Generate field points
+            const fieldPoints = [];
+            const gridSize = 12;
+            for (let i = 0; i <= gridSize; i++) {
+                for (let j = 0; j <= gridSize; j++) {
+                    const x = minX + (i / gridSize) * (maxX - minX);
+                    const y = minY + (j / gridSize) * (maxY - minY);
+                    const field = calculateTotalField(x, y);
+                    fieldPoints.push({ x, y, ...field });
+                }
+            }
+            
+            const maxMagnitude = Math.max(...fieldPoints.map(p => p.magnitude), 1e-10);
+            
+            let svgContent = `
+                <defs>
+                    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                        <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(100,116,139,0.2)" stroke-width="0.5"/>
+                    </pattern>
+                </defs>
+                <rect width="${width}" height="${height}" fill="url(#grid)"/>
+            `;
+            
+            // Draw field vectors
+            fieldPoints.forEach(point => {
+                const x = scaleX(point.x);
+                const y = scaleY(point.y);
+                const magnitude = point.magnitude / maxMagnitude;
+                const length = Math.min(magnitude * 25, 20);
+                
+                if (length < 2) return;
+                
+                const angle = Math.atan2(point.By, point.Bx);
+                const dx = Math.cos(angle) * length;
+                const dy = -Math.sin(angle) * length;
+                
+                const opacity = Math.min(0.3 + magnitude * 0.7, 1);
+                const hue = 180 + (1 - magnitude) * 40;
+                
+                svgContent += `
+                    <line x1="${x - dx/2}" y1="${y + dy/2}" x2="${x + dx/2}" y2="${y - dy/2}" 
+                          stroke="hsl(${hue}, 100%, 50%)" stroke-width="1.5" opacity="${opacity}"
+                          stroke-dasharray="4 2"/>
+                    <circle cx="${x + dx/2}" cy="${y - dy/2}" r="2" 
+                            fill="hsl(${hue}, 100%, 60%)" opacity="${opacity}"/>
+                `;
+            });
+            
+            // Draw wires
+            wires.forEach(wire => {
+                const x = scaleX(wire.x);
+                const y = scaleY(wire.y);
+                const isPositive = wire.current > 0;
+                const color = isPositive ? '#0ea5e9' : '#ef4444';
+                
+                svgContent += `
+                    <circle cx="${x}" cy="${y}" r="18" fill="${color}" opacity="0.2"/>
+                    <circle cx="${x}" cy="${y}" r="12" fill="${color}" stroke="#f8fafc" stroke-width="2"/>
+                `;
+                
+                if (isPositive) {
+                    svgContent += `<circle cx="${x}" cy="${y}" r="4" fill="#f8fafc"/>`;
+                } else {
+                    svgContent += `
+                        <line x1="${x-5}" y1="${y-5}" x2="${x+5}" y2="${y+5}" stroke="#f8fafc" stroke-width="2"/>
+                        <line x1="${x-5}" y1="${y+5}" x2="${x+5}" y2="${y-5}" stroke="#f8fafc" stroke-width="2"/>
+                    `;
+                }
+                
+                svgContent += `
+                    <text x="${x}" y="${y + 28}" text-anchor="middle" fill="#f8fafc" font-size="11" font-weight="600">
+                        I${wire.id} = ${wire.current}A
+                    </text>
+                `;
+            });
+            
+            // Draw measurement point
+            const mx = scaleX(measureX);
+            const my = scaleY(measureY);
+            svgContent += `
+                <circle cx="${mx}" cy="${my}" r="8" fill="#a855f7" stroke="#f8fafc" stroke-width="2"/>
+                <text x="${mx}" y="${my - 15}" text-anchor="middle" fill="#a855f7" font-size="10" font-weight="600">
+                    Medición
+                </text>
+            `;
+            
+            // Axis labels
+            svgContent += `
+                <text x="${width/2}" y="${height - 8}" text-anchor="middle" fill="#64748b" font-size="12">X (m)</text>
+                <text x="12" y="${height/2}" text-anchor="middle" fill="#64748b" font-size="12" 
+                      transform="rotate(-90, 12, ${height/2})">Y (m)</text>
+            `;
+            
+            svg.innerHTML = svgContent;
+        }
+
+        // Step-by-step display
+        function renderStepProgress() {
+            if (!gaussJordanResult) return;
+            
+            const container = document.getElementById('step-progress');
+            container.innerHTML = gaussJordanResult.steps.map((_, i) => `
+                <div class="step-dot ${i === currentStepIndex ? 'active' : ''} ${i < currentStepIndex ? 'completed' : ''}"
+                     onclick="goToStep(${i})"></div>
+            `).join('');
+            
+            document.getElementById('current-step').textContent = currentStepIndex + 1;
+            document.getElementById('total-steps').textContent = gaussJordanResult.steps.length;
+        }
+
+        function renderMatrix() {
+            if (!gaussJordanResult) return;
+            
+            const step = gaussJordanResult.steps[currentStepIndex];
+            const container = document.getElementById('matrix-display');
+            const n = step.matrix.length;
+            const m = step.matrix[0].length;
+            
+            let html = '';
+            step.matrix.forEach((row, i) => {
+                html += '<div class="matrix-row">';
+                row.forEach((cell, j) => {
+                    if (j === m - 1) {
+                        html += '<div class="matrix-divider"></div>';
+                    }
+                    
+                    let cellClass = 'matrix-cell';
+                    if (i === step.pivotRow && j === step.pivotCol) {
+                        cellClass += ' highlight-pivot';
+                    } else if (i === step.pivotRow) {
+                        cellClass += ' highlight-row';
+                    } else if (j === step.pivotCol) {
+                        cellClass += ' highlight-col';
+                    }
+                    
+                    const value = Math.abs(cell) < 1e-10 ? 0 : cell;
+                    const formatted = Math.abs(value) < 0.0001 && value !== 0 
+                        ? value.toExponential(2) 
+                        : value.toFixed(4);
+                    
+                    html += `<div class="${cellClass}">${formatted}</div>`;
+                });
+                html += '</div>';
+            });
+            
+            container.innerHTML = html;
+            
+            document.getElementById('step-description').textContent = step.description;
+            document.getElementById('step-operation').textContent = step.operation || '';
+            
+            // Show solution on last step
+            const solutionBox = document.getElementById('solution-box');
+            if (currentStepIndex === gaussJordanResult.steps.length - 1 && gaussJordanResult.solution) {
+                solutionBox.style.display = 'block';
+                const solutionGrid = document.getElementById('solution-grid');
+                solutionGrid.innerHTML = gaussJordanResult.solution.map((val, i) => `
+                    <div class="solution-item">
+                        <div class="var-name">I${i + 1}</div>
+                        <div class="var-value">${val.toFixed(4)}</div>
+                    </div>
+                `).join('');
+            } else {
+                solutionBox.style.display = 'none';
+            }
+            
+            // Update button states
+            document.getElementById('btn-prev').disabled = currentStepIndex === 0;
+            document.getElementById('btn-reset').disabled = currentStepIndex === 0;
+            document.getElementById('btn-next').disabled = currentStepIndex === gaussJordanResult.steps.length - 1;
+        }
+
+        function goToStep(index) {
+            currentStepIndex = index;
+            renderStepProgress();
+            renderMatrix();
+        }
+
+        function nextStep() {
+            if (gaussJordanResult && currentStepIndex < gaussJordanResult.steps.length - 1) {
+                currentStepIndex++;
+                renderStepProgress();
+                renderMatrix();
+            }
+        }
+
+        function prevStep() {
+            if (currentStepIndex > 0) {
+                currentStepIndex--;
+                renderStepProgress();
+                renderMatrix();
+            }
+        }
+
+        function resetSteps() {
+            currentStepIndex = 0;
+            stopAutoPlay();
+            renderStepProgress();
+            renderMatrix();
+        }
+
+        function toggleAutoPlay() {
+            if (autoPlayInterval) {
+                stopAutoPlay();
+            } else {
+                startAutoPlay();
+            }
+        }
+
+        function startAutoPlay() {
+            currentStepIndex = 0;
+            renderStepProgress();
+            renderMatrix();
+            
+            document.getElementById('btn-autoplay').innerHTML = '⏸ Pausar';
+            document.getElementById('btn-autoplay').classList.add('animate-pulse');
+            
+            autoPlayInterval = setInterval(() => {
+                if (currentStepIndex >= gaussJordanResult.steps.length - 1) {
+                    stopAutoPlay();
+                    return;
+                }
+                currentStepIndex++;
+                renderStepProgress();
+                renderMatrix();
+            }, 1500);
+        }
+
+        function stopAutoPlay() {
+            if (autoPlayInterval) {
+                clearInterval(autoPlayInterval);
+                autoPlayInterval = null;
+            }
+            document.getElementById('btn-autoplay').innerHTML = '▶ Auto Play';
+            document.getElementById('btn-autoplay').classList.remove('animate-pulse');
+        }
+
+        // Main update function
+        function updateSimulation() {
+            const measureX = parseFloat(document.getElementById('measure-x').value) || 0;
+            const measureY = parseFloat(document.getElementById('measure-y').value) || 0;
+            
+            // Update display
+            document.getElementById('display-x').textContent = measureX;
+            document.getElementById('display-y').textContent = measureY;
+            
+            // Calculate field
+            const field = calculateTotalField(measureX, measureY);
+            
+            document.getElementById('result-magnitude').textContent = formatMagneticField(field.magnitude);
+            document.getElementById('result-bx').textContent = formatMagneticField(field.Bx);
+            document.getElementById('result-by').textContent = formatMagneticField(field.By);
+            
+            const angle = Math.atan2(field.By, field.Bx) * (180 / Math.PI);
+            document.getElementById('result-angle').textContent = angle.toFixed(1);
+            
+            // Generate and solve system
+            const matrix = generateSystemMatrix();
+            if (matrix) {
+                gaussJordanResult = gaussJordan(matrix);
+                currentStepIndex = 0;
+                stopAutoPlay();
+                renderStepProgress();
+                renderMatrix();
+            }
+            
+            // Update visualization
+            renderVisualization();
+        }
     </script>
 </body>
 </html>
