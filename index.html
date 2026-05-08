@@ -213,30 +213,37 @@ async function sendToMake() {
             })
         });
 
-        // 1. Convertimos la respuesta a JSON
-        const responseData = await response.json(); 
+        // LEER COMO TEXTO PRIMERO (MÁS SEGURO)
+        const rawText = await response.text();
+        let finalMessage = "";
 
-        // 2. Quitamos la animación de carga
+        try {
+            // Intentamos ver si es un JSON
+            const data = JSON.parse(rawText);
+            finalMessage = data.motivo || data.mensaje || rawText;
+        } catch (e) {
+            // Si no es JSON, usamos el texto tal cual
+            finalMessage = rawText;
+        }
+
         const typingElement = document.getElementById(typingId);
         if(typingElement) typingElement.remove();
         
-        // 3. Mostramos la respuesta usando la propiedad "motivo" que viene de Make
-        // Si Make envía el JSON como lo configuramos, usamos responseData.motivo
         chat.insertAdjacentHTML('beforeend', `
             <div class="msg ai">
                 <div class="av">✨</div>
                 <div class="body">
                     <p style="margin:0">✅ <b>Decisión de Auditoría:</b></p>
-                    <div class="ai-response-box">${responseData.motivo || "Auditoría procesada correctamente."}</div>
+                    <div class="ai-response-box">${finalMessage}</div>
                     <p style="font-size:11px; color:var(--muted); margin-top:8px">Se ha enviado una copia detallada a <b>${email}</b></p>
                 </div>
             </div>
         `);
     } catch (error) {
-        console.error("Error detallado:", error);
+        console.error("Error:", error);
         const typingElement = document.getElementById(typingId);
         if(typingElement) typingElement.remove();
-        alert("Error de conexión con el servidor. Revisa que Make esté activo.");
+        alert("Error al conectar con MedAuth AI. Verifica tu conexión o los permisos CORS en Make.");
     } finally {
         btn.disabled = false;
         btn.textContent = '✨ Procesar Auditoría';
