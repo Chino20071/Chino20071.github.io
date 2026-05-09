@@ -3,253 +3,273 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>MedAuth AI · Auditoría Médica</title>
+<title>MedAuth AI · Auditoría Completa</title>
 <style>
   :root {
     --bg:#0e1116; --panel:#171a21; --panel-2:#1f2330; --border:#2a2f3d;
-    --text:#eaf2ef; --muted:#8a93a3; --primary:#10b981; --primary-2:#34d399;
-    --danger:#ef4444; --warn:#f59e0b; --ok:#10b981;
+    --text:#eaf2ef; --muted:#8a93a3; 
+    --primary:#10b981; /* Verde - Aprobado */
+    --warning:#f59e0b; /* Naranja - Pendiente */
+    --danger:#ef4444;  /* Rojo - Rechazado */
     --grad:linear-gradient(135deg,#10b981,#34d399);
-    --glow:0 0 40px rgba(16,185,129,.25);
-    --shadow:0 20px 60px -20px rgba(0,0,0,.7);
-    --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
   }
   *{box-sizing:border-box}
-  html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh; overflow-x: hidden;}
-  body{background: radial-gradient(ellipse at top,rgba(16,185,129,.12),transparent 60%), var(--bg);}
-  
-  header{position:sticky;top:0;z-index:10;backdrop-filter:blur(12px);background:rgba(14,17,22,.7);border-bottom:1px solid var(--border)}
-  .wrap{max-width:1200px;margin:0 auto;padding:14px 22px;display:flex;justify-content:space-between;align-items:center}
-  .brand{display:flex;align-items:center;gap:12px}
-  .logo{width:40px;height:40px;border-radius:12px;background:var(--grad);display:grid;place-items:center;box-shadow:var(--glow);font-size:20px}
-  .brand h1{margin:0;font-size:17px}
-  
-  main{max-width:1200px;margin:0 auto;padding:24px 22px;display:grid;grid-template-columns:400px 1fr;gap:20px}
-  @media(max-width:900px){main{grid-template-columns:1fr}}
-  
-  .card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:20px;box-shadow:var(--shadow)}
-  .field{margin-bottom:16px}
-  .field label{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;font-weight:600}
-  
-  input,textarea{width:100%;background:var(--panel-2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:14px;font-family:inherit;outline:none;transition:.15s}
-  textarea{resize:vertical;min-height:70px}
-  input:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(16,185,129,.15)}
-  
-  .file-input-wrapper { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
-  .btn-file { 
-    background: var(--border); color: var(--text); padding: 6px 12px; border-radius: 6px; 
-    font-size: 11px; cursor: pointer; border: 1px solid transparent; transition: 0.2s;
+  body { 
+    background: radial-gradient(ellipse at top,rgba(16,185,129,.12),transparent 60%), var(--bg);
+    color: var(--text); font-family: var(--font); margin: 0; min-height: 100vh;
   }
-  .btn-file:hover { background: #3a4150; border-color: var(--primary); }
-  .file-name { font-size: 11px; color: var(--primary-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px; }
-  input[type="file"] { display: none; }
 
-  .btn{width:100%;padding:12px;border:0;border-radius:10px;background:var(--grad);color:#06281f;font-weight:700;font-size:14px;cursor:pointer;box-shadow:var(--glow);transition:.15s; margin-top: 10px;}
-  .btn:hover{filter:brightness(1.1)}
-  .btn:disabled{opacity:.5;cursor:not-allowed}
+  /* --- LOGIN SCREEN --- */
+  #login-screen {
+    display: flex; align-items: center; justify-content: center; height: 100vh;
+    position: fixed; width: 100%; top: 0; left: 0; z-index: 100; background: var(--bg);
+  }
+  .login-card { background: var(--panel); border: 1px solid var(--border); padding: 40px; border-radius: 20px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+  .forgot-pass { display: block; margin-top: 20px; color: var(--muted); font-size: 13px; text-decoration: none; transition: 0.2s; cursor: pointer; }
+  .forgot-pass:hover { color: var(--primary); text-decoration: underline; }
 
-  .chat{display:flex;flex-direction:column;height:75vh;background:var(--panel);border-radius:16px;border:1px solid var(--border);overflow:hidden}
-  .chat-body{flex:1;overflow-y:auto;padding:20px; scroll-behavior: smooth;}
-  
-  .msg{margin-bottom:20px; animation: fadeIn 0.3s ease;}
+  /* --- STEPPER --- */
+  .app-content { display: none; padding-top: 20px; }
+  .stepper { display: flex; justify-content: space-between; max-width: 800px; margin: 20px auto; padding: 0 20px; position: relative; }
+  .stepper::before { content: ''; position: absolute; top: 16px; left: 50px; right: 50px; height: 2px; background: var(--border); z-index: 1; }
+  .step { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; flex: 1; }
+  .circle-step { width: 32px; height: 32px; border-radius: 50%; background: var(--panel-2); border: 2px solid var(--border); display: grid; place-items: center; margin-bottom: 8px; font-size: 12px; font-weight: bold; transition: 0.3s; }
+  .step.active .circle-step { background: var(--primary); color: #06281f; border-color: var(--primary); box-shadow: 0 0 20px rgba(16,185,129,0.3); }
+
+  /* --- CARDS & FORMS --- */
+  main { max-width: 900px; margin: 0 auto; padding: 20px; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.4); }
+  .step-content { display: none; }
+  .step-content.active { display: block; animation: fadeIn 0.4s ease; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-  
-  .msg.user .bubble{background:var(--panel-2); padding:12px; border-radius:12px 12px 2px 12px; border:1px solid var(--border); max-width:85%; margin-left:auto;}
-  .msg.ai{display:flex; gap:12px;}
-  .msg.ai .av{width:32px; height:32px; border-radius:8px; background:var(--grad); display:grid; place-items:center; flex-shrink:0;}
-  .msg.ai .body{flex:1;}
-  
-  .badge{padding:3px 8px; border-radius:6px; font-size:11px; font-weight:700; text-transform:uppercase;}
-  .badge.ok{background:rgba(16,185,129,0.2); color:var(--primary);}
 
-  .typing { display: flex; gap: 4px; padding: 10px 0; }
-  .typing span { width: 6px; height: 6px; border-radius: 50%; background: var(--primary); animation: bounce 1.2s infinite; }
-  @keyframes bounce { 0%, 80%, 100% { opacity: 0.3; } 40% { opacity: 1; transform: translateY(-4px); } }
+  .field { margin-bottom: 20px; text-align: left; }
+  .field label { display: block; font-size: 11px; color: var(--muted); text-transform: uppercase; margin-bottom: 8px; font-weight: 600; }
+  input, textarea { width: 100%; background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; color: var(--text); outline: none; font-family: inherit; }
 
-  .ai-response-box {
-    margin-top: 10px;
-    padding: 15px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
-    border-left: 4px solid var(--primary);
-    font-size: 13px;
-    line-height: 1.6;
-    color: #e2e8f0;
-    white-space: pre-wrap;
-    box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
+  /* --- RESULTADO DINÁMICO (Basado en image_baf0f6.png) --- */
+  .result-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 1px; background: var(--border); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); margin-top: 20px; }
+  .result-block { background: var(--panel); padding: 25px; display: flex; align-items: center; gap: 20px; }
+  
+  /* Clases de estado dinámico */
+  .state-approved { --status-color: var(--primary); }
+  .state-pending { --status-color: var(--warning); }
+  .state-rejected { --status-color: var(--danger); }
+
+  .status-icon { 
+    width: 60px; height: 60px; border-radius: 50%; border: 4px solid var(--status-color); 
+    display: grid; place-items: center; color: var(--status-color); font-size: 30px; font-weight: bold; 
   }
+  .status-text h2 { margin: 0; color: var(--status-color); font-size: 24px; letter-spacing: 1px; font-weight: 800; }
+  .status-text p { margin: 5px 0; font-size: 13px; color: var(--muted); }
+  
+  .prob-block { flex-direction: column; justify-content: center; text-align: center; border-left: 1px solid var(--border); }
+  .progress-ring { position: relative; width: 80px; height: 80px; margin: 0 auto; }
+  .progress-ring svg { transform: rotate(-90deg); width: 80px; height: 80px; }
+  .progress-ring circle { fill: none; stroke-width: 6; stroke-linecap: round; }
+  .ring-bg { stroke: var(--panel-2); }
+  .ring-fill { stroke: var(--status-color); stroke-dasharray: 188.5; stroke-dashoffset: 188.5; transition: stroke-dashoffset 1.5s ease-in-out; }
+  .ring-perc { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-weight: 800; font-size: 18px; color: var(--text); }
+
+  /* --- BUTTONS --- */
+  .nav-btns { display: flex; justify-content: space-between; margin-top: 30px; gap: 15px; }
+  .btn { padding: 14px 25px; border-radius: 10px; border: none; cursor: pointer; font-weight: bold; transition: 0.3s; font-family: inherit; }
+  .btn-primary { background: var(--grad); color: #06281f; width: 100%; }
+  .btn-next { background: var(--grad); color: #06281f; flex: 2; }
+  .btn-prev { background: var(--panel-2); color: var(--text); border: 1px solid var(--border); flex: 1; }
+  .btn:hover { filter: brightness(1.1); transform: translateY(-2px); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 </style>
 </head>
 <body>
 
-<header>
-  <div class="wrap">
-    <div class="brand">
-      <div class="logo">🩺</div>
-      <div>
-        <h1>MedAuth AI</h1>
-        <p style="margin:0; font-size:11px; color:var(--muted)">Sincronización Activa</p>
-      </div>
+<!-- PANTALLA DE LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <img src="data:image/png;base64,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" alt="" width="90" height="90" />
+    <h2 style="margin: 0 0 20px 0;">MedAuth AI</h2>
+    <div class="field">
+      <label>Usuario</label>
+      <input type="text" id="user" placeholder="admin@medauth.ai">
     </div>
-    <div class="status">
-      <span class="badge ok">● Sistema Online</span>
+    <div class="field">
+      <label>Contraseña</label>
+      <input type="password" id="pass" placeholder="••••••••">
     </div>
+    <button class="btn btn-primary" onclick="login()">Entrar al Sistema</button>
+    <a class="forgot-pass" onclick="alert('Se ha enviado un enlace de recuperación a su correo electrónico.')">Olvide mi contraseña</a>
   </div>
-</header>
+</div>
 
-<main>
-  <section>
+<!-- CONTENIDO PRINCIPAL -->
+<div id="app-content" class="app-content">
+  <div class="stepper">
+    <div class="step active" id="st-1"><div class="circle-step">1</div></div>
+    <div class="step" id="st-2"><div class="circle-step">2</div></div>
+    <div class="step" id="st-3"><div class="circle-step">3</div></div>
+    <div class="step" id="st-4"><div class="circle-step">4</div></div>
+  </div>
+
+  <main>
     <div class="card">
-      <h2 style="margin:0 0 20px; font-size:16px">📋 Registro de Paciente</h2>
-      
-      <div class="field">
-        <label>Nombre del Paciente</label>
-        <input id="nombre" placeholder="Ej. Juan Pérez" />
+      <!-- PASO 1 -->
+      <div class="step-content active" id="step-1">
+        <h2 style="margin-top:0">Datos del Paciente</h2>
+        <div class="field"><label>Nombre Completo</label><input id="nombre" placeholder="Juan Pérez"></div>
+        <div class="field"><label>Email</label><input id="email" type="email" placeholder="juan@correo.com"></div>
       </div>
 
-      <div class="field">
-        <label>Correo Electrónico</label>
-        <input type="email" id="email" placeholder="paciente@correo.com" />
+      <!-- PASO 2 -->
+      <div class="step-content" id="step-2">
+        <h2 style="margin-top:0">Información Clínica</h2>
+        <div class="field"><label>Diagnóstico CIE-10</label><input id="cie" placeholder="K80.2 - Colelitiasis"></div>
+        <div class="field"><label>Resumen Médico</label><textarea id="clinica" style="height: 100px;"></textarea></div>
       </div>
 
-      <div class="field">
-        <label>Póliza (Texto o Archivo)</label>
-        <input id="poliza_text" placeholder="Número de Póliza" />
-        <div class="file-input-wrapper">
-          <label for="file_poliza" class="btn-file">📎 Adjuntar Póliza</label>
-          <input type="file" id="file_poliza" onchange="updateFileName('file_poliza', 'name_poliza')">
-          <span id="name_poliza" class="file-name"></span>
-        </div>
+      <!-- PASO 3 -->
+      <div class="step-content" id="step-3">
+        <h2 style="margin-top:0">Póliza</h2>
+        <div class="field"><label>Nº de Póliza</label><input id="poliza" placeholder="POL-2026-XYZ"></div>
+        <p style="font-size: 12px; color: var(--muted);">Presione finalizar para que la IA realice la auditoría.</p>
       </div>
 
-      <div class="field">
-        <label>Informe Médico (Texto o Archivo)</label>
-        <textarea id="informe_text" placeholder="Diagnóstico..."></textarea>
-        <div class="file-input-wrapper">
-          <label for="file_informe" class="btn-file">📎 Adjuntar Informe</label>
-          <input type="file" id="file_informe" onchange="updateFileName('file_informe', 'name_informe')">
-          <span id="name_informe" class="file-name"></span>
-        </div>
-      </div>
-
-      <button class="btn" id="goBtn" onclick="sendToMake()">✨ Procesar Auditoría</button>
-    </div>
-  </section>
-
-  <section class="chat">
-    <div style="padding:15px; border-bottom:1px solid var(--border); background:rgba(255,255,255,0.02)">
-      <h3 style="margin:0; font-size:14px">Resultado de la Auditoría</h3>
-    </div>
-    <div class="chat-body" id="chat">
-      <div class="msg ai">
-        <div class="av">✨</div>
-        <div class="body">Esperando datos para iniciar el proceso de auditoría médica.</div>
-      </div>
-    </div>
-  </section>
-</main>
-
-<script>
-const WEBHOOK_URL = 'https://hook.us2.make.com/fuqy5gm1i8cznyp8fa1qpm14sjp3cvr9';
-
-function updateFileName(inputId, spanId) {
-    const input = document.getElementById(inputId);
-    const span = document.getElementById(spanId);
-    span.textContent = input.files.length > 0 ? input.files[0].name : "";
-}
-
-const toBase64 = file => new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = error => reject(error);
-});
-
-async function sendToMake() {
-    const nombre = document.getElementById('nombre').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const polizaText = document.getElementById('poliza_text').value.trim();
-    const informeText = document.getElementById('informe_text').value.trim();
-    const filePoliza = document.getElementById('file_poliza').files[0];
-    const fileInforme = document.getElementById('file_informe').files[0];
-    const btn = document.getElementById('goBtn');
-    const chat = document.getElementById('chat');
-
-    if (!nombre || !email) {
-        alert("Por favor, ingresa nombre y email."); return;
-    }
-
-    btn.disabled = true;
-    btn.textContent = '⏳ Procesando Auditoría...';
-
-    let polizaB64 = filePoliza ? await toBase64(filePoliza) : null;
-    let informeB64 = fileInforme ? await toBase64(fileInforme) : null;
-
-    chat.insertAdjacentHTML('beforeend', `<div class="msg user"><div class="bubble">Solicitando auditoría para <b>${nombre}</b>...</div></div>`);
-    
-    const typingId = 'typing-' + Date.now();
-    chat.insertAdjacentHTML('beforeend', `
-        <div class="msg ai" id="${typingId}">
-            <div class="av">✨</div>
-            <div class="body">
-                <div class="typing"><span></span><span></span><span></span></div>
-                El auditor está revisando su caso...
-            </div>
-        </div>
-    `);
-    chat.scrollTop = chat.scrollHeight;
-
-    try {
-        const response = await fetch(WEBHOOK_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                nombre, email,
-                poliza_texto: polizaText,
-                poliza_archivo: polizaB64,
-                informe_texto: informeText,
-                informe_archivo: informeB64,
-                fecha: new Date().toLocaleString()
-            })
-        });
-
-        // LEER COMO TEXTO PRIMERO (MÁS SEGURO)
-        const rawText = await response.text();
-        let finalMessage = "";
-
-        try {
-            // Intentamos ver si es un JSON
-            const data = JSON.parse(rawText);
-            finalMessage = data.motivo || data.mensaje || rawText;
-        } catch (e) {
-            // Si no es JSON, usamos el texto tal cual
-            finalMessage = rawText;
-        }
-
-        const typingElement = document.getElementById(typingId);
-        if(typingElement) typingElement.remove();
-        
-        chat.insertAdjacentHTML('beforeend', `
-            <div class="msg ai">
-                <div class="av">✨</div>
-                <div class="body">
-                    <p style="margin:0">✅ <b>Decisión de Auditoría:</b></p>
-                    <div class="ai-response-box">${finalMessage}</div>
-                    <p style="font-size:11px; color:var(--muted); margin-top:8px">Se ha enviado una copia detallada a <b>${email}</b></p>
+      <!-- PASO 4: RESULTADO DINÁMICO -->
+      <div class="step-content" id="step-3">
+    <div class="card state-approved"> <!-- Cambiar a state-rejected o state-pending dinámicamente -->
+        <div class="result-grid">
+            <div class="result-block">
+                <div class="status-icon">✓</div>
+                <div class="status-text">
+                    <h2>APROBADO</h2>
+                    <p>Referencia: #MED-99281</p>
                 </div>
             </div>
-        `);
-    } catch (error) {
-        console.error("Error:", error);
-        const typingElement = document.getElementById(typingId);
-        if(typingElement) typingElement.remove();
-        alert("Error al conectar con MedAuth AI. Verifica tu conexión o los permisos CORS en Make.");
-    } finally {
-        btn.disabled = false;
-        btn.textContent = '✨ Procesar Auditoría';
-        chat.scrollTop = chat.scrollHeight;
+            <div class="result-block prob-block">
+                <div class="progress-ring">
+                    <svg>
+                        <circle class="ring-bg" cx="40" cy="40" r="30"></circle>
+                        <circle class="ring-fill" cx="40" cy="40" r="30"></circle>
+                    </svg>
+                    <div class="ring-perc">98%</div>
+                </div>
+                <p style="font-size: 10px; margin-top: 5px;">CONFIANZA IA</p>
+            </div>
+        </div>
+        
+        <div class="field" style="margin-top: 20px;">
+            <label>Observaciones de la Auditoría</label>
+            <textarea readonly>El análisis no detectó anomalías en la facturación. Los códigos CIE-10 coinciden con el tratamiento aplicado.</textarea>
+        </div>
+    </div>
+</div>
+
+      <div class="nav-btns" id="nav-btns">
+        <button class="btn btn-prev" id="btnPrev" onclick="move(-1)" disabled>Anterior</button>
+        <button class="btn btn-next" id="btnNext" onclick="move(1)">Siguiente</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  let step = 1;
+
+  function login() {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app-content').style.display = 'block';
+  }
+
+  function move(delta) {
+    if (delta === 1 && step === 3) {
+      step++;
+      updateUI();
+      simulateAudit();
+      return;
+    }
+    step += delta;
+    updateUI();
+  }
+
+  function updateUI() {
+    document.querySelectorAll('.step-content').forEach((s, i) => s.classList.toggle('active', i+1 === step));
+    document.querySelectorAll('.step').forEach((s, i) => s.classList.toggle('active', i+1 === step));
+    document.getElementById('btnPrev').disabled = (step === 1 || step === 4);
+    document.getElementById('btnNext').style.display = (step === 4) ? 'none' : 'block';
+    document.getElementById('btnNext').innerText = step === 3 ? 'Finalizar Auditoría' : 'Siguiente';
+  }
+
+  function simulateAudit() {
+    // CAMBIA ESTA VARIABLE PARA PROBAR LOS 3 ESTADOS: 'approved', 'pending', 'rejected'
+    const finalState = 'approved'; 
+
+    setTimeout(() => {
+      document.getElementById('loading-ia').style.display = 'none';
+      const container = document.getElementById('status-container');
+      const res = document.getElementById('resultado-final');
+      res.style.display = 'block';
+      
+      const ring = document.getElementById('ring-fill');
+      const percTxt = document.getElementById('perc-txt');
+      const title = document.getElementById('status-title');
+      const desc = document.getElementById('status-desc');
+      const icon = document.getElementById('main-icon');
+
+      if (finalState === 'approved') {
+        container.className = 'result-grid state-approved';
+        title.innerText = 'PRE-APROBADA';
+        desc.innerText = 'Cumple con todos los requisitos.';
+        icon.innerText = '✓';
+        ring.style.strokeDashoffset = (188.5 * (1 - 0.96)); 
+        percTxt.innerText = '96%';
+      } else if (finalState === 'pending') {
+        container.className = 'result-grid state-pending';
+        title.innerText = 'PENDIENTE';
+        desc.innerText = 'Requiere revisión manual de un auditor.';
+        icon.innerText = '●';
+        ring.style.strokeDashoffset = (188.5 * (1 - 0.50));
+        percTxt.innerText = '50%';
+      } else {
+        container.className = 'result-grid state-rejected';
+        title.innerText = 'RECHAZADA';
+        desc.innerText = 'No cumple criterios de cobertura.';
+        icon.innerText = '✕';
+        ring.style.strokeDashoffset = (188.5 * (1 - 0.15));
+        percTxt.innerText = '15%';
+      }
+    }, 2000);
+  }
+  const steps = document.querySelectorAll('.step-content');
+const circles = document.querySelectorAll('.step');
+let currentStep = 0;
+
+function moveStep(delta) {
+    steps[currentStep].classList.remove('active');
+    circles[currentStep].classList.remove('active');
+    
+    currentStep += delta;
+    
+    steps[currentStep].classList.add('active');
+    circles[currentStep].classList.add('active');
+    
+    // Si llegamos al final, animamos el anillo de progreso
+    if (currentStep === 2) {
+        setTimeout(animateRing, 500);
     }
 }
+
+function animateRing() {
+    const ring = document.querySelector('.ring-fill');
+    // Ejemplo: 85% de probabilidad
+    const percent = 85;
+    const offset = 188.5 - (188.5 * percent) / 100;
+    ring.style.strokeDashoffset = offset;
+}
 </script>
+
+<style>
+  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+</style>
+
 </body>
 </html>
