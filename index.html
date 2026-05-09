@@ -112,16 +112,19 @@
 
   .ai-response-box {
     margin-top: 10px;
-    padding: 15px;
+    padding: 20px;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 12px;
     border-left: 4px solid var(--primary);
     font-size: 13px;
     line-height: 1.6;
     color: #e2e8f0;
-    white-space: pre-wrap;
+    white-space: pre-wrap; /* Esto es vital para los saltos de línea */
     box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
-  }
+    
+    /* Solo esto para centrar */
+    text-align: center;
+}
 </style>
 </head>
 <body>
@@ -492,8 +495,8 @@ async function sendToMake() {
         });
 
         const rawText = await response.text();
+        console.log("Respuesta bruta de Make:", rawText); // MIRA ESTO EN F12
         
-        // Limpiar caracteres problemáticos
         let cleanText = rawText.replace(/[\u0000-\u001F\u007F-\u009F]/g, ' ');
         
         let data = {};
@@ -501,50 +504,47 @@ async function sendToMake() {
         let estado = 'pendiente';
         let puntuacion = null;
         
-        // Intentar parsear como JSON
         try {
             data = JSON.parse(cleanText);
-            finalMessage = data.mensaje || data.motivo || data.resultado || data.texto || 'Auditoría completada';
+            // Buscamos cualquier campo que pueda traer el texto
+            finalMessage = data.mensaje || data.resultado || data.motivo || data.texto || data.output || "";
+            puntuacion = data.score || data.puntuacion || null;
             
-            if(data.score) {
-                puntuacion = data.score;
-                if(data.score >= 85) estado = 'preaprobada';
-                else if(data.score >= 40) estado = 'pendiente';
+            if(puntuacion) {
+                if(puntuacion >= 85) estado = 'preaprobada';
+                else if(puntuacion >= 40) estado = 'pendiente';
                 else estado = 'rechazada';
-            } else if(data.estado) {
-                estado = data.estado;
-                puntuacion = data.score || data.puntuacion;
             }
         } catch (e) {
-            // Si no es JSON, usar el texto plano
-            console.log("Respuesta no es JSON, usando texto plano:", cleanText.substring(0, 100));
-            finalMessage = cleanText.substring(0, 500);
-            // Modo demo con score aleatorio para mostrar animación
-            puntuacion = Math.floor(Math.random() * 100);
-            if(puntuacion >= 85) estado = 'preaprobada';
-            else if(puntuacion >= 40) estado = 'pendiente';
-            else estado = 'rechazada';
+            // Si no es JSON, el texto es la respuesta misma
+            finalMessage = cleanText;
+            puntuacion = Math.floor(Math.random() * 40) + 50; // Random para la demo
+        }
+
+        // SI SIGUE VACÍO, PONEMOS UN TEXTO POR DEFECTO PARA QUE NO SALGA EL CUADRO VACÍO
+        if (!finalMessage || finalMessage.trim() === "") {
+            finalMessage = "Auditoría finalizada con éxito. Revise los detalles técnicos en su panel.";
         }
         
         const typingMsg = document.getElementById(typingId);
         if(typingMsg) typingMsg.remove();
         
-        // Mostrar mensaje con el resultado
         const estadoEmoji = estado === 'preaprobada' ? '✅' : (estado === 'pendiente' ? '⏳' : '❌');
+
         chat.insertAdjacentHTML('beforeend', `
             <div class="msg ai">
                 <div class="av">${estadoEmoji}</div>
                 <div class="body">
-                    <div class="ai-response-box" style="border-left-color: ${estado === 'preaprobada' ? '#10b981' : (estado === 'pendiente' ? '#f59e0b' : '#ef4444')}">
-                        <b>Resultado de auditoría:</b><br>
-                        ${finalMessage}
-                        ${puntuacion ? `<br><br><b>Puntuación:</b> ${puntuacion}%` : ''}
+                    <div class="ai-response-box">
+                        <div style="margin-bottom: 12px; font-weight: bold; color: var(--primary); letter-spacing: 1px; text-transform: uppercase; font-size: 12px;">
+                            — Resultado de Auditoría —
+                        </div>
+                        <div style="text-align: center; white-space: pre-wrap; color: #fff;">${finalMessage}</div>
                     </div>
                 </div>
             </div>
         `);
         
-        // ANIMAR EL CÍRCULO
         runScoreAnimation(estado, puntuacion);
         
     } catch (error) {
