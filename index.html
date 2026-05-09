@@ -119,11 +119,17 @@
     font-size: 13px;
     line-height: 1.6;
     color: #e2e8f0;
-    white-space: pre-wrap; /* Esto es vital para los saltos de línea */
-    box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
+    white-space: pre-wrap;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
+    box-sizing: border-box;
     
-    /* Solo esto para centrar */
-    text-align: center;
+    /* FUERZA EL CENTRADO INTERNO */
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centra horizontalmente los hijos */
+    justify-content: center;
+    text-align: center; /* Centra las líneas de texto */
 }
 </style>
 </head>
@@ -532,19 +538,20 @@ async function sendToMake() {
         const estadoEmoji = estado === 'preaprobada' ? '✅' : (estado === 'pendiente' ? '⏳' : '❌');
 
         chat.insertAdjacentHTML('beforeend', `
-            <div class="msg ai">
-                <div class="av">${estadoEmoji}</div>
-                <div class="body">
-                    <div class="ai-response-box">
-                        <div style="margin-bottom: 12px; font-weight: bold; color: var(--primary); letter-spacing: 1px; text-transform: uppercase; font-size: 12px;">
-                            — Resultado de Auditoría —
-                        </div>
-                        <div style="text-align: center; white-space: pre-wrap; color: #fff;">${finalMessage}</div>
-                    </div>
+    <div class="msg ai" style="display: flex; align-items: flex-start; gap: 12px; width: 100%;">
+        <div class="av">${estadoEmoji}</div>
+        <div class="body" style="flex: 1; width: 100%; display: flex; flex-direction: column; align-items: center;">
+            <div class="ai-response-box">
+                <div style="margin-bottom: 15px; font-weight: bold; color: var(--primary); letter-spacing: 1px; text-transform: uppercase; font-size: 13px; width: 100%;">
+                    — Resultado de Auditoría —
+                </div>
+                <div style="white-space: pre-wrap; color: #ffffff; width: 100%;">
+                    ${finalMessage}
                 </div>
             </div>
-        `);
-        
+        </div>
+    </div>
+`);
         runScoreAnimation(estado, puntuacion);
         
     } catch (error) {
