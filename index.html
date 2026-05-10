@@ -176,26 +176,16 @@
 <main>
   <div class="card">
     <div class="step-content active" id="step-1">
-      <h2 style="margin:0 0 20px; font-size:16px">📋 Registro de Paciente</h2>
-      <div class="field">
-        <label>Nombre del Paciente</label>
-        <input id="nombre" placeholder="Ej. Juan Pérez" />
-      </div>
-      <div class="field">
-        <label>Correo Electrónico</label>
-        <input type="email" id="email" placeholder="paciente@correo.com" />
-      </div>
-      <div class="field">
-        <label>Aseguradora</label>
-        <select id="aseguradora">
-          <option value="Mapfre">Mapfre</option>
-          <option value="Axa">Axa</option>
-          <option value="Sanitas">Sanitas</option>
-          <option value="Seguros Bolívar">Seguros Bolívar</option>
-          <option value="Sura">Sura</option>
-        </select>
-      </div>
-    </div>
+  <h2 style="margin:0 0 20px; font-size:16px">📋 Registro de Paciente</h2>
+  <div class="field">
+    <label>Nombre del Paciente</label>
+    <input id="nombre" placeholder="Ej. Juan Pérez" />
+  </div>
+  <div class="field">
+    <label>Correo Electrónico</label>
+    <input type="email" id="email" placeholder="paciente@correo.com" />
+  </div>
+  </div>
 
     <div class="step-content" id="step-2">
       <h2 style="margin:0 0 20px; font-size:16px">🩺 Informe Médico</h2>
@@ -395,7 +385,35 @@ function updateFileName(inputId, spanId) {
     const span = document.getElementById(spanId);
     span.textContent = input.files.length > 0 ? input.files[0].name : "";
 }
+function validateStep() {
+    if (currentStep === 1) {
+        const nombre = document.getElementById('nombre').value.trim();
+        const email = document.getElementById('email').value.trim();
+        if (!nombre || !email) {
+            alert("⚠️ Debes completar el nombre y el correo para continuar.");
+            return false;
+        }
+    }
 
+    if (currentStep === 2) {
+        const informeTxt = document.getElementById('informe_text').value.trim();
+        const informeFile = document.getElementById('file_informe').files.length;
+        if (!informeTxt && informeFile === 0) {
+            alert("⚠️ Por favor, escribe el diagnóstico o adjunta el informe médico.");
+            return false;
+        }
+    }
+
+    if (currentStep === 3) {
+        const polizaTxt = document.getElementById('poliza_text').value.trim();
+        const polizaFile = document.getElementById('file_poliza').files.length;
+        if (!polizaTxt && polizaFile === 0) {
+            alert("⚠️ Es obligatorio ingresar el número de póliza o adjuntar el documento.");
+            return false;
+        }
+    }
+    return true; // Si todo está lleno, permite avanzar
+}
 function runScoreAnimation(status, customScore = null) {
   const circle = document.getElementById('progressCircle');
   const scoreVal = document.getElementById('scoreValue');
@@ -458,7 +476,6 @@ const toBase64 = file => new Promise((resolve, reject) => {
 async function sendToMake() {
     const nombre = document.getElementById('nombre').value.trim();
     const email = document.getElementById('email').value.trim();
-    const aseguradora = document.getElementById('aseguradora').value;
     const polizaText = document.getElementById('poliza_text').value.trim();
     const informeText = document.getElementById('informe_text').value.trim();
     const filePoliza = document.getElementById('file_poliza').files[0];
@@ -480,7 +497,7 @@ async function sendToMake() {
             <div class="av">✨</div>
             <div class="body">
                 <div class="typing"><span></span><span></span><span></span></div>
-                Analizando historial y póliza...
+                Analizando historial y póliza con IA...
             </div>
         </div>
     `);
@@ -496,92 +513,63 @@ async function sendToMake() {
                 poliza_archivo: polizaB64,
                 informe_texto: informeText,
                 informe_archivo: informeB64,
-                fecha: new Date().toLocaleString()
+                fecha: new Date().toISOString() // Formato estándar para la IA
             })
         });
 
         const rawText = await response.text();
-        console.log("Respuesta bruta de Make:", rawText); // MIRA ESTO EN F12
-        
-        let cleanText = rawText.replace(/[\u0000-\u001F\u007F-\u009F]/g, ' ');
+        // Limpiamos posibles caracteres raros o bloques de código markdown que Gemini a veces añade
+        let cleanText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
         
         let data = {};
         let finalMessage = "";
         let estado = 'pendiente';
-        let puntuacion = null;
+        let puntuacion = 0;
         
         try {
             data = JSON.parse(cleanText);
-            // Buscamos cualquier campo que pueda traer el texto
-            finalMessage = data.mensaje || data.resultado || data.motivo || data.texto || data.output || "";
-            puntuacion = data.score || data.puntuacion || null;
+            // Ajustamos a las llaves que definimos en el Prompt de Gemini
+            finalMessage = data.mensaje_correo || data.razon || "Análisis completado.";
+            puntuacion = data.score || 0;
             
-            if(puntuacion) {
-                if(puntuacion >= 85) estado = 'preaprobada';
-                else if(puntuacion >= 40) estado = 'pendiente';
-                else estado = 'rechazada';
-            }
+            // Mapeo de estados para la animación
+            const dec = data.decision.toUpperCase();
+            if (dec === 'APROBADO') estado = 'preaprobada';
+            else if (dec === 'RECHAZADO') estado = 'rechazada';
+            else estado = 'pendiente';
+
         } catch (e) {
-            // Si no es JSON, el texto es la respuesta misma
-            finalMessage = cleanText;
-            puntuacion = Math.floor(Math.random() * 40) + 50; // Random para la demo
+            console.error("Error al parsear JSON de la IA:", e);
+            finalMessage = "Error en el formato de respuesta del auditor. Por favor, intente de nuevo.";
+            puntuacion = 10;
+            estado = 'rechazada';
         }
 
-        // SI SIGUE VACÍO, PONEMOS UN TEXTO POR DEFECTO PARA QUE NO SALGA EL CUADRO VACÍO
-        if (!finalMessage || finalMessage.trim() === "") {
-            finalMessage = "Auditoría finalizada con éxito. Revise los detalles técnicos en su panel.";
-        }
-        
         const typingMsg = document.getElementById(typingId);
         if(typingMsg) typingMsg.remove();
         
         const estadoEmoji = estado === 'preaprobada' ? '✅' : (estado === 'pendiente' ? '⏳' : '❌');
 
         chat.insertAdjacentHTML('beforeend', `
-    <div class="msg ai" style="display: flex; align-items: flex-start; gap: 12px; width: 100%;">
-        <div class="av">${estadoEmoji}</div>
-        <div class="body" style="flex: 1; width: 100%; display: flex; flex-direction: column; align-items: center;">
-            <div class="ai-response-box">
-                <div style="margin-bottom: 15px; font-weight: bold; color: var(--primary); letter-spacing: 1px; text-transform: uppercase; font-size: 13px; width: 100%;">
-                    — Resultado de Auditoría —
-                </div>
-                <div style="white-space: pre-wrap; color: #ffffff; width: 100%;">
-                    ${finalMessage}
-                </div>
-            </div>
-        </div>
-    </div>
-`);
-        runScoreAnimation(estado, puntuacion);
-        
-    } catch (error) {
-        console.error('Error en la auditoría:', error);
-        
-        const typingMsg = document.getElementById(typingId);
-        if(typingMsg) typingMsg.remove();
-        
-        // Modo demostración - mostrar animación aleatoria
-        const estados = ['preaprobada', 'pendiente', 'rechazada'];
-        const randomEstado = estados[Math.floor(Math.random() * estados.length)];
-        const randomScore = randomEstado === 'preaprobada' ? Math.floor(Math.random() * (98 - 85 + 1) + 85) : 
-                           (randomEstado === 'pendiente' ? Math.floor(Math.random() * (60 - 40 + 1) + 40) :
-                           Math.floor(Math.random() * (39 - 20 + 1) + 20));
-        
-        chat.insertAdjacentHTML('beforeend', `
             <div class="msg ai">
-                <div class="av">🎲</div>
+                <div class="av">${estadoEmoji}</div>
                 <div class="body">
-                    <div class="ai-response-box" style="border-left-color: #f59e0b;">
-                        <b>🔬 Modo Demo</b><br>
-                        Simulando auditoría para: ${nombre}<br>
-                        <b>Resultado simulado:</b> ${randomEstado === 'preaprobada' ? 'PRE-APROBADA' : (randomEstado === 'pendiente' ? 'DOCUMENTACIÓN PENDIENTE' : 'RECHAZADA')}<br>
-                        <b>Puntuación:</b> ${randomScore}%
+                    <div class="ai-response-box">
+                        <div style="margin-bottom: 10px; font-weight: bold; color: var(--primary);">RESULTADO OFICIAL</div>
+                        <div style="text-align: left;">${finalMessage}</div>
                     </div>
                 </div>
             </div>
         `);
         
-        runScoreAnimation(randomEstado, randomScore);
+        // Ejecutamos la animación del círculo con los datos reales
+        runScoreAnimation(estado, puntuacion);
+        
+    } catch (error) {
+        console.error('Error de red:', error);
+        const typingMsg = document.getElementById(typingId);
+        if(typingMsg) typingMsg.remove();
+        alert("Hubo un error al conectar con el servidor de auditoría.");
     }
     
     btn.disabled = false;
