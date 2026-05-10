@@ -264,7 +264,7 @@
 const WEBHOOK_URL = 'https://hook.us2.make.com/fuqy5gm1i8cznyp8fa1qpm14sjp3cvr9';
 let currentStep = 1;
 
-// Función de LOGIN
+// Función de LOGIN - corregida
 function iniciarSesion() {
     const user = document.getElementById('loginUser').value.trim();
     const pass = document.getElementById('loginPass').value.trim();
@@ -274,18 +274,18 @@ function iniciarSesion() {
         return;
     }
     
+    // Ocultar el login
     document.getElementById('login-overlay').style.display = 'none';
+    
+    // Mostrar mensaje de bienvenida
     const chat = document.getElementById('chat');
-    chat.innerHTML = `<div class="msg ai"><div class="av">🎉</div><div class="body">Bienvenido/a <b>${user}</b>! Complete los datos para comenzar.</div></div>`;
+    chat.innerHTML = `<div class="msg ai">
+        <div class="av">🎉</div>
+        <div class="body">Bienvenido/a <b>${user}</b>! Complete los datos para comenzar.</div>
+    </div>`;
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('loginBtn').onclick = iniciarSesion;
-    document.getElementById('btnNext').onclick = () => moveStep(1);
-    document.getElementById('btnPrev').onclick = () => moveStep(-1);
-    document.getElementById('goBtn').onclick = sendToMake;
-});
-
+// Función para mover entre pasos
 function moveStep(step) {
     if (step === 1 && !validateStep()) return;
 
@@ -350,7 +350,7 @@ function runScoreAnimation(status, customScore = null) {
     const statusLabel = document.getElementById('statusLabel');
     const resStatus = document.getElementById('res-status');
     
-    let targetScore = customScore || 50;
+    let targetScore = customScore || 0;
     
     if(status === 'preaprobada') {
         circle.style.stroke = '#10b981';
@@ -375,7 +375,8 @@ function runScoreAnimation(status, customScore = null) {
         }
         currentScore++;
         scoreVal.textContent = currentScore + "%";
-        circle.style.strokeDashoffset = 283 - (283 * currentScore) / 100;
+        const dashOffset = 283 - (283 * currentScore) / 100;
+        circle.style.strokeDashoffset = dashOffset;
     }, 15);
 }
 
@@ -385,6 +386,16 @@ const toBase64 = file => new Promise((resolve, reject) => {
     reader.onload = () => resolve(reader.result);
     reader.onerror = error => reject(error);
 });
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+    });
+}
 
 async function sendToMake() {
     const nombre = document.getElementById('nombre').value.trim();
@@ -421,37 +432,19 @@ async function sendToMake() {
             })
         });
 
-        try {
-        const response = await fetch(WEBHOOK_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                nombre, email, 
-                aseguradora: "Salud Segura S.A.",
-                poliza_texto: polizaText,
-                poliza_archivo: polizaB64,
-                informe_texto: informeText,
-                informe_archivo: informeB64,
-                fecha: new Date().toISOString()
-            })
-        });
-
         const rawText = await response.text();
-        console.log("Respuesta recibida:", rawText); // Esto te permitirá ver qué llega en la consola (F12)
+        console.log("Respuesta recibida:", rawText);
 
-        // LIMPIEZA PROFUNDA DE CARACTERES ESPECIALES
         let cleanText = rawText
-            .replace(/```json/g, '') // Quita tags de bloque de código
-            .replace(/```/g, '')     // Quita cierres de bloque
-            .replace(/[\u0000-\u001F\u007F-\u009F]/g, "") // ELIMINA CARACTERES DE CONTROL (Corrige el error de posición 32)
+            .replace(/```json/g, '')
+            .replace(/```/g, '')
+            .replace(/[\u0000-\u001F\u007F-\u009F]/g, "")
             .trim();
         
         let data = {};
         try {
             data = JSON.parse(cleanText);
         } catch (e) {
-            console.error("Error al parsear, intentando rescate de JSON...");
-            // Si el JSON viene rodeado de texto, intentamos extraer solo el objeto {}
             const match = cleanText.match(/\{[\s\S]*\}/);
             if (match) {
                 data = JSON.parse(match[0]);
@@ -461,7 +454,6 @@ async function sendToMake() {
         }
 
         let estado = 'pendiente';
-        // Normalizamos la decisión para que no falle por mayúsculas/minúsculas
         const decisionIA = data.decision ? data.decision.toUpperCase() : '';
         
         if (decisionIA === 'APROBADO' || decisionIA === 'APROBADA') estado = 'preaprobada';
@@ -469,25 +461,27 @@ async function sendToMake() {
 
         document.getElementById(typingId).remove();
         
+        const mensajeFinal = data.mensaje_correo || data.razon || "Análisis completado sin detalles.";
+        
         chat.insertAdjacentHTML('beforeend', `
             <div class="msg ai">
                 <div class="av">🤖</div>
                 <div class="body">
-                    <div class="ai-response-box">
-                        <div style="font-weight:bold; color:#10b981; margin-bottom:10px;">DICTAMEN IA</div>
-                        ${data.mensaje_correo || data.razon || "Análisis completado sin detalles."}
+                    <div style="background:var(--panel); border-radius:12px; padding:16px; border-left:4px solid #10b981;">
+                        <div style="font-weight:bold; color:#10b981; margin-bottom:10px;">📋 DICTAMEN IA</div>
+                        <div style="white-space:pre-wrap; line-height:1.5;">${escapeHtml(mensajeFinal)}</div>
                     </div>
                 </div>
             </div>`);
         
-        // Ejecutamos la animación con el score que viene de la IA
         runScoreAnimation(estado, data.score || 0);
+        document.getElementById('res-status').textContent = estado === 'preaprobada' ? 'Pre-Aprobado' : (estado === 'rechazada' ? 'Rechazado' : 'Pendiente');
 
     } catch (error) {
         console.error("Error detallado:", error);
         const typingElement = document.getElementById(typingId);
         if (typingElement) {
-            typingElement.innerHTML = `<div class="av">⚠️</div><div class="body">Error en el formato de auditoría. Revise la consola (F12).</div>`;
+            typingElement.innerHTML = `<div class="av">⚠️</div><div class="body">Error en la auditoría: ${error.message}</div>`;
         }
         runScoreAnimation('rechazada', 0);
     }
@@ -496,6 +490,20 @@ async function sendToMake() {
     btn.textContent = '✨ Procesar Auditoría';
     chat.scrollTop = chat.scrollHeight;
 }
+
+// ASIGNAR EVENTOS cuando el DOM está listo
+document.addEventListener('DOMContentLoaded', function() {
+    // Botón de login
+    const loginBtn = document.getElementById('loginBtn');
+    if (loginBtn) {
+        loginBtn.onclick = iniciarSesion;
+    }
+    
+    // Botones de navegación
+    document.getElementById('btnNext').onclick = () => moveStep(1);
+    document.getElementById('btnPrev').onclick = () => moveStep(-1);
+    document.getElementById('goBtn').onclick = sendToMake;
+});
 </script>
 </body>
 </html>
