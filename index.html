@@ -437,47 +437,51 @@ async function sendToMake() {
 
         let data;
         try {
-            // 1. Buscamos dónde empieza el primer '{' y dónde termina el último '}'
             const start = rawText.indexOf('{');
             const end = rawText.lastIndexOf('}');
+            if (start === -1) throw new Error("No se encontró JSON");
             
-            if (start === -1) throw new Error("No se encontró un objeto JSON en la respuesta.");
-
-            // 2. Extraemos solo esa parte
             let jsonString = rawText.substring(start, end + 1);
-
-            // 3. LIMPIEZA CRÍTICA: La IA a veces mete saltos de línea reales dentro de los strings
-            // Este regex busca saltos de línea que NO estén precedidos por comas o llaves (basura de formato)
+            // Limpieza mejorada para evitar errores de parseo por saltos de línea de la IA
             jsonString = jsonString.replace(/\n/g, "\\n").replace(/\r/g, "\\r");
-            
-            // Reparación de posibles escapes dobles
-            jsonString = jsonString.replace(/\\n/g, "\n").replace(/\\r/g, "\r");
-
-            data = JSON.parse(rawText.substring(start, end + 1));
+            data = JSON.parse(jsonString);
         } catch (e) {
             console.error("Error de parseo:", e);
-            throw new Error("La IA respondió con un formato incompatible. Intente de nuevo.");
+            throw new Error("Formato de respuesta inválido.");
         }
-        // --- PROCESAMIENTO DE DATOS ---
-        const decisionIA = String(data.decision || '').toUpperCase();
-        let estado = (decisionIA.includes('APROBADO') || decisionIA.includes('APROBADA')) ? 'preaprobada' : 'rechazada';
+
+        // --- PROCESAMIENTO DE DATOS DINÁMICOS ---
+        // Buscamos la decisión en los campos comunes que envía Make
+        const decisionIA = String(data.decision || data.estado || '').toUpperCase();
         
-        // Mapeo de campos según el PDF oficial
-        const mensajeFinal = data.justificacion || data.mensaje_correo || data.razon || "Análisis técnico finalizado.";
+        let estado;
+        if (decisionIA.includes('APROBADO') || decisionIA.includes('APROBADA')) {
+            estado = 'preaprobada';
+        } else if (decisionIA.includes('RECHAZADO') || decisionIA.includes('RECHAZADA')) {
+            estado = 'rechazada';
+        } else {
+            estado = 'pendiente';
+        }
+
+        // Extraemos la información directamente de la respuesta de Make
+        const mensajeFinal = data.justificacion || data.mensaje || data.razon || data.analisis || "Análisis completado.";
         const proximoPaso = data.proximo_paso ? `<br><br><b>📌 Próximo paso:</b> ${data.proximo_paso}` : "";
-        const scoreFinal = parseInt(data.score) || (estado === 'preaprobada' ? 100 : 0);
+        const scoreFinal = parseInt(data.score) || (estado === 'preaprobada' ? 100 : (estado === 'rechazada' ? 15 : 50));
+
+        // Actualizar UI de la tarjeta de control
+        document.getElementById('res-status').textContent = estado.charAt(0).toUpperCase() + estado.slice(1);
 
         // Eliminar mensaje de carga
         const typingEl = document.getElementById(typingId);
         if(typingEl) typingEl.remove();
         
-        // Mostrar el dictamen profesional
+        // Mostrar el dictamen con la información real de Make
         chat.insertAdjacentHTML('beforeend', `
             <div class="msg ai">
                 <div class="av">🤖</div>
                 <div class="body">
-                    <div style="background:var(--panel); border-radius:12px; padding:18px; border-left:4px solid ${estado === 'preaprobada' ? '#10b981' : '#ef4444'}; box-shadow: var(--shadow);">
-                        <div style="font-weight:bold; color:${estado === 'preaprobada' ? '#10b981' : '#ef4444'}; margin-bottom:10px; font-size: 13px; letter-spacing: 1px;">
+                    <div style="background:var(--panel); border-radius:12px; padding:18px; border-left:4px solid ${estado === 'preaprobada' ? '#10b981' : (estado === 'rechazada' ? '#ef4444' : '#f59e0b')}; box-shadow: var(--shadow);">
+                        <div style="font-weight:bold; color:${estado === 'preaprobada' ? '#10b981' : (estado === 'rechazada' ? '#ef4444' : '#f59e0b')}; margin-bottom:10px; font-size: 13px; letter-spacing: 1px;">
                             📋 DICTAMEN DE AUDITORÍA IA
                         </div>
                         <div style="white-space:pre-wrap; line-height:1.6; text-align:left; font-size: 14px;">
@@ -485,20 +489,20 @@ async function sendToMake() {
                             ${proximoPaso}
                         </div>
                         <div style="margin-top:15px; padding-top:10px; border-top:1px solid var(--border); font-size:11px; color:var(--muted);">
-                            <b>Código detectado:</b> ${data.codigo_ciel0 || 'N/A'} | <b>Plan:</b> ${data.plan_paciente || 'N/A'}
+                            <b>Código:</b> ${data.codigo_cie10 || data.codigo || 'N/A'} | <b>Plan:</b> ${data.plan_paciente || 'Detectado'}
                         </div>
                     </div>
                 </div>
             </div>`);
         
-        // Ejecutar animación del círculo
+        // Ejecutar animación con el color y score correcto
         runScoreAnimation(estado, scoreFinal);
 
     } catch (error) {
         console.error("Error:", error);
         const typingElement = document.getElementById(typingId);
         if (typingElement) typingElement.remove();
-        chat.insertAdjacentHTML('beforeend', `<div class="msg ai"><div class="av">⚠️</div><div class="body">Error: ${error.message}</div></div>`);
+        chat.insertAdjacentHTML('beforeend', `<div class="msg ai"><div class="av">⚠️</div><div class="body">Error en comunicación: ${error.message}</div></div>`);
         runScoreAnimation('rechazada', 0);
     }
     
