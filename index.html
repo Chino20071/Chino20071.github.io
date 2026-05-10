@@ -398,45 +398,98 @@ function escapeHtml(str) {
 }
 
 async function sendToMake() {
-    // ... (Mantén la parte inicial de las variables y el botón igual) ...
+    const nombre = document.getElementById('nombre').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const polizaText = document.getElementById('poliza_text').value.trim();
+    const informeText = document.getElementById('informe_text').value.trim();
     const btn = document.getElementById('goBtn');
     const chat = document.getElementById('chat');
+
     btn.disabled = true;
     btn.textContent = '⏳ Analizando...';
+
+    // Mostramos mensaje de carga
+    const typingId = 'typing-' + Date.now();
+    chat.insertAdjacentHTML('beforeend', `<div class="msg ai" id="${typingId}"><div class="av">✨</div><div class="body"><div class="typing"><span></span><span></span><span></span></div>Analizando documentos médicos...</div></div>`);
+    chat.scrollTop = chat.scrollHeight;
 
     try {
         const response = await fetch(WEBHOOK_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ /* ... tus datos ... */ })
+            body: JSON.stringify({
+                nombre: nombre,
+                email: email,
+                informe_texto: informeText, // Asegúrate que en Make diga "informe_texto"
+                poliza_texto: polizaText,
+                fecha: new Date().toISOString()
+            })
         });
 
         const rawText = await response.text();
-        let data = JSON.parse(rawText.replace(/\n/g, "\\n"));
+        console.log("Respuesta de Make:", rawText);
 
-        // VERIFICACIÓN DE CUOTA EXCEDIDA EN MAKE
-        if (!data.decision || data.decision === "") {
-            throw new Error("QUOTA_EXCEEDED");
+        let data = {};
+        try {
+            // Limpieza extrema por si Make envía texto antes o después del JSON
+            const start = rawText.indexOf('{');
+            const end = rawText.lastIndexOf('}');
+            if (start !== -1 && end !== -1) {
+                data = JSON.parse(rawText.substring(start, end + 1).replace(/\n/g, "\\n"));
+            }
+        } catch (e) { console.error("Error parseando respuesta"); }
+
+        // --- LÓGICA DEL CÍRCULO Y COLORES ---
+        let decision = String(data.decision || '').toUpperCase();
+        let score = parseInt(data.score) || 0;
+        let estado = 'pendiente';
+
+        // Si la IA aprobó o el texto sugiere aprobación
+        if (decision.includes('APROB') || rawText.toUpperCase().includes('APROB')) {
+            estado = 'preaprobada';
+            score = (score === 0) ? 95 : score; // Si no hay score, forzamos 95 para el círculo verde
+        } 
+        else if (decision.includes('RECHAZ') || rawText.toUpperCase().includes('RECHAZ')) {
+            estado = 'rechazada';
+            score = (score === 0) ? 15 : score; // Si no hay score, forzamos 15 para el círculo rojo
         }
 
-        // Si hay datos, animamos normal
-        runScoreAnimation(data.decision.includes('APROB') ? 'preaprobada' : 'rechazada', data.score);
-        // ... (resto de tu lógica de mostrado de mensajes) ...
+        // Actualizamos UI
+        const typingEl = document.getElementById(typingId);
+        if(typingEl) typingEl.remove();
+        
+        document.getElementById('res-status').textContent = estado.toUpperCase();
+        document.getElementById('res-paciente').textContent = nombre;
+
+        const mensajeFinal = data.razon || data.mensaje_correo || "Análisis completado. Revise su correo para más detalles.";
+
+        chat.insertAdjacentHTML('beforeend', `
+            <div class="msg ai">
+                <div class="av">🤖</div>
+                <div class="body">
+                    <div style="background:var(--panel); border-radius:12px; padding:18px; border-left:4px solid ${estado === 'preaprobada' ? '#10b981' : (estado === 'rechazada' ? '#ef4444' : '#f59e0b')}; shadow: var(--shadow);">
+                        <div style="font-weight:bold; color:${estado === 'preaprobada' ? '#10b981' : (estado === 'rechazada' ? '#ef4444' : '#f59e0b')}; margin-bottom:10px; font-size: 11px;">
+                            📋 DICTAMEN DE AUDITORÍA
+                        </div>
+                        <div style="white-space:pre-wrap; line-height:1.6; text-align:left; font-size: 14px;">
+                            ${mensajeFinal}
+                        </div>
+                    </div>
+                </div>
+            </div>`);
+
+        // INICIAR ANIMACIÓN DEL CÍRCULO
+        runScoreAnimation(estado, score);
 
     } catch (error) {
-        const typingEl = document.querySelector('.typing')?.parentElement?.parentElement;
-        if(typingEl) typingEl.remove();
-
-        let errorMsg = "Ocurrió un error inesperado.";
-        if (error.message === "QUOTA_EXCEEDED") {
-            errorMsg = "⚠️ **Límite de la IA alcanzado:** El motor de análisis ha superado sus solicitudes gratuitas por este minuto. Por favor, espera 60 segundos y vuelve a intentarlo.";
-        }
-
-        chat.insertAdjacentHTML('beforeend', `<div class="msg ai"><div class="av">⚠️</div><div class="body">${errorMsg}</div></div>`);
-        runScoreAnimation('pendiente', 0); // El círculo se queda en gris/0
+        console.error(error);
+        if(document.getElementById(typingId)) document.getElementById(typingId).remove();
+        chat.insertAdjacentHTML('beforeend', `<div class="msg ai"><div class="av">⚠️</div><div class="body">Error de comunicación. Intente de nuevo.</div></div>`);
     }
+
     btn.disabled = false;
     btn.textContent = '✨ Procesar Auditoría';
+    chat.scrollTop = chat.scrollHeight;
 }
 // ASIGNAR EVENTOS cuando el DOM está listo
 document.addEventListener('DOMContentLoaded', function() {
