@@ -110,18 +110,15 @@
   .typing span { width: 6px; height: 6px; border-radius: 50%; background: var(--primary); animation: bounce 1.2s infinite; }
   @keyframes bounce { 0%, 80%, 100% { opacity: 0.3; } 40% { opacity: 1; transform: translateY(-4px); } }
 
-  .ai-response-box {
-    margin-top: 10px;
-    padding: 20px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
-    border-left: 4px solid var(--primary);
-    font-size: 13px;
-    line-height: 1.6;
-    color: #e2e8f0;
-    white-space: pre-wrap;
-    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
-    box-sizing: border-box;
+  /* Busca .ai-response-box en tu CSS y añade esto */
+.ai-response-box {
+    white-space: pre-wrap; /* Esto permite que los saltos de línea y emojis se vean bien */
+    line-height: 1.5;
+    font-size: 0.95rem;
+    text-align: left;
+    border-left: 4px solid #10b981; /* Una barrita verde lateral de estilo profesional */
+    padding-left: 15px;
+}
     
     /* FUERZA EL CENTRADO INTERNO */
     width: 100%;
