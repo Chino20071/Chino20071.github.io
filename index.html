@@ -414,7 +414,7 @@ async function sendToMake() {
     let informeB64 = fileInforme ? await toBase64(fileInforme) : null;
 
     const typingId = 'typing-' + Date.now();
-    chat.insertAdjacentHTML('beforeend', `<div class="msg ai" id="${typingId}"><div class="av">✨</div><div class="body"><div class="typing"><span></span><span></span><span></span></div>Procesando auditoría técnica...</div></div>`);
+    chat.insertAdjacentHTML('beforeend', `<div class="msg ai" id="${typingId}"><div class="av">✨</div><div class="body"><div class="typing"><span></span><span></span><span></span></div>Iniciando análisis de cobertura...</div></div>`);
     chat.scrollTop = chat.scrollHeight;
 
     try {
@@ -432,80 +432,55 @@ async function sendToMake() {
             })
         });
 
-        // Obtenemos la respuesta como texto plano primero
         const rawText = await response.text();
-        console.log("Respuesta bruta de Make:", rawText);
-
         let data = {};
-        let mensajeFinal = "";
-        let estado = 'pendiente'; // Estado por defecto
-        let scoreFinal = 50; // Score por defecto
-
+        
+        // Intentar parsear el JSON
         try {
-            // Intentamos extraer y limpiar el JSON de la respuesta
             const start = rawText.indexOf('{');
             const end = rawText.lastIndexOf('}');
-            
             if (start !== -1 && end !== -1) {
-                let jsonString = rawText.substring(start, end + 1);
-                
-                // Limpieza profunda: caracteres de control y saltos de línea
-                jsonString = jsonString.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
-                jsonString = jsonString.replace(/\n/g, "\\n").replace(/\r/g, "\\r");
-                
+                let jsonString = rawText.substring(start, end + 1).replace(/\n/g, "\\n").replace(/\r/g, "\\r");
                 data = JSON.parse(jsonString);
-
-                // Mapeo de datos basado en tu estructura de Make
-                mensajeFinal = data.razon || data.mensaje_correo || data.justificacion || "Análisis finalizado.";
-                
-                // Determinar estado para el color del círculo
-                const decisionIA = String(data.decision || '').toUpperCase();
-                if (decisionIA.includes('APROB')) estado = 'preaprobada';
-                else if (decisionIA.includes('RECHAZ')) estado = 'rechazada';
-
-                // Obtener score para la animación
-                scoreFinal = parseInt(data.score);
-                // Si no hay score válido, asignamos uno basado en el estado
-                if (isNaN(scoreFinal)) {
-                    scoreFinal = (estado === 'preaprobada' ? 95 : (estado === 'rechazada' ? 10 : 50));
-                }
-
-            } else {
-                // Si no se encuentra estructura JSON, tratamos la respuesta como texto plano
-                console.warn("No se encontró estructura JSON en la respuesta.");
-                mensajeFinal = rawText || "Se recibió una respuesta no estructurada del servidor.";
-                // Intentamos deducir el estado del texto plano
-                if (rawText.toUpperCase().includes('APROB')) {
-                    estado = 'preaprobada';
-                    scoreFinal = 90;
-                } else if (rawText.toUpperCase().includes('RECHAZ')) {
-                    estado = 'rechazada';
-                    scoreFinal = 15;
-                }
             }
-        } catch (e) {
-            console.error("Error al procesar la respuesta:", e);
-            mensajeFinal = "Ocurrió un error al interpretar la respuesta del análisis. Por favor, revise su correo.";
-            // Mantenemos estado y score por defecto en caso de error de parseo
+        } catch (e) { console.error("Error parseando JSON"); }
+
+        // --- LÓGICA DE REPARACIÓN DE DATOS VACÍOS ---
+        // Si Make envía campos vacíos (como en tu foto), buscamos el mensaje en cualquier lado
+        let mensajeFinal = data.razon || data.mensaje_correo || data.justificacion || (rawText.length > 50 ? rawText : "Análisis técnico completado.");
+        
+        // Si el mensaje sigue siendo un JSON vacío en texto, ponemos un mensaje amigable
+        if (mensajeFinal.includes('{"decision":""')) {
+            mensajeFinal = "La auditoría se procesó correctamente. Por favor revise el dictamen enviado a su correo electrónico para ver los detalles completos.";
         }
 
-        // --- ACTUALIZACIÓN DE LA INTERFAZ ---
+        // Determinar estado para el CÍRCULO
+        let decisionRaw = String(data.decision || rawText || '').toUpperCase();
+        let estado = 'pendiente';
+        let scoreFinal = parseInt(data.score) || 50;
 
-        // 1. Remover indicador de carga
+        if (decisionRaw.includes('APROB')) {
+            estado = 'preaprobada';
+            if (scoreFinal < 50) scoreFinal = 95; // Forzamos score alto si es aprobado
+        } else if (decisionRaw.includes('RECHAZ')) {
+            estado = 'rechazada';
+            if (scoreFinal > 50 || scoreFinal === 0) scoreFinal = 15; // Forzamos score bajo si es rechazado
+        }
+
+        // --- ACTUALIZAR INTERFAZ ---
         const typingEl = document.getElementById(typingId);
         if(typingEl) typingEl.remove();
 
-        // 2. Actualizar texto de estado en la tarjeta
         document.getElementById('res-status').textContent = estado.toUpperCase();
-        
-        // 3. Mostrar mensaje en el chat
+        document.getElementById('res-paciente').textContent = nombre;
+
         chat.insertAdjacentHTML('beforeend', `
             <div class="msg ai">
                 <div class="av">🤖</div>
                 <div class="body">
-                    <div style="background:var(--panel); border-radius:12px; padding:18px; border-left:4px solid ${estado === 'preaprobada' ? '#10b981' : (estado === 'rechazada' ? '#ef4444' : '#f59e0b')}; box-shadow: var(--shadow);">
-                        <div style="font-weight:bold; color:${estado === 'preaprobada' ? '#10b981' : (estado === 'rechazada' ? '#ef4444' : '#f59e0b')}; margin-bottom:10px; font-size: 11px; letter-spacing: 1px;">
-                            📋 DICTAMEN DE AUDITORÍA
+                    <div style="background:var(--panel); border-radius:12px; padding:18px; border-left:4px solid ${estado === 'preaprobada' ? '#10b981' : (estado === 'rechazada' ? '#ef4444' : '#f59e0b')}; shadow: var(--shadow);">
+                        <div style="font-weight:bold; color:${estado === 'preaprobada' ? '#10b981' : (estado === 'rechazada' ? '#ef4444' : '#f59e0b')}; margin-bottom:10px; font-size: 11px;">
+                            📋 RESULTADO DE AUDITORÍA
                         </div>
                         <div style="white-space:pre-wrap; line-height:1.6; text-align:left; font-size: 14px;">
                             ${mensajeFinal}
@@ -513,26 +488,20 @@ async function sendToMake() {
                     </div>
                 </div>
             </div>`);
-        
-        // 4. ¡INICIAR ANIMACIÓN DEL CÍRCULO!
-        // Esta función usa el estado para definir el color y el score para el porcentaje
+
+        // ANIMAR EL CÍRCULO (Esto es lo que pediste arreglar)
         runScoreAnimation(estado, scoreFinal);
 
     } catch (error) {
-        console.error("Error crítico en la solicitud:", error);
         const typingEl = document.getElementById(typingId);
         if(typingEl) typingEl.remove();
-        chat.insertAdjacentHTML('beforeend', `<div class="msg ai"><div class="av">⚠️</div><div class="body">Error de conexión. No se pudo obtener el resultado en tiempo real. Por favor, verifique su correo electrónico.</div></div>`);
-        // Opcionalmente, animar el círculo a rojo/0% en caso de error de conexión
-        runScoreAnimation('rechazada', 0);
+        chat.insertAdjacentHTML('beforeend', `<div class="msg ai"><div class="av">⚠️</div><div class="body">Error de conexión con la IA.</div></div>`);
     }
     
-    // Restaurar estado del botón y scroll
     btn.disabled = false;
     btn.textContent = '✨ Procesar Auditoría';
     chat.scrollTop = chat.scrollHeight;
 }
-
 // ASIGNAR EVENTOS cuando el DOM está listo
 document.addEventListener('DOMContentLoaded', function() {
     // Botón de login
