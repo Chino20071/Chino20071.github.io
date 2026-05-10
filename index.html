@@ -435,65 +435,57 @@ async function sendToMake() {
         const rawText = await response.text();
         console.log("Respuesta bruta:", rawText);
 
-        // --- LIMPIEZA ULTRA REFORZADA ---
         let data;
         try {
-            // Intentamos encontrar el primer '{' y el último '}' para ignorar basura fuera del JSON
             const start = rawText.indexOf('{');
             const end = rawText.lastIndexOf('}');
             if (start === -1 || end === -1) throw new Error("Formato no reconocido");
-            
-            const jsonString = rawText.substring(start, end + 1)
-                                     .replace(/[\n\r\t]/g, " "); // Quitamos saltos de línea físicos
+            const jsonString = rawText.substring(start, end + 1).replace(/[\n\r\t]/g, " ");
             data = JSON.parse(jsonString);
         } catch (e) {
-            console.error("Error parseando:", e);
             throw new Error("La IA envió un formato inválido. Revisa el prompt en Make.");
         }
 
-        // --- PROCESAMIENTO DE ESTADO ---
-        let estado = 'rechazada';
-        const decisionIA = String(data.decision).toUpperCase();
+        // --- PROCESAMIENTO DE DATOS ---
+        const decisionIA = String(data.decision || '').toUpperCase();
+        let estado = (decisionIA.includes('APROBADO') || decisionIA.includes('APROBADA')) ? 'preaprobada' : 'rechazada';
         
-        if (decisionIA.includes('APROBADO') || decisionIA.includes('APROBADA')) {
-            estado = 'preaprobada';
-        }
+        // Mapeo de campos según el PDF oficial
+        const mensajeFinal = data.justificacion || data.mensaje_correo || data.razon || "Análisis técnico finalizado.";
+        const proximoPaso = data.proximo_paso ? `<br><br><b>📌 Próximo paso:</b> ${data.proximo_paso}` : "";
+        const scoreFinal = parseInt(data.score) || (estado === 'preaprobada' ? 100 : 0);
 
         // Eliminar mensaje de carga
         const typingEl = document.getElementById(typingId);
         if(typingEl) typingEl.remove();
         
-        // Busca esta línea y cámbiala:
-const mensajeFinal = data.justificacion || data.mensaje_correo || data.razon || "Análisis completado.";
-
-// Y para que se vea aún mejor, puedes agregar el próximo paso:
-const proximoPaso = data.proximo_paso ? `<br><br><b>Próximo paso:</b> ${data.proximo_paso}` : "";
-
-chat.insertAdjacentHTML('beforeend', `
-    <div class="msg ai">
-        <div class="av">🤖</div>
-        <div class="body">
-            <div style="background:var(--panel); border-radius:12px; padding:16px; border-left:4px solid ${estado === 'preaprobada' ? '#10b981' : '#ef4444'};">
-                <div style="font-weight:bold; color:${estado === 'preaprobada' ? '#10b981' : '#ef4444'}; margin-bottom:10px;">
-                    📋 DICTAMEN DE AUDITORÍA
+        // Mostrar el dictamen profesional
+        chat.insertAdjacentHTML('beforeend', `
+            <div class="msg ai">
+                <div class="av">🤖</div>
+                <div class="body">
+                    <div style="background:var(--panel); border-radius:12px; padding:18px; border-left:4px solid ${estado === 'preaprobada' ? '#10b981' : '#ef4444'}; box-shadow: var(--shadow);">
+                        <div style="font-weight:bold; color:${estado === 'preaprobada' ? '#10b981' : '#ef4444'}; margin-bottom:10px; font-size: 13px; letter-spacing: 1px;">
+                            📋 DICTAMEN DE AUDITORÍA IA
+                        </div>
+                        <div style="white-space:pre-wrap; line-height:1.6; text-align:left; font-size: 14px;">
+                            ${mensajeFinal}
+                            ${proximoPaso}
+                        </div>
+                        <div style="margin-top:15px; padding-top:10px; border-top:1px solid var(--border); font-size:11px; color:var(--muted);">
+                            <b>Código detectado:</b> ${data.codigo_ciel0 || 'N/A'} | <b>Plan:</b> ${data.plan_paciente || 'N/A'}
+                        </div>
+                    </div>
                 </div>
-                <div style="white-space:pre-wrap; line-height:1.5; text-align:left;">
-                    ${mensajeFinal}
-                    ${proximoPaso}
-                </div>
-            </div>
-        </div>
-    </div>`);
+            </div>`);
         
-        // Animación de Score
-        const finalScore = parseInt(data.score) || (estado === 'preaprobada' ? 100 : 0);
-        runScoreAnimation(estado, finalScore);
+        // Ejecutar animación del círculo
+        runScoreAnimation(estado, scoreFinal);
 
     } catch (error) {
         console.error("Error:", error);
         const typingElement = document.getElementById(typingId);
         if (typingElement) typingElement.remove();
-        
         chat.insertAdjacentHTML('beforeend', `<div class="msg ai"><div class="av">⚠️</div><div class="body">Error: ${error.message}</div></div>`);
         runScoreAnimation('rechazada', 0);
     }
