@@ -424,13 +424,51 @@ async function sendToMake() {
             })
         });
 
+        try {
+        const response = await fetch(WEBHOOK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                nombre, email, 
+                aseguradora: "Salud Segura S.A.",
+                poliza_texto: polizaText,
+                poliza_archivo: polizaB64,
+                informe_texto: informeText,
+                informe_archivo: informeB64,
+                fecha: new Date().toISOString()
+            })
+        });
+
         const rawText = await response.text();
-        let cleanText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+        console.log("Respuesta recibida:", rawText); // Esto te permitirá ver qué llega en la consola (F12)
+
+        // LIMPIEZA PROFUNDA DE CARACTERES ESPECIALES
+        let cleanText = rawText
+            .replace(/```json/g, '') // Quita tags de bloque de código
+            .replace(/```/g, '')     // Quita cierres de bloque
+            .replace(/[\u0000-\u001F\u007F-\u009F]/g, "") // ELIMINA CARACTERES DE CONTROL (Corrige el error de posición 32)
+            .trim();
         
-        let data = JSON.parse(cleanText);
+        let data = {};
+        try {
+            data = JSON.parse(cleanText);
+        } catch (e) {
+            console.error("Error al parsear, intentando rescate de JSON...");
+            // Si el JSON viene rodeado de texto, intentamos extraer solo el objeto {}
+            const match = cleanText.match(/\{[\s\S]*\}/);
+            if (match) {
+                data = JSON.parse(match[0]);
+            } else {
+                throw new Error("No se encontró un JSON válido en la respuesta.");
+            }
+        }
+
         let estado = 'pendiente';
-        if (data.decision?.toUpperCase() === 'APROBADO') estado = 'preaprobada';
-        else if (data.decision?.toUpperCase() === 'RECHAZADO') estado = 'rechazada';
+        // Normalizamos la decisión para que no falle por mayúsculas/minúsculas
+        const decisionIA = data.decision ? data.decision.toUpperCase() : '';
+        
+        if (decisionIA === 'APROBADO' || decisionIA === 'APROBADA') estado = 'preaprobada';
+        else if (decisionIA === 'RECHAZADO' || decisionIA === 'RECHAZADA') estado = 'rechazada';
 
         document.getElementById(typingId).remove();
         
@@ -440,16 +478,20 @@ async function sendToMake() {
                 <div class="body">
                     <div class="ai-response-box">
                         <div style="font-weight:bold; color:#10b981; margin-bottom:10px;">DICTAMEN IA</div>
-                        ${data.mensaje_correo || data.razon}
+                        ${data.mensaje_correo || data.razon || "Análisis completado sin detalles."}
                     </div>
                 </div>
             </div>`);
         
+        // Ejecutamos la animación con el score que viene de la IA
         runScoreAnimation(estado, data.score || 0);
 
     } catch (error) {
-        console.error(error);
-        document.getElementById(typingId).innerHTML = "⚠️ Error en la conexión. Verifique el flujo en Make.";
+        console.error("Error detallado:", error);
+        const typingElement = document.getElementById(typingId);
+        if (typingElement) {
+            typingElement.innerHTML = `<div class="av">⚠️</div><div class="body">Error en el formato de auditoría. Revise la consola (F12).</div>`;
+        }
         runScoreAnimation('rechazada', 0);
     }
     
