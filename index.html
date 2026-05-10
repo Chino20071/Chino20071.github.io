@@ -267,75 +267,26 @@
 const WEBHOOK_URL = 'https://hook.us2.make.com/fuqy5gm1i8cznyp8fa1qpm14sjp3cvr9';
 let currentStep = 1;
 
-// Función de LOGIN - CORREGIDA
+// Función de LOGIN
 function iniciarSesion() {
     const user = document.getElementById('loginUser').value.trim();
     const pass = document.getElementById('loginPass').value.trim();
     
-    if(user === "") {
-        alert("⚠️ Por favor ingrese su usuario");
-        document.getElementById('loginUser').focus();
+    if(user === "" || pass === "") {
+        alert("⚠️ Por favor ingrese usuario y contraseña");
         return;
     }
     
-    if(pass === "") {
-        alert("⚠️ Por favor ingrese su contraseña");
-        document.getElementById('loginPass').focus();
-        return;
-    }
-    
-    // CUALQUIER usuario y contraseña funciona - sin restricciones
     document.getElementById('login-overlay').style.display = 'none';
-    
     const chat = document.getElementById('chat');
-    if(chat) {
-        chat.innerHTML = `
-            <div class="msg ai">
-                <div class="av">🎉</div>
-                <div class="body">
-                    Bienvenido/a <b>${user}</b>!<br>
-                    Complete el formulario en 3 pasos y presione "Procesar Auditoría".
-                </div>
-            </div>
-        `;
-    }
+    chat.innerHTML = `<div class="msg ai"><div class="av">🎉</div><div class="body">Bienvenido/a <b>${user}</b>! Complete los datos para comenzar.</div></div>`;
 }
 
-// Configurar eventos cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', function() {
-    // Botón de login
-    const loginBtn = document.getElementById('loginBtn');
-    if(loginBtn) {
-        loginBtn.addEventListener('click', iniciarSesion);
-    }
-    
-    // Enter en campos de login
-    const passInput = document.getElementById('loginPass');
-    if(passInput) {
-        passInput.addEventListener('keypress', function(e) {
-            if(e.key === 'Enter') {
-                iniciarSesion();
-            }
-        });
-    }
-    
-    const userInput = document.getElementById('loginUser');
-    if(userInput) {
-        userInput.addEventListener('keypress', function(e) {
-            if(e.key === 'Enter') {
-                iniciarSesion();
-            }
-        });
-    }
-    
-    // Botones de navegación
-    const btnNext = document.getElementById('btnNext');
-    const btnPrev = document.getElementById('btnPrev');
-    const goBtn = document.getElementById('goBtn');
-    
-    if(btnNext) btnNext.onclick = () => moveStep(1);
-    if(btnPrev) btnPrev.onclick = () => moveStep(-1);
-    if(goBtn) goBtn.onclick = () => sendToMake();
+    document.getElementById('loginBtn').onclick = iniciarSesion;
+    document.getElementById('btnNext').onclick = () => moveStep(1);
+    document.getElementById('btnPrev').onclick = () => moveStep(-1);
+    document.getElementById('goBtn').onclick = sendToMake;
 });
 
 function moveStep(step) {
@@ -361,7 +312,7 @@ function moveStep(step) {
         btnNext.style.display = 'none';
         goBtn.style.display = 'block';
         document.getElementById('res-paciente').textContent = document.getElementById('nombre').value || '---';
-        document.getElementById('res-seguro').textContent = document.getElementById('aseguradora').value || '---';
+        document.getElementById('res-seguro').textContent = "Salud Segura S.A.";
     } else {
         btnNext.style.display = 'block';
         goBtn.style.display = 'none';
@@ -369,101 +320,66 @@ function moveStep(step) {
 }
 
 function validateStep() {
-    if (currentStep === 1) {
-        const nombre = document.getElementById('nombre').value;
-        const email = document.getElementById('email').value;
-        if (!nombre || !email) {
-            alert("Por favor, ingresa nombre y email."); 
-            return false;
-        }
+    const nombre = document.getElementById('nombre').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const informeTxt = document.getElementById('informe_text').value.trim();
+    const informeFile = document.getElementById('file_informe').files.length;
+    const polizaTxt = document.getElementById('poliza_text').value.trim();
+    const polizaFile = document.getElementById('file_poliza').files.length;
+
+    if (currentStep === 1 && (!nombre || !email)) {
+        alert("⚠️ Nombre y Email son obligatorios.");
+        return false;
+    }
+    if (currentStep === 2 && (!informeTxt && informeFile === 0)) {
+        alert("⚠️ Ingrese el diagnóstico o adjunte el informe.");
+        return false;
+    }
+    if (currentStep === 3 && (!polizaTxt && polizaFile === 0)) {
+        alert("⚠️ Ingrese su póliza o adjunte el carnet.");
+        return false;
     }
     return true;
 }
 
 function updateFileName(inputId, spanId) {
     const input = document.getElementById(inputId);
-    const span = document.getElementById(spanId);
-    span.textContent = input.files.length > 0 ? input.files[0].name : "";
+    document.getElementById(spanId).textContent = input.files.length > 0 ? input.files[0].name : "";
 }
-function validateStep() {
-    if (currentStep === 1) {
-        const nombre = document.getElementById('nombre').value.trim();
-        const email = document.getElementById('email').value.trim();
-        if (!nombre || !email) {
-            alert("⚠️ Debes completar el nombre y el correo para continuar.");
-            return false;
-        }
-    }
 
-    if (currentStep === 2) {
-        const informeTxt = document.getElementById('informe_text').value.trim();
-        const informeFile = document.getElementById('file_informe').files.length;
-        if (!informeTxt && informeFile === 0) {
-            alert("⚠️ Por favor, escribe el diagnóstico o adjunta el informe médico.");
-            return false;
-        }
-    }
-
-    if (currentStep === 3) {
-        const polizaTxt = document.getElementById('poliza_text').value.trim();
-        const polizaFile = document.getElementById('file_poliza').files.length;
-        if (!polizaTxt && polizaFile === 0) {
-            alert("⚠️ Es obligatorio ingresar el número de póliza o adjuntar el documento.");
-            return false;
-        }
-    }
-    return true; // Si todo está lleno, permite avanzar
-}
 function runScoreAnimation(status, customScore = null) {
-  const circle = document.getElementById('progressCircle');
-  const scoreVal = document.getElementById('scoreValue');
-  const statusLabel = document.getElementById('statusLabel');
-  
-  let currentScore = 0;
-  let targetScore;
-  
-  switch(status) {
-    case 'preaprobada':
-      targetScore = customScore || Math.floor(Math.random() * (98 - 85 + 1) + 85);
-      circle.style.stroke = '#10b981';
-      statusLabel.style.color = '#10b981';
-      statusLabel.textContent = 'PRE-APROBADA';
-      document.getElementById('res-status').textContent = 'Pre-Aprobado';
-      break;
-    case 'pendiente':
-      targetScore = customScore || Math.floor(Math.random() * (60 - 40 + 1) + 40);
-      circle.style.stroke = '#f59e0b';
-      statusLabel.style.color = '#f59e0b';
-      statusLabel.textContent = 'DOCUMENTACIÓN PENDIENTE';
-      document.getElementById('res-status').textContent = 'Pendiente';
-      break;
-    case 'rechazada':
-      targetScore = customScore || Math.floor(Math.random() * (39 - 20 + 1) + 20);
-      circle.style.stroke = '#ef4444';
-      statusLabel.style.color = '#ef4444';
-      statusLabel.textContent = 'RECHAZADA';
-      document.getElementById('res-status').textContent = 'Rechazado';
-      break;
-    default:
-      targetScore = 0;
-  }
-  
-  statusLabel.style.opacity = "0";
-  scoreVal.textContent = "0%";
-  circle.style.strokeDashoffset = 283;
-  
-  const interval = setInterval(() => {
-    if (currentScore >= targetScore) {
-      clearInterval(interval);
-      statusLabel.style.opacity = "1";
-      return;
-    }
+    const circle = document.getElementById('progressCircle');
+    const scoreVal = document.getElementById('scoreValue');
+    const statusLabel = document.getElementById('statusLabel');
+    const resStatus = document.getElementById('res-status');
     
-    scoreVal.textContent = currentScore + "%";
-    const offset = 283 - (283 * currentScore) / 100;
-    circle.style.strokeDashoffset = offset;
-    currentScore++;
-  }, 20);
+    let targetScore = customScore || 50;
+    
+    if(status === 'preaprobada') {
+        circle.style.stroke = '#10b981';
+        statusLabel.textContent = 'PRE-APROBADA';
+        resStatus.textContent = 'Pre-Aprobado';
+    } else if(status === 'rechazada') {
+        circle.style.stroke = '#ef4444';
+        statusLabel.textContent = 'RECHAZADA';
+        resStatus.textContent = 'Rechazado';
+    } else {
+        circle.style.stroke = '#f59e0b';
+        statusLabel.textContent = 'PENDIENTE';
+        resStatus.textContent = 'Pendiente';
+    }
+
+    let currentScore = 0;
+    const interval = setInterval(() => {
+        if (currentScore >= targetScore) {
+            clearInterval(interval);
+            statusLabel.style.opacity = "1";
+            return;
+        }
+        currentScore++;
+        scoreVal.textContent = currentScore + "%";
+        circle.style.strokeDashoffset = 283 - (283 * currentScore) / 100;
+    }, 15);
 }
 
 const toBase64 = file => new Promise((resolve, reject) => {
@@ -484,23 +400,13 @@ async function sendToMake() {
     const chat = document.getElementById('chat');
 
     btn.disabled = true;
-    btn.textContent = '⏳ Procesando...';
+    btn.textContent = '⏳ Analizando...';
 
     let polizaB64 = filePoliza ? await toBase64(filePoliza) : null;
     let informeB64 = fileInforme ? await toBase64(fileInforme) : null;
 
-    chat.innerHTML = `<div class="msg user"><div class="bubble">Solicitando auditoría para <b>${nombre}</b> en <b>${aseguradora}</b>...</div></div>`;
-    
     const typingId = 'typing-' + Date.now();
-    chat.insertAdjacentHTML('beforeend', `
-        <div class="msg ai" id="${typingId}">
-            <div class="av">✨</div>
-            <div class="body">
-                <div class="typing"><span></span><span></span><span></span></div>
-                Analizando historial y póliza con IA...
-            </div>
-        </div>
-    `);
+    chat.insertAdjacentHTML('beforeend', `<div class="msg ai" id="${typingId}"><div class="av">✨</div><div class="body"><div class="typing"><span></span><span></span><span></span></div>Auditoría en curso para ${nombre}...</div></div>`);
     chat.scrollTop = chat.scrollHeight;
 
     try {
@@ -508,72 +414,47 @@ async function sendToMake() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                nombre, email, aseguradora,
+                nombre, email, 
+                aseguradora: "Salud Segura S.A.",
                 poliza_texto: polizaText,
                 poliza_archivo: polizaB64,
                 informe_texto: informeText,
                 informe_archivo: informeB64,
-                fecha: new Date().toISOString() // Formato estándar para la IA
+                fecha: new Date().toISOString()
             })
         });
 
         const rawText = await response.text();
-        // Limpiamos posibles caracteres raros o bloques de código markdown que Gemini a veces añade
         let cleanText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
         
-        let data = {};
-        let finalMessage = "";
+        let data = JSON.parse(cleanText);
         let estado = 'pendiente';
-        let puntuacion = 0;
+        if (data.decision?.toUpperCase() === 'APROBADO') estado = 'preaprobada';
+        else if (data.decision?.toUpperCase() === 'RECHAZADO') estado = 'rechazada';
+
+        document.getElementById(typingId).remove();
         
-        try {
-            data = JSON.parse(cleanText);
-            // Ajustamos a las llaves que definimos en el Prompt de Gemini
-            finalMessage = data.mensaje_correo || data.razon || "Análisis completado.";
-            puntuacion = data.score || 0;
-            
-            // Mapeo de estados para la animación
-            const dec = data.decision.toUpperCase();
-            if (dec === 'APROBADO') estado = 'preaprobada';
-            else if (dec === 'RECHAZADO') estado = 'rechazada';
-            else estado = 'pendiente';
-
-        } catch (e) {
-            console.error("Error al parsear JSON de la IA:", e);
-            finalMessage = "Error en el formato de respuesta del auditor. Por favor, intente de nuevo.";
-            puntuacion = 10;
-            estado = 'rechazada';
-        }
-
-        const typingMsg = document.getElementById(typingId);
-        if(typingMsg) typingMsg.remove();
-        
-        const estadoEmoji = estado === 'preaprobada' ? '✅' : (estado === 'pendiente' ? '⏳' : '❌');
-
         chat.insertAdjacentHTML('beforeend', `
             <div class="msg ai">
-                <div class="av">${estadoEmoji}</div>
+                <div class="av">🤖</div>
                 <div class="body">
                     <div class="ai-response-box">
-                        <div style="margin-bottom: 10px; font-weight: bold; color: var(--primary);">RESULTADO OFICIAL</div>
-                        <div style="text-align: left;">${finalMessage}</div>
+                        <div style="font-weight:bold; color:#10b981; margin-bottom:10px;">DICTAMEN IA</div>
+                        ${data.mensaje_correo || data.razon}
                     </div>
                 </div>
-            </div>
-        `);
+            </div>`);
         
-        // Ejecutamos la animación del círculo con los datos reales
-        runScoreAnimation(estado, puntuacion);
-        
+        runScoreAnimation(estado, data.score || 0);
+
     } catch (error) {
-        console.error('Error de red:', error);
-        const typingMsg = document.getElementById(typingId);
-        if(typingMsg) typingMsg.remove();
-        alert("Hubo un error al conectar con el servidor de auditoría.");
+        console.error(error);
+        document.getElementById(typingId).innerHTML = "⚠️ Error en la conexión. Verifique el flujo en Make.";
+        runScoreAnimation('rechazada', 0);
     }
     
     btn.disabled = false;
-    btn.textContent = '🚀 Procesar Auditoría';
+    btn.textContent = '✨ Procesar Auditoría';
     chat.scrollTop = chat.scrollHeight;
 }
 </script>
