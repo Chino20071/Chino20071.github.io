@@ -398,109 +398,45 @@ function escapeHtml(str) {
 }
 
 async function sendToMake() {
-    const nombre = document.getElementById('nombre').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const polizaText = document.getElementById('poliza_text').value.trim();
-    const informeText = document.getElementById('informe_text').value.trim();
-    const filePoliza = document.getElementById('file_poliza').files[0];
-    const fileInforme = document.getElementById('file_informe').files[0];
+    // ... (Mantén la parte inicial de las variables y el botón igual) ...
     const btn = document.getElementById('goBtn');
     const chat = document.getElementById('chat');
-
     btn.disabled = true;
     btn.textContent = '⏳ Analizando...';
-
-    let polizaB64 = filePoliza ? await toBase64(filePoliza) : null;
-    let informeB64 = fileInforme ? await toBase64(fileInforme) : null;
-
-    const typingId = 'typing-' + Date.now();
-    chat.insertAdjacentHTML('beforeend', `<div class="msg ai" id="${typingId}"><div class="av">✨</div><div class="body"><div class="typing"><span></span><span></span><span></span></div>Iniciando análisis de cobertura...</div></div>`);
-    chat.scrollTop = chat.scrollHeight;
 
     try {
         const response = await fetch(WEBHOOK_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                nombre, email, 
-                aseguradora: "Salud Segura S.A.",
-                poliza_texto: polizaText,
-                poliza_archivo: polizaB64,
-                informe_texto: informeText,
-                informe_archivo: informeB64,
-                fecha: new Date().toISOString()
-            })
+            body: JSON.stringify({ /* ... tus datos ... */ })
         });
 
         const rawText = await response.text();
-        let data = {};
-        
-        // Intentar parsear el JSON
-        try {
-            const start = rawText.indexOf('{');
-            const end = rawText.lastIndexOf('}');
-            if (start !== -1 && end !== -1) {
-                let jsonString = rawText.substring(start, end + 1).replace(/\n/g, "\\n").replace(/\r/g, "\\r");
-                data = JSON.parse(jsonString);
-            }
-        } catch (e) { console.error("Error parseando JSON"); }
+        let data = JSON.parse(rawText.replace(/\n/g, "\\n"));
 
-        // --- LÓGICA DE REPARACIÓN DE DATOS VACÍOS ---
-        // Si Make envía campos vacíos (como en tu foto), buscamos el mensaje en cualquier lado
-        let mensajeFinal = data.razon || data.mensaje_correo || data.justificacion || (rawText.length > 50 ? rawText : "Análisis técnico completado.");
-        
-        // Si el mensaje sigue siendo un JSON vacío en texto, ponemos un mensaje amigable
-        if (mensajeFinal.includes('{"decision":""')) {
-            mensajeFinal = "La auditoría se procesó correctamente. Por favor revise el dictamen enviado a su correo electrónico para ver los detalles completos.";
+        // VERIFICACIÓN DE CUOTA EXCEDIDA EN MAKE
+        if (!data.decision || data.decision === "") {
+            throw new Error("QUOTA_EXCEEDED");
         }
 
-        // Determinar estado para el CÍRCULO
-        let decisionRaw = String(data.decision || rawText || '').toUpperCase();
-        let estado = 'pendiente';
-        let scoreFinal = parseInt(data.score) || 50;
-
-        if (decisionRaw.includes('APROB')) {
-            estado = 'preaprobada';
-            if (scoreFinal < 50) scoreFinal = 95; // Forzamos score alto si es aprobado
-        } else if (decisionRaw.includes('RECHAZ')) {
-            estado = 'rechazada';
-            if (scoreFinal > 50 || scoreFinal === 0) scoreFinal = 15; // Forzamos score bajo si es rechazado
-        }
-
-        // --- ACTUALIZAR INTERFAZ ---
-        const typingEl = document.getElementById(typingId);
-        if(typingEl) typingEl.remove();
-
-        document.getElementById('res-status').textContent = estado.toUpperCase();
-        document.getElementById('res-paciente').textContent = nombre;
-
-        chat.insertAdjacentHTML('beforeend', `
-            <div class="msg ai">
-                <div class="av">🤖</div>
-                <div class="body">
-                    <div style="background:var(--panel); border-radius:12px; padding:18px; border-left:4px solid ${estado === 'preaprobada' ? '#10b981' : (estado === 'rechazada' ? '#ef4444' : '#f59e0b')}; shadow: var(--shadow);">
-                        <div style="font-weight:bold; color:${estado === 'preaprobada' ? '#10b981' : (estado === 'rechazada' ? '#ef4444' : '#f59e0b')}; margin-bottom:10px; font-size: 11px;">
-                            📋 RESULTADO DE AUDITORÍA
-                        </div>
-                        <div style="white-space:pre-wrap; line-height:1.6; text-align:left; font-size: 14px;">
-                            ${mensajeFinal}
-                        </div>
-                    </div>
-                </div>
-            </div>`);
-
-        // ANIMAR EL CÍRCULO (Esto es lo que pediste arreglar)
-        runScoreAnimation(estado, scoreFinal);
+        // Si hay datos, animamos normal
+        runScoreAnimation(data.decision.includes('APROB') ? 'preaprobada' : 'rechazada', data.score);
+        // ... (resto de tu lógica de mostrado de mensajes) ...
 
     } catch (error) {
-        const typingEl = document.getElementById(typingId);
+        const typingEl = document.querySelector('.typing')?.parentElement?.parentElement;
         if(typingEl) typingEl.remove();
-        chat.insertAdjacentHTML('beforeend', `<div class="msg ai"><div class="av">⚠️</div><div class="body">Error de conexión con la IA.</div></div>`);
+
+        let errorMsg = "Ocurrió un error inesperado.";
+        if (error.message === "QUOTA_EXCEEDED") {
+            errorMsg = "⚠️ **Límite de la IA alcanzado:** El motor de análisis ha superado sus solicitudes gratuitas por este minuto. Por favor, espera 60 segundos y vuelve a intentarlo.";
+        }
+
+        chat.insertAdjacentHTML('beforeend', `<div class="msg ai"><div class="av">⚠️</div><div class="body">${errorMsg}</div></div>`);
+        runScoreAnimation('pendiente', 0); // El círculo se queda en gris/0
     }
-    
     btn.disabled = false;
     btn.textContent = '✨ Procesar Auditoría';
-    chat.scrollTop = chat.scrollHeight;
 }
 // ASIGNAR EVENTOS cuando el DOM está listo
 document.addEventListener('DOMContentLoaded', function() {
