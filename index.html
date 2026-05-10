@@ -437,15 +437,27 @@ async function sendToMake() {
 
         let data;
         try {
+            // 1. Buscamos dónde empieza el primer '{' y dónde termina el último '}'
             const start = rawText.indexOf('{');
             const end = rawText.lastIndexOf('}');
-            if (start === -1 || end === -1) throw new Error("Formato no reconocido");
-            const jsonString = rawText.substring(start, end + 1).replace(/[\n\r\t]/g, " ");
-            data = JSON.parse(jsonString);
-        } catch (e) {
-            throw new Error("La IA envió un formato inválido. Revisa el prompt en Make.");
-        }
+            
+            if (start === -1) throw new Error("No se encontró un objeto JSON en la respuesta.");
 
+            // 2. Extraemos solo esa parte
+            let jsonString = rawText.substring(start, end + 1);
+
+            // 3. LIMPIEZA CRÍTICA: La IA a veces mete saltos de línea reales dentro de los strings
+            // Este regex busca saltos de línea que NO estén precedidos por comas o llaves (basura de formato)
+            jsonString = jsonString.replace(/\n/g, "\\n").replace(/\r/g, "\\r");
+            
+            // Reparación de posibles escapes dobles
+            jsonString = jsonString.replace(/\\n/g, "\n").replace(/\\r/g, "\r");
+
+            data = JSON.parse(rawText.substring(start, end + 1));
+        } catch (e) {
+            console.error("Error de parseo:", e);
+            throw new Error("La IA respondió con un formato incompatible. Intente de nuevo.");
+        }
         // --- PROCESAMIENTO DE DATOS ---
         const decisionIA = String(data.decision || '').toUpperCase();
         let estado = (decisionIA.includes('APROBADO') || decisionIA.includes('APROBADA')) ? 'preaprobada' : 'rechazada';
