@@ -461,14 +461,20 @@ async function sendToMake() {
         document.getElementById('res-status').textContent = estado.toUpperCase();
         document.getElementById('res-paciente').textContent = nombre;
 
-        const mensajeFinal = data.razon || data.mensaje_correo || "Análisis completado. Revise su correo para más detalles.";
+        // 1. Definimos el mensaje que vamos a mostrar (buscando en todas las opciones de Make)
+        const mensajeFinal = data.razon || data.mensaje_correo || data.justificacion || "Análisis técnico finalizado. Los detalles han sido enviados a su correo.";
 
+        // 2. Removemos el icono de carga antes de poner el mensaje
+        const typingEl = document.getElementById(typingId);
+        if(typingEl) typingEl.remove();
+
+        // 3. Inyectamos el mensaje con el diseño de auditoría
         chat.insertAdjacentHTML('beforeend', `
             <div class="msg ai">
                 <div class="av">🤖</div>
                 <div class="body">
-                    <div style="background:var(--panel); border-radius:12px; padding:18px; border-left:4px solid ${estado === 'preaprobada' ? '#10b981' : (estado === 'rechazada' ? '#ef4444' : '#f59e0b')}; shadow: var(--shadow);">
-                        <div style="font-weight:bold; color:${estado === 'preaprobada' ? '#10b981' : (estado === 'rechazada' ? '#ef4444' : '#f59e0b')}; margin-bottom:10px; font-size: 11px;">
+                    <div style="background: rgba(255,255,255,0.05); border-radius:12px; padding:18px; border-left:4px solid ${estado === 'preaprobada' ? '#10b981' : (estado === 'rechazada' ? '#ef4444' : '#f59e0b')}; color: white;">
+                        <div style="font-weight:bold; color:${estado === 'preaprobada' ? '#10b981' : (estado === 'rechazada' ? '#ef4444' : '#f59e0b')}; margin-bottom:10px; font-size: 12px; letter-spacing: 1px;">
                             📋 DICTAMEN DE AUDITORÍA
                         </div>
                         <div style="white-space:pre-wrap; line-height:1.6; text-align:left; font-size: 14px;">
