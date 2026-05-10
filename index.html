@@ -463,21 +463,27 @@ async function sendToMake() {
         const typingEl = document.getElementById(typingId);
         if(typingEl) typingEl.remove();
         
-        const mensajeFinal = data.mensaje_correo || data.razon || "Análisis completado.";
-        
-        // Mostrar Dictamen
-        chat.insertAdjacentHTML('beforeend', `
-            <div class="msg ai">
-                <div class="av">🤖</div>
-                <div class="body">
-                    <div style="background:var(--panel); border-radius:12px; padding:16px; border-left:4px solid ${estado === 'preaprobada' ? '#10b981' : '#ef4444'};">
-                        <div style="font-weight:bold; color:${estado === 'preaprobada' ? '#10b981' : '#ef4444'}; margin-bottom:10px;">
-                            📋 DICTAMEN IA - ${decisionIA}
-                        </div>
-                        <div style="white-space:pre-wrap; line-height:1.5; text-align:left;">${mensajeFinal}</div>
-                    </div>
+        // Busca esta línea y cámbiala:
+const mensajeFinal = data.justificacion || data.mensaje_correo || data.razon || "Análisis completado.";
+
+// Y para que se vea aún mejor, puedes agregar el próximo paso:
+const proximoPaso = data.proximo_paso ? `<br><br><b>Próximo paso:</b> ${data.proximo_paso}` : "";
+
+chat.insertAdjacentHTML('beforeend', `
+    <div class="msg ai">
+        <div class="av">🤖</div>
+        <div class="body">
+            <div style="background:var(--panel); border-radius:12px; padding:16px; border-left:4px solid ${estado === 'preaprobada' ? '#10b981' : '#ef4444'};">
+                <div style="font-weight:bold; color:${estado === 'preaprobada' ? '#10b981' : '#ef4444'}; margin-bottom:10px;">
+                    📋 DICTAMEN DE AUDITORÍA
                 </div>
-            </div>`);
+                <div style="white-space:pre-wrap; line-height:1.5; text-align:left;">
+                    ${mensajeFinal}
+                    ${proximoPaso}
+                </div>
+            </div>
+        </div>
+    </div>`);
         
         // Animación de Score
         const finalScore = parseInt(data.score) || (estado === 'preaprobada' ? 100 : 0);
