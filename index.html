@@ -78,21 +78,21 @@
   .control-label { font-size: 10px; color: var(--muted); text-transform: uppercase; }
   .control-value { font-size: 16px; font-weight: 700; color: var(--primary-2); }
 
-  .progress-box { display: flex; flex-direction: column; align-items: center; margin: 20px 0; }
+  .progress-box { display: flex; flex-direction: column; align-items: center; margin: 20px 0; position: relative; }
   .circle-svg { width: 120px; height: 120px; transform: rotate(-90deg); }
   .circle-bg { fill: none; stroke: var(--border); stroke-width: 8; }
   .circle-bar { 
-  fill: none; 
-  stroke: var(--primary); 
-  stroke-width: 8; 
-  stroke-linecap: round; 
-  stroke-dasharray: 283; 
-  stroke-dashoffset: 283; 
-  transition: stroke-dashoffset 0.02s linear; /* Más rápida para mejor respuesta */
-}
+    fill: none; 
+    stroke: var(--primary); 
+    stroke-width: 8; 
+    stroke-linecap: round; 
+    stroke-dasharray: 283; 
+    stroke-dashoffset: 283; 
+    transition: stroke-dashoffset 0.02s linear;
+  }
   .percentage { position: absolute; font-size: 22px; font-weight: 800; color: var(--text); }
 
-  .chat{display:flex;flex-direction:column;height:auto; min-height: 250px; background:var(--panel-2);border-radius:12px;border:1px solid var(--border);overflow:hidden; margin-top: 10px;}
+  .chat{display:flex;flex-direction:column;height:auto; min-height: 280px; background:var(--panel-2);border-radius:12px;border:1px solid var(--border);overflow:hidden; margin-top: 10px;}
   .chat-body{flex:1;overflow-y:auto;padding:20px; scroll-behavior: smooth;}
   
   .msg{margin-bottom:20px; animation: fadeIn 0.3s ease;}
@@ -110,24 +110,23 @@
   .typing span { width: 6px; height: 6px; border-radius: 50%; background: var(--primary); animation: bounce 1.2s infinite; }
   @keyframes bounce { 0%, 80%, 100% { opacity: 0.3; } 40% { opacity: 1; transform: translateY(-4px); } }
 
-  /* Busca .ai-response-box en tu CSS y añade esto */
-.ai-response-box {
-    white-space: pre-wrap; /* Esto permite que los saltos de línea y emojis se vean bien */
+  .ai-response-box {
+    white-space: pre-wrap;
     line-height: 1.5;
     font-size: 0.95rem;
     text-align: left;
-    border-left: 4px solid #10b981; /* Una barrita verde lateral de estilo profesional */
+    border-left: 4px solid #10b981;
     padding-left: 15px;
-}
-    
-    /* FUERZA EL CENTRADO INTERNO */
     width: 100%;
     display: flex;
     flex-direction: column;
-    align-items: center; /* Centra horizontalmente los hijos */
-    justify-content: center;
-    text-align: center; /* Centra las líneas de texto */
-}
+    text-align: left;
+  }
+  
+  /* Ajuste para el centro de la IA */
+  .msg.ai .body {
+    width: 100%;
+  }
 </style>
 </head>
 <body>
@@ -173,16 +172,16 @@
 <main>
   <div class="card">
     <div class="step-content active" id="step-1">
-  <h2 style="margin:0 0 20px; font-size:16px">📋 Registro de Paciente</h2>
-  <div class="field">
-    <label>Nombre del Paciente</label>
-    <input id="nombre" placeholder="Ej. Juan Pérez" />
-  </div>
-  <div class="field">
-    <label>Correo Electrónico</label>
-    <input type="email" id="email" placeholder="paciente@correo.com" />
-  </div>
-  </div>
+      <h2 style="margin:0 0 20px; font-size:16px">📋 Registro de Paciente</h2>
+      <div class="field">
+        <label>Nombre del Paciente</label>
+        <input id="nombre" placeholder="Ej. Juan Pérez" />
+      </div>
+      <div class="field">
+        <label>Correo Electrónico</label>
+        <input type="email" id="email" placeholder="paciente@correo.com" />
+      </div>
+    </div>
 
     <div class="step-content" id="step-2">
       <h2 style="margin:0 0 20px; font-size:16px">🩺 Informe Médico</h2>
@@ -264,7 +263,7 @@
 const WEBHOOK_URL = 'https://hook.us2.make.com/8twf87pufbegxwa4o53l5kd4abl6vg01';
 let currentStep = 1;
 
-// Función de LOGIN - corregida
+// ================= LOGIN CORREGIDO =================
 function iniciarSesion() {
     const user = document.getElementById('loginUser').value.trim();
     const pass = document.getElementById('loginPass').value.trim();
@@ -274,23 +273,27 @@ function iniciarSesion() {
         return;
     }
     
-    // Ocultar el login
+    // Ocultar el overlay de login
     document.getElementById('login-overlay').style.display = 'none';
     
-    // Mostrar mensaje de bienvenida
-    const chat = document.getElementById('chat');
-    chat.innerHTML = `<div class="msg ai">
-        <div class="av">🎉</div>
-        <div class="body">Bienvenido/a <b>${user}</b>! Complete los datos para comenzar.</div>
-    </div>`;
+    // Mostrar mensaje de bienvenida en el chat
+    const chatDiv = document.getElementById('chat');
+    if (chatDiv) {
+        chatDiv.innerHTML = `<div class="msg ai">
+            <div class="av">🎉</div>
+            <div class="body">Bienvenido/a <b>${escapeHtml(user)}</b>! Complete los datos para comenzar.</div>
+        </div>`;
+    }
 }
 
-// Función para mover entre pasos
-function moveStep(step) {
-    if (step === 1 && !validateStep()) return;
+// ================= NAVEGACIÓN PASOS =================
+function moveStep(direction) {
+    // Validar paso actual antes de avanzar
+    if (direction === 1 && !validateStep()) return;
 
-    currentStep += step;
+    currentStep += direction;
     
+    // Actualizar contenidos
     document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
     document.getElementById(`step-${currentStep}`).classList.add('active');
 
@@ -308,7 +311,8 @@ function moveStep(step) {
     if (currentStep === 4) {
         btnNext.style.display = 'none';
         goBtn.style.display = 'block';
-        document.getElementById('res-paciente').textContent = document.getElementById('nombre').value || '---';
+        // Actualizar información básica en panel de control
+        document.getElementById('res-paciente').textContent = document.getElementById('nombre').value.trim() || '---';
         document.getElementById('res-seguro').textContent = "Salud Segura S.A.";
     } else {
         btnNext.style.display = 'block';
@@ -341,7 +345,10 @@ function validateStep() {
 
 function updateFileName(inputId, spanId) {
     const input = document.getElementById(inputId);
-    document.getElementById(spanId).textContent = input.files.length > 0 ? input.files[0].name : "";
+    const nameSpan = document.getElementById(spanId);
+    if (nameSpan) {
+        nameSpan.textContent = input.files.length > 0 ? input.files[0].name : "";
+    }
 }
 
 function runScoreAnimation(status, customScore = null) {
@@ -350,27 +357,27 @@ function runScoreAnimation(status, customScore = null) {
     const statusLabel = document.getElementById('statusLabel');
     const resStatus = document.getElementById('res-status');
     
-    let targetScore = customScore || 0;
+    let targetScore = customScore !== null ? customScore : 0;
     
     if(status === 'preaprobada') {
         circle.style.stroke = '#10b981';
         statusLabel.textContent = 'PRE-APROBADA';
-        resStatus.textContent = 'Pre-Aprobado';
+        if(resStatus) resStatus.textContent = 'Pre-Aprobado';
     } else if(status === 'rechazada') {
         circle.style.stroke = '#ef4444';
         statusLabel.textContent = 'RECHAZADA';
-        resStatus.textContent = 'Rechazado';
+        if(resStatus) resStatus.textContent = 'Rechazado';
     } else {
         circle.style.stroke = '#f59e0b';
         statusLabel.textContent = 'PENDIENTE';
-        resStatus.textContent = 'Pendiente';
+        if(resStatus) resStatus.textContent = 'Pendiente';
     }
 
     let currentScore = 0;
     const interval = setInterval(() => {
         if (currentScore >= targetScore) {
             clearInterval(interval);
-            statusLabel.style.opacity = "1";
+            if(statusLabel) statusLabel.style.opacity = "1";
             return;
         }
         currentScore++;
@@ -380,13 +387,6 @@ function runScoreAnimation(status, customScore = null) {
     }, 15);
 }
 
-const toBase64 = file => new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = error => reject(error);
-});
-
 function escapeHtml(str) {
     if (!str) return '';
     return str.replace(/[&<>]/g, function(m) {
@@ -394,6 +394,8 @@ function escapeHtml(str) {
         if (m === '<') return '&lt;';
         if (m === '>') return '&gt;';
         return m;
+    }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+        return c;
     });
 }
 
@@ -405,10 +407,15 @@ async function sendToMake() {
     const btn = document.getElementById('goBtn');
     const chat = document.getElementById('chat');
 
+    if (!nombre || !email) {
+        alert("Por favor complete los datos del paciente en el paso 1.");
+        moveStep(-3);
+        return;
+    }
+
     btn.disabled = true;
     btn.textContent = '⏳ Analizando...';
 
-    // Mostramos mensaje de carga
     const typingId = 'typing-' + Date.now();
     chat.insertAdjacentHTML('beforeend', `<div class="msg ai" id="${typingId}"><div class="av">✨</div><div class="body"><div class="typing"><span></span><span></span><span></span></div>Analizando documentos médicos...</div></div>`);
     chat.scrollTop = chat.scrollHeight;
@@ -420,95 +427,127 @@ async function sendToMake() {
             body: JSON.stringify({
                 nombre: nombre,
                 email: email,
-                informe_texto: informeText, // Asegúrate que en Make diga "informe_texto"
+                informe_texto: informeText,
                 poliza_texto: polizaText,
                 fecha: new Date().toISOString()
             })
         });
 
         const rawText = await response.text();
-        console.log("Respuesta de Make:", rawText);
+        console.log("Respuesta RAW:", rawText);
 
         let data = {};
-        try {
-            // Limpieza extrema por si Make envía texto antes o después del JSON
-            const start = rawText.indexOf('{');
-            const end = rawText.lastIndexOf('}');
-            if (start !== -1 && end !== -1) {
-                data = JSON.parse(rawText.substring(start, end + 1).replace(/\n/g, "\\n"));
-            }
-        } catch (e) { console.error("Error parseando respuesta"); }
-
-        // --- LÓGICA DEL CÍRCULO Y COLORES ---
-        let decision = String(data.decision || '').toUpperCase();
-        let score = parseInt(data.score) || 0;
-        let estado = 'pendiente';
-
-        // Si la IA aprobó o el texto sugiere aprobación
-        if (decision.includes('APROB') || rawText.toUpperCase().includes('APROB')) {
-            estado = 'preaprobada';
-            score = (score === 0) ? 95 : score; // Si no hay score, forzamos 95 para el círculo verde
-        } 
-        else if (decision.includes('RECHAZ') || rawText.toUpperCase().includes('RECHAZ')) {
-            estado = 'rechazada';
-            score = (score === 0) ? 15 : score; // Si no hay score, forzamos 15 para el círculo rojo
+        // Extraer JSON de la respuesta
+        const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+            try {
+                data = JSON.parse(jsonMatch[0]);
+            } catch(e) { console.warn("Error parseando JSON extraído"); }
         }
 
-        // Actualizamos UI
-        const typingEl = document.getElementById(typingId);
-        if(typingEl) typingEl.remove();
+        // Determinar decisión y score
+        let decisionText = (data.decision || data.resultado || data.estado || '').toString().toUpperCase();
+        let rawUpper = rawText.toUpperCase();
+        let estado = 'pendiente';
+        let score = parseInt(data.score) || parseInt(data.confianza) || 0;
         
-        document.getElementById('res-status').textContent = estado.toUpperCase();
-        document.getElementById('res-paciente').textContent = nombre;
+        if (decisionText.includes('APROB') || rawUpper.includes('APROB') || rawUpper.includes('PRE-APROB') || rawUpper.includes('APROBADA')) {
+            estado = 'preaprobada';
+            if (score === 0 || isNaN(score)) score = 92;
+        } 
+        else if (decisionText.includes('RECHAZ') || rawUpper.includes('RECHAZ') || rawUpper.includes('DENEG') || rawUpper.includes('NO APROB')) {
+            estado = 'rechazada';
+            if (score === 0 || isNaN(score)) score = 18;
+        } else {
+            // Por defecto si no encuentra keywords, intentar extraer número del texto
+            let scoreMatch = rawText.match(/\b([0-8][0-9]|90)\%/);
+            if(scoreMatch) score = parseInt(scoreMatch[1]);
+            if (score > 70) estado = 'preaprobada';
+            else if (score < 40) estado = 'rechazada';
+            else estado = 'pendiente';
+        }
+        
+        score = Math.min(100, Math.max(0, score));
+        
+        // Mensaje final a mostrar
+        const mensajeFinal = data.razon || data.mensaje_correo || data.justificacion || data.mensaje || 
+            (estado === 'preaprobada' ? "✅ **Cobertura Pre-aprobada**\n\nEl análisis clínico y de póliza indica que el tratamiento es elegible. Se ha enviado un dictamen detallado al correo registrado." :
+            (estado === 'rechazada' ? "❌ **Cobertura No Aprobada**\n\nBasado en las condiciones de la póliza y la documentación presentada, no es posible autorizar la cobertura. Se notificarán los motivos específicos por correo." :
+            "🟡 **Evaluación Pendiente**\n\nSe requiere documentación adicional para determinar la cobertura. En breve recibirá instrucciones en su correo."));
 
-        // 1. Definimos el mensaje que vamos a mostrar (buscando en todas las opciones de Make)
-        const mensajeFinal = data.razon || data.mensaje_correo || data.justificacion || "Análisis técnico finalizado. Los detalles han sido enviados a su correo.";
-
-        // 2. Removemos el icono de carga antes de poner el mensaje
+        // Eliminar mensaje de carga
         const typingEl = document.getElementById(typingId);
         if(typingEl) typingEl.remove();
 
-        // 3. Inyectamos el mensaje con el diseño de auditoría
+        // Agregar respuesta de IA formateada
         chat.insertAdjacentHTML('beforeend', `
             <div class="msg ai">
                 <div class="av">🤖</div>
                 <div class="body">
-                    <div style="background: rgba(255,255,255,0.05); border-radius:12px; padding:18px; border-left:4px solid ${estado === 'preaprobada' ? '#10b981' : (estado === 'rechazada' ? '#ef4444' : '#f59e0b')}; color: white;">
-                        <div style="font-weight:bold; color:${estado === 'preaprobada' ? '#10b981' : (estado === 'rechazada' ? '#ef4444' : '#f59e0b')}; margin-bottom:10px; font-size: 12px; letter-spacing: 1px;">
+                    <div style="background: rgba(255,255,255,0.05); border-radius:12px; padding:18px; border-left:4px solid ${estado === 'preaprobada' ? '#10b981' : (estado === 'rechazada' ? '#ef4444' : '#f59e0b')};">
+                        <div style="font-weight:bold; color:${estado === 'preaprobada' ? '#10b981' : (estado === 'rechazada' ? '#ef4444' : '#f59e0b')}; margin-bottom:12px; font-size: 12px; letter-spacing: 1px;">
                             📋 DICTAMEN DE AUDITORÍA
                         </div>
                         <div style="white-space:pre-wrap; line-height:1.6; text-align:left; font-size: 14px;">
-                            ${mensajeFinal}
+                            ${escapeHtml(mensajeFinal).replace(/\n/g, '<br>')}
                         </div>
                     </div>
                 </div>
             </div>`);
-
-        // INICIAR ANIMACIÓN DEL CÍRCULO
+        
+        // Actualizar controles UI
+        document.getElementById('res-status').textContent = estado === 'preaprobada' ? 'Pre-Aprobado' : (estado === 'rechazada' ? 'Rechazado' : 'Pendiente');
+        document.getElementById('res-paciente').textContent = nombre;
+        
+        // Iniciar animación del círculo
         runScoreAnimation(estado, score);
-
+        
     } catch (error) {
-        console.error(error);
-        if(document.getElementById(typingId)) document.getElementById(typingId).remove();
-        chat.insertAdjacentHTML('beforeend', `<div class="msg ai"><div class="av">⚠️</div><div class="body">Error de comunicación. Intente de nuevo.</div></div>`);
+        console.error("Error en envío:", error);
+        const typingEl = document.getElementById(typingId);
+        if(typingEl) typingEl.remove();
+        chat.insertAdjacentHTML('beforeend', `<div class="msg ai"><div class="av">⚠️</div><div class="body">Error de comunicación con el servidor de auditoría. Verifique conexión e intente nuevamente.</div></div>`);
     }
 
     btn.disabled = false;
     btn.textContent = '✨ Procesar Auditoría';
     chat.scrollTop = chat.scrollHeight;
 }
-// ASIGNAR EVENTOS cuando el DOM está listo
+
+// ========== INICIALIZACIÓN Y EVENTOS ==========
 document.addEventListener('DOMContentLoaded', function() {
-    // Botón de login
+    // Evento login
     const loginBtn = document.getElementById('loginBtn');
     if (loginBtn) {
-        loginBtn.onclick = iniciarSesion;
+        loginBtn.addEventListener('click', iniciarSesion);
     }
     
-    // Botones de navegación
-    document.getElementById('btnNext').onclick = () => moveStep(1);
-    document.getElementById('btnPrev').onclick = () => moveStep(-1);
-    document.getElementById('goBtn').onclick = sendToMake;
+    // Permitir login con Enter
+    const loginPass = document.getElementById('loginPass');
+    if(loginPass) {
+        loginPass.addEventListener('keypress', function(e) {
+            if(e.key === 'Enter') iniciarSesion();
+        });
+    }
+    const loginUser = document.getElementById('loginUser');
+    if(loginUser) {
+        loginUser.addEventListener('keypress', function(e) {
+            if(e.key === 'Enter') iniciarSesion();
+        });
+    }
+    
+    // Botones del wizard
+    const btnNext = document.getElementById('btnNext');
+    const btnPrev = document.getElementById('btnPrev');
+    const goBtn = document.getElementById('goBtn');
+    
+    if(btnNext) btnNext.addEventListener('click', () => moveStep(1));
+    if(btnPrev) btnPrev.addEventListener('click', () => moveStep(-1));
+    if(goBtn) goBtn.addEventListener('click', sendToMake);
+    
+    // Inicializar circle offset
+    const circle = document.getElementById('progressCircle');
+    if(circle) circle.style.strokeDashoffset = 283;
 });
 </script>
 </body>
